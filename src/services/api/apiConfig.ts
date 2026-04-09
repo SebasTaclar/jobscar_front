@@ -1,8 +1,8 @@
 // Configuración base para la API
 export const API_CONFIG = {
-  baseURL: import.meta.env.DEV
+  baseURL: false
     ? 'http://localhost:7071/api/v1'
-    : 'https://soydani-back-csf6gmejcfdwdygu.centralus-01.azurewebsites.net/api/v1',
+    : 'https://red-wave-0e026e310.1.azurestaticapps.net/api/v1',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

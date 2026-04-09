@@ -183,7 +183,7 @@
           </p>
           <ul>
             <li><strong>Instagram:</strong> @appsstorepro</li>
-            <li><strong>Teléfono:</strong> +57 320 986 0099</li>
+            <li><strong>Teléfono:</strong> +57 314 4607515</li>
             <li><strong>Dirección física:</strong> Centro comercial Unilago, Bogotá - Loc. 1-124, Cra. 15 # 78 - 33, Bogotá D.C.</li>
           </ul>
           <p>

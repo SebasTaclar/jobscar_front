@@ -3,44 +3,11 @@
     <div class="dashboard-header">
       <h1 class="dashboard-title">
         <span class="icon">⚙️</span>
-        Panel de Administración - SOYDANI
+        Panel de Administración - JOB'S CAR
       </h1>
-      <p class="dashboard-subtitle">Gestiona productos, categorías y configuraciones</p>
+      <p class="dashboard-subtitle">Gestiona clientes, servicios, vehículos y reportes del taller</p>
     </div>
-
-    <!-- Estadísticas rápidas -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon">📦</div>
-        <div class="stat-content">
-          <div class="stat-number">{{ products.length }}</div>
-          <div class="stat-label">Productos</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🏷️</div>
-        <div class="stat-content">
-          <div class="stat-number">{{ categories.length }}</div>
-          <div class="stat-label">Categorías</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">✅</div>
-        <div class="stat-content">
-          <div class="stat-number">{{ availableProductsCount }}</div>
-          <div class="stat-label">Disponibles</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">💰</div>
-        <div class="stat-content">
-          <div class="stat-number">${{ totalValue.toLocaleString() }}</div>
-          <div class="stat-label">Valor Total</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Navegación por pestañas -->
+<!-- Navegación por pestañas -->
     <div class="tabs-container">
       <div class="tabs">
         <button
@@ -56,15 +23,352 @@
       </div>
     </div>
 
-    <!-- Contenido de las pestañas -->
+    <!-- Estadísticas rápidas del taller -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-content">
+          <div class="stat-number">{{ uniqueClientsCount }}</div>
+          <div class="stat-label">Clientes</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🛠️</div>
+        <div class="stat-content">
+          <div class="stat-number">{{ servicesCount }}</div>
+          <div class="stat-label">Servicios</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🚗</div>
+        <div class="stat-content">
+          <div class="stat-number">{{ vehiclesCount }}</div>
+          <div class="stat-label">Vehículos atendidos</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-content">
+          <div class="stat-number">{{ reportsCount }}</div>
+          <div class="stat-label">Reportes</div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Pestaña: Clientes
+    <div v-if="activeTab === 'clients'" class="content-section">
+      <div class="section-title-bar">
+        <h2 class="section-title">👥 Clientes</h2>
+      </div>
+      <div class="clients-grid">
+        <div v-for="client in burnedClients" :key="client.id" class="pro-card client-card">
+          <div class="card-header">
+            <div class="avatar-large">{{ client.name.charAt(0).toUpperCase() }}</div>
+            <div class="type-badge" :class="client.type">{{ client.type }}</div>
+          </div>
+          <h3 class="card-title">{{ client.name }}</h3>
+          <div class="card-body">
+            <p class="info-row"><span class="label">📞</span> {{ client.phone }}</p>
+            <p class="info-row"><span class="label">✉️</span> {{ client.email }}</p>
+            <p class="info-row highlight"><span class="label">🔔</span> {{ client.reminder }}</p>
+            <p class="info-row note"><span class="label">📝</span> {{ client.notes }}</p>
+          </div>
+          <div class="card-footer">
+            <div class="stat"><strong>{{ client.totalOrders }}</strong> órdenes</div>
+            <div class="stat"><strong>${{ (client.totalSpent / 1000).toFixed(0) }}k</strong> gastado</div>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+    <!-- Pestaña: Servicios -->
+    <div v-if="activeTab === 'services'" class="content-section">
+      <div class="section-title-bar">
+        <h2 class="section-title">🛠️ Servicios</h2>
+      </div>
+      <div class="services-grid">
+        <div v-for="service in burnedServices" :key="service.id" class="pro-card service-card">
+          <h3 class="card-title">{{ service.name }}</h3>
+          <p class="card-description">{{ service.description }}</p>
+          <div class="card-footer">
+            <span class="price-badge">${{ service.price.toLocaleString() }}</span>
+            <span class="status-badge available">{{ service.status }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña: Categorías -->
+    <div v-if="activeTab === 'categories'" class="content-section">
+      <div class="section-title-bar">
+        <h2 class="section-title">📂 Categorías</h2>
+      </div>
+      <div class="categories-grid">
+        <div v-for="cat in burnedCategories" :key="cat.id" class="pro-card category-card">
+          <h3 class="card-title">{{ cat.name }}</h3>
+          <p class="card-description">{{ cat.description }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña: Vehículos -->
+    <div v-if="activeTab === 'vehicles'" class="content-section">
+      <div class="section-title-bar">
+        <h2 class="section-title">🚗 Vehículos</h2>
+      </div>
+      <div class="vehicles-grid">
+        <div v-for="vehicle in burnedVehicles" :key="vehicle.plate" class="pro-card vehicle-card">
+          <div class="plate-badge">{{ vehicle.plate }}</div>
+          <h3 class="card-title">{{ vehicle.brand }} {{ vehicle.model }}</h3>
+          <div class="card-body">
+            <p class="info-row"><span class="label">📅</span> {{ vehicle.year }}</p>
+            <p class="info-row"><span class="label">⏱️</span> {{ vehicle.km.toLocaleString() }} km</p>
+            <p class="info-row"><span class="label">👤</span> {{ vehicle.client }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña: Órdenes de trabajo -->
+    <div v-if="activeTab === 'orders'" class="content-section">
+      <div class="section-title-bar">
+        <h2 class="section-title">📝 Órdenes de Trabajo</h2>
+      </div>
+      <div class="orders-grid">
+        <div v-for="order in burnedOrders" :key="order.id" class="pro-card order-card">
+          <div class="order-header">
+            <span class="order-id">#{{ order.id }}</span>
+            <span class="status-badge" :class="order.status.toLowerCase()">{{ order.status }}</span>
+          </div>
+          <h3 class="card-title">{{ order.vehicle }} - {{ order.client }}</h3>
+          <div class="card-body">
+            <p><b>Diagnóstico:</b> {{ order.diagnosis }}</p>
+            <p><b>Servicios:</b> {{ order.services.join(', ') }}</p>
+            <p><b>Repuestos:</b> {{ order.parts.join(', ') }}</p>
+            <p><b>Mecánico:</b> 🔧 {{ order.mechanic }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña: Facturación -->
+    <div v-if="activeTab === 'invoices'" class="content-section">
+      <div class="section-title-bar">
+        <h2 class="section-title">💵 Facturación</h2>
+      </div>
+      <div class="invoices-grid">
+        <div v-for="invoice in burnedInvoices" :key="invoice.id" class="pro-card invoice-card">
+          <div class="invoice-header">
+            <span class="invoice-num">Factura #{{ invoice.id }}</span>
+            <span class="status-badge" :class="invoice.status.toLowerCase()">{{ invoice.status }}</span>
+          </div>
+          <h3 class="card-title">{{ invoice.client }}</h3>
+          <div class="card-body">
+            <p><b>Vehículo:</b> {{ invoice.vehicle }}</p>
+            <p><b>Items:</b> {{ invoice.items.join(', ') }}</p>
+          </div>
+          <div class="invoice-footer">
+            <span class="total-amount">${{ invoice.total.toLocaleString() }}</span>
+            <span class="payment-method">{{ invoice.payments.join(', ') }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña: Inventario -->
+    <div v-if="activeTab === 'inventory'" class="content-section">
+      <div class="section-title-bar">
+        <h2 class="section-title">🧰 Inventario</h2>
+      </div>
+      <div class="inventory-grid">
+        <div v-for="item in burnedInventory" :key="item.id" class="pro-card inventory-card">
+          <h3 class="card-title">{{ item.name }}</h3>
+          <p class="category-label">{{ item.category }}</p>
+          <div class="card-body">
+            <div class="stock-info" :class="item.stock > 5 ? 'high' : 'low'">
+              <span>📦 Stock:</span> <strong>{{ item.stock }}</strong>
+            </div>
+          </div>
+          <div class="price-row">
+            <span class="cost">Costo: ${{ item.cost.toLocaleString() }}</span>
+            <span class="price">Precio: ${{ item.price.toLocaleString() }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña: Empleados -->
+    <div v-if="activeTab === 'employees'" class="content-section">
+      <div class="section-title-bar">
+        <h2 class="section-title">🧑‍🔧 Empleados</h2>
+      </div>
+      <div class="employees-grid">
+        <div v-for="emp in burnedEmployees" :key="emp.id" class="pro-card employee-card">
+          <div class="emp-avatar">{{ emp.name.charAt(0) }}</div>
+          <h3 class="card-title">{{ emp.name }}</h3>
+          <p class="role-label">{{ emp.role }}</p>
+          <div class="emp-stats">
+            <span class="stat-num">{{ emp.orders }}</span>
+            <span class="stat-label">Órdenes asignadas</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña: Agenda -->
+    <div v-if="activeTab === 'agenda'" class="content-section">
+      <div class="section-title-bar">
+        <h2 class="section-title">📅 Agenda</h2>
+      </div>
+      <div class="agenda-grid">
+        <div v-for="appt in burnedAgenda" :key="appt.id" class="pro-card agenda-card">
+          <div class="time-badge">{{ appt.time }}</div>
+          <h3 class="card-title">{{ appt.service }}</h3>
+          <div class="card-body">
+            <p><b>Cliente:</b> {{ appt.client }}</p>
+            <p><b>Vehículo:</b> {{ appt.vehicle }}</p>
+            <p><b>Mecánico:</b> {{ appt.mechanic }}</p>
+          </div>
+          <div class="date-footer">📅 {{ appt.date }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pestaña: Reportes -->
+    <div v-if="activeTab === 'reports'" class="content-section">
+      <div class="section-title-bar">
+        <h2 class="section-title">📊 Reportes</h2>
+      </div>
+      <div class="reports-grid">
+        <div class="pro-card report-card">
+          <h3 class="report-title">💰 Ingresos recientes</h3>
+          <ul class="report-list">
+            <li v-for="ing in burnedReports.ingresos" :key="ing.fecha" class="report-item">
+              <span class="report-label">{{ ing.fecha }}</span>
+              <span class="report-value">${{ ing.total.toLocaleString() }}</span>
+            </li>
+          </ul>
+        </div>
+        <div class="pro-card report-card">
+          <h3 class="report-title">🏆 Servicios más vendidos</h3>
+          <ul class="report-list">
+            <li v-for="srv in burnedReports.servicios" :key="srv.nombre" class="report-item">
+              <span class="report-label">{{ srv.nombre }}</span>
+              <span class="report-value">{{ srv.vendidos }} vendidos</span>
+            </li>
+          </ul>
+        </div>
+        <div class="pro-card report-card">
+          <h3 class="report-title">👥 Clientes frecuentes</h3>
+          <ul class="report-list">
+            <li v-for="cli in burnedReports.clientes" :key="cli.nombre" class="report-item">
+              <span class="report-label">{{ cli.nombre }}</span>
+              <span class="report-value">{{ cli.visitas }} visitas</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
     <div class="tab-content">
-      <!-- Pestaña de Productos -->
-      <div v-if="activeTab === 'products'" class="content-section">
+
+      <!-- Pestaña de Clientes -->
+      <div v-if="activeTab === 'clients'" class="content-section">
         <div class="section-header">
-          <h2>Gestión de Productos</h2>
+          <h2>Clientes</h2>
+          <button class="btn btn-primary" @click="showCreateClient = true">➕ Crear Cliente</button>
+        </div>
+
+        <!-- Modal para crear cliente -->
+        <div v-if="showCreateClient" class="modal-overlay" @click="showCreateClient = false">
+          <div class="modal" @click.stop>
+            <div class="modal-header">
+              <h3>Registrar Cliente</h3>
+              <button class="modal-close" @click="showCreateClient = false">✕</button>
+            </div>
+            <div class="modal-body">
+              <form @submit.prevent="addBurnedClient">
+                <div class="form-group">
+                  <label>Nombre *</label>
+                  <input v-model="newClient.name" type="text" class="form-input" required placeholder="Ej: Juan Pérez" />
+                </div>
+                <div class="form-group">
+                  <label>Teléfono</label>
+                  <input v-model="newClient.phone" type="text" class="form-input" placeholder="Ej: 3001234567" />
+                </div>
+                <div class="form-group">
+                  <label>Email</label>
+                  <input v-model="newClient.email" type="email" class="form-input" placeholder="Ej: juan@email.com" />
+                </div>
+                <div class="form-group">
+                  <label>Notas internas</label>
+                  <textarea v-model="newClient.notes" class="form-input" rows="2" placeholder="Ej: Cliente exigente, siempre paga tarde"></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Recordatorios</label>
+                  <input v-model="newClient.reminder" type="text" class="form-input" placeholder="Ej: SOAT vence 10/2026" />
+                </div>
+                <div class="form-actions">
+                  <button type="button" class="btn btn-secondary" @click="showCreateClient = false">Cancelar</button>
+                  <button type="submit" class="btn btn-primary">Registrar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="clients-grid">
+          <div
+            v-for="client in burnedClients"
+            :key="client.id"
+            class="client-card"
+          >
+            <div class="client-avatar">
+              {{ client.name.charAt(0).toUpperCase() }}
+            </div>
+            <div class="client-info">
+              <h3>{{ client.name }}</h3>
+              <p class="client-email">{{ client.email }}</p>
+              <p class="client-meta">
+                <span>Tel: {{ client.phone }}</span>
+                <span v-if="client.reminder"> · <b>🔔 {{ client.reminder }}</b></span>
+              </p>
+              <p v-if="client.notes" class="client-notes"><b>Notas:</b> {{ client.notes }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="clients-grid">
+          <div
+            v-for="client in filteredClients"
+            :key="client.id"
+            class="client-card"
+          >
+            <div class="client-avatar">
+              {{ client.name.charAt(0).toUpperCase() }}
+            </div>
+            <div class="client-info">
+              <h3>{{ client.name }}</h3>
+              <p class="client-email">{{ client.email }}</p>
+              <p class="client-meta">
+                <span>{{ client.totalOrders }} orden{{ client.totalOrders === 1 ? '' : 'es' }}</span>
+                <span v-if="client.totalSpent > 0">
+                  · Total: ${{ client.totalSpent.toLocaleString() }}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestaña de Servicios (antes Productos) -->
+      <div v-if="activeTab === 'services'" class="content-section">
+        <div class="section-header">
+          <h2>Gestión de Servicios</h2>
           <button class="btn btn-primary" @click="showProductForm = true">
             <span class="btn-icon">➕</span>
-            Nuevo Producto
+            Nuevo Servicio
           </button>
         </div>
 
@@ -110,16 +414,16 @@
         <!-- Estado vacío o sin resultados -->
         <div v-if="filteredProducts.length === 0 && !searchProducts" class="empty-state">
           <div class="empty-icon">📦</div>
-          <h3>No hay productos</h3>
-          <p>Comienza agregando tu primer producto</p>
+          <h3>No hay servicios</h3>
+          <p>Comienza agregando tu primer servicio del taller</p>
           <button class="btn btn-primary" @click="showProductForm = true">
-            Crear Primer Producto
+            Crear Primer Servicio
           </button>
         </div>
         <div v-else-if="filteredProducts.length === 0 && searchProducts" class="empty-state">
           <div class="empty-icon">🔍</div>
           <h3>No se encontraron resultados</h3>
-          <p>No hay productos que coincidan con "{{ searchProducts }}"</p>
+          <p>No hay servicios que coincidan con "{{ searchProducts }}"</p>
           <button class="btn btn-secondary" @click="searchProducts = ''">
             Limpiar búsqueda
           </button>
@@ -256,10 +560,58 @@
         </div>
       </div>
 
-      <!-- Pestaña de Resumen de Compras -->
-      <div v-if="activeTab === 'sales'" class="content-section">
+      <!-- Pestaña de Gestión de Vehículos
+      <div v-if="activeTab === 'vehicles'" class="content-section">
         <div class="section-header">
-          <h2>Resumen de Compras</h2>
+          <h2>Gestión de vehículos</h2>
+        </div>
+
+        <div v-if="sales.length > 0">
+          <div class="sales-table-container">
+            <table class="sales-table vehicles-table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Servicio</th>
+                  <th>Estado</th>
+                  <th>Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="sale in sales" :key="sale.id" class="sale-row">
+                  <td>
+                    <div class="customer-info">
+                      <div class="customer-name">{{ sale.customerName }}</div>
+                      <div class="customer-email">{{ sale.customerEmail }}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="product-name">{{ sale.productName }}</div>
+                  </td>
+                  <td>
+                    <span :class="['status-badge', sale.status]">
+                      {{ getSaleStatusText(sale.status) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="date">{{ formatDate(sale.date) }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div v-else class="empty-state">
+          <div class="empty-icon">🚗</div>
+          <h3>No hay vehículos registrados</h3>
+          <p>Cuando registres servicios o ventas, los vehículos aparecerán aquí.</p>
+        </div>
+      </div> -->
+
+      <!-- Pestaña de Reportes (antes Resumen de Compras) -->
+      <div v-if="activeTab === 'reports'" class="content-section">
+        <div class="section-header">
+          <h2>Reportes y ventas</h2>
           <button @click="loadPurchases" class="btn-secondary" :disabled="isLoadingSales">
             {{ isLoadingSales ? 'Cargando...' : 'Actualizar' }}
           </button>
@@ -282,11 +634,7 @@
           </div>
         </div>
 
-        <!-- Estado de carga -->
-        <div v-if="isLoadingSales" class="loading-state">
-          <div class="spinner"></div>
-          <p>Cargando compras...</p>
-        </div>
+
 
         <!-- Error -->
         <div v-else-if="salesError" class="error-state">
@@ -735,12 +1083,80 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { reactive, ref, computed, onMounted, watch } from 'vue'
 import { useProducts, type ShowcaseProduct } from '@/composables/useProducts'
 import type { Product } from '@/types/ProductType'
 import type { Category, CreateCategoryRequest } from '@/types/CategoryType'
 import { paymentService } from '@/services/api/paymentService'
 import type { Purchase, ProductPaymentItem } from '@/services/api/paymentService'
+
+// Estado para modal y formulario de cliente quemado
+const showCreateClient = ref(false)
+const newClient = reactive({
+  name: '',
+  phone: '',
+  email: '',
+  notes: '',
+  reminder: ''
+})
+
+// Ejemplos quemados
+const burnedClients = ref([
+  {
+    id: 1,
+    name: 'Juan Pérez',
+    phone: '3001234567',
+    email: 'juan@email.com',
+    notes: 'Cliente exigente, prefiere que lo llamen antes de cambiar repuestos.',
+    reminder: 'SOAT vence 10/2026',
+    type: 'frecuente',
+    totalOrders: 5,
+    totalSpent: 1200000
+  },
+  {
+    id: 2,
+    name: 'María Gómez',
+    phone: '3209876543',
+    email: 'maria@email.com',
+    notes: 'Siempre paga tarde.',
+    reminder: 'Mantenimiento anual: 15/05/2026',
+    type: 'moroso',
+    totalOrders: 2,
+    totalSpent: 450000
+  },
+  {
+    id: 3,
+    name: 'Carlos Ramírez',
+    phone: '3105551122',
+    email: 'carlos@email.com',
+    notes: 'Solicita repuestos originales.',
+    reminder: 'Revisión técnico-mecánica: 01/08/2026',
+    type: 'nuevo',
+    totalOrders: 1,
+    totalSpent: 350000
+  }
+])
+
+function addBurnedClient() {
+  if (!newClient.name) return
+  burnedClients.value.push({
+    id: Date.now(),
+    name: newClient.name,
+    phone: newClient.phone,
+    email: newClient.email,
+    notes: newClient.notes,
+    reminder: newClient.reminder,
+    type: 'nuevo',
+    totalOrders: 0,
+    totalSpent: 0
+  })
+  newClient.name = ''
+  newClient.phone = ''
+  newClient.email = ''
+  newClient.notes = ''
+  newClient.reminder = ''
+  showCreateClient.value = false
+}
 
 // Tipos
 interface Sale {
@@ -760,7 +1176,7 @@ interface Sale {
 
 // Estado reactivo (persistente)
 const ACTIVE_TAB_KEY = 'admin_active_tab'
-const activeTab = ref<string>(localStorage.getItem(ACTIVE_TAB_KEY) || 'products')
+const activeTab = ref<string>(localStorage.getItem(ACTIVE_TAB_KEY) || 'clients')
 const showProductForm = ref(false)
 const showCategoryForm = ref(false)
 const showShowcaseForm = ref(false)
@@ -783,6 +1199,7 @@ const searchProducts = ref('')
 const searchCategories = ref('')
 const searchShowcase = ref('')
 const searchSales = ref('')
+const searchClients = ref('')
 
 // Usar el composable de productos
 const {
@@ -959,11 +1376,83 @@ const showcaseFormValid = computed(() => {
 
 // Pestañas
 const tabs = [
-  { id: 'products', name: 'Productos', icon: '📦' },
-  { id: 'categories', name: 'Categorías', icon: '🏷️' },
-  { id: 'showcase', name: 'Novedades', icon: '✨' },
-  { id: 'sales', name: 'Resumen de Compras', icon: '📊' }
+  { id: 'clients', name: 'Clientes', icon: '👥' },
+  { id: 'vehicles', name: 'Vehículos', icon: '🚗' },
+  { id: 'orders', name: 'Órdenes', icon: '📝' },
+  { id: 'invoices', name: 'Facturación', icon: '💵' },
+  { id: 'inventory', name: 'Inventario', icon: '🧰' },
+  { id: 'employees', name: 'Empleados', icon: '🧑‍🔧' },
+  { id: 'agenda', name: 'Agenda', icon: '📅' },
+  { id: 'reports', name: 'Reportes', icon: '📊' }
 ]
+// Datos quemados para cada módulo
+const burnedVehicles = [
+  { plate: 'ABC123', brand: 'Chevrolet', model: 'Sail', year: 2018, km: 45000, client: 'Juan Pérez' },
+  { plate: 'XYZ789', brand: 'Renault', model: 'Logan', year: 2020, km: 32000, client: 'María Gómez' },
+  { plate: 'JKL456', brand: 'Mazda', model: '3', year: 2017, km: 60000, client: 'Carlos Ramírez' }
+]
+
+const burnedOrders = [
+  { id: 1, vehicle: 'ABC123', client: 'Juan Pérez', diagnosis: 'Cambio de aceite y revisión general', services: ['Cambio aceite', 'Revisión'], parts: ['Filtro aceite'], mechanic: 'Pedro', status: 'Terminado' },
+  { id: 2, vehicle: 'XYZ789', client: 'María Gómez', diagnosis: 'Frenos hacen ruido', services: ['Revisión frenos'], parts: ['Pastillas de freno'], mechanic: 'Luis', status: 'En proceso' }
+]
+
+const burnedInvoices = [
+  { id: 1001, client: 'Juan Pérez', vehicle: 'ABC123', total: 350000, status: 'Pagado', payments: ['Efectivo'], items: ['Cambio aceite', 'Revisión general'] },
+  { id: 1002, client: 'María Gómez', vehicle: 'XYZ789', total: 220000, status: 'Pendiente', payments: ['Transferencia'], items: ['Revisión frenos', 'Pastillas'] }
+]
+
+const burnedInventory = [
+  { id: 1, name: 'Filtro aceite', category: 'Filtros', cost: 12000, price: 25000, stock: 8 },
+  { id: 2, name: 'Pastillas de freno', category: 'Frenos', cost: 35000, price: 60000, stock: 3 }
+]
+
+const burnedEmployees = [
+  { id: 1, name: 'Pedro', role: 'Mecánico', orders: 12 },
+  { id: 2, name: 'Luis', role: 'Mecánico', orders: 8 },
+  { id: 3, name: 'Ana', role: 'Recepción', orders: 0 }
+]
+
+
+const burnedAgenda = [
+  { id: 1, date: '2026-04-10', time: '09:00', client: 'Juan Pérez', vehicle: 'ABC123', service: 'Cambio aceite', mechanic: 'Pedro' },
+  { id: 2, date: '2026-04-10', time: '11:00', client: 'María Gómez', vehicle: 'XYZ789', service: 'Revisión frenos', mechanic: 'Luis' }
+]
+
+// Servicios
+const burnedServices = [
+  { id: 1, name: 'Cambio de aceite', description: 'Cambio de aceite y filtro', price: 80000, status: 'Disponible' },
+  { id: 2, name: 'Revisión general', description: 'Inspección completa del vehículo', price: 120000, status: 'Disponible' },
+  { id: 3, name: 'Reparación de frenos', description: 'Reparación y ajuste de sistema de frenos', price: 250000, status: 'Disponible' }
+]
+
+// Categorías
+const burnedCategories = [
+  { id: 1, name: 'Mantenimiento', description: 'Servicios de mantenimiento regular' },
+  { id: 2, name: 'Reparaciones', description: 'Reparaciones y correcciones' },
+  { id: 3, name: 'Diagnóstico', description: 'Servicios de diagnóstico' }
+]
+
+// Reportes
+const burnedReports = {
+  ingresos: [
+    { fecha: '2026-04-08', total: 350000 },
+    { fecha: '2026-04-09', total: 220000 }
+  ],
+  servicios: [
+    { nombre: 'Cambio de aceite', vendidos: 10 },
+    { nombre: 'Revisión frenos', vendidos: 7 }
+  ],
+  clientes: [
+    { nombre: 'Juan Pérez', visitas: 5 },
+    { nombre: 'María Gómez', visitas: 2 }
+  ]
+}
+
+// Asegurar que la pestaña activa siempre sea válida
+if (!tabs.some((t) => t.id === activeTab.value)) {
+  activeTab.value = tabs[0].id
+}
 
 // Computed
 const availableProductsCount = computed(() =>
@@ -990,6 +1479,23 @@ const pendingSales = computed(() =>
 )
 
 const totalSalesCount = computed(() => sales.value.length)
+
+// Métricas del taller
+const uniqueClientsCount = computed(() => {
+  const emails = new Set<string>()
+  sales.value.forEach((sale) => {
+    if (sale.customerEmail) {
+      emails.add(sale.customerEmail.toLowerCase())
+    }
+  })
+  return emails.size
+})
+
+const servicesCount = computed(() => products.value.length)
+
+const vehiclesCount = computed(() => totalSalesCount.value)
+
+const reportsCount = computed(() => burnedReports.servicios.length)
 
 // Computed properties para búsqueda y filtrado
 const filteredProducts = computed(() => {
@@ -1038,6 +1544,50 @@ const filteredSales = computed(() => {
     (sale.items && sale.items.some(item =>
       item.productName.toLowerCase().includes(searchLower)
     ))
+  )
+})
+
+// Resumen de clientes a partir de ventas
+interface ClientSummary {
+  id: string
+  name: string
+  email: string
+  totalOrders: number
+  totalSpent: number
+}
+
+const clientSummaries = computed<ClientSummary[]>(() => {
+  const map = new Map<string, ClientSummary>()
+
+  sales.value.forEach((sale) => {
+    const key = (sale.customerEmail || sale.customerName).toLowerCase()
+    const existing = map.get(key) || {
+      id: key,
+      name: sale.customerName,
+      email: sale.customerEmail,
+      totalOrders: 0,
+      totalSpent: 0
+    }
+
+    existing.totalOrders += 1
+    if (sale.status === 'completed') {
+      existing.totalSpent += sale.totalAmount
+    }
+
+    map.set(key, existing)
+  })
+
+  return Array.from(map.values())
+})
+
+const filteredClients = computed(() => {
+  if (!searchClients.value.trim()) {
+    return clientSummaries.value
+  }
+  const searchLower = searchClients.value.toLowerCase().trim()
+  return clientSummaries.value.filter((client) =>
+    client.name.toLowerCase().includes(searchLower) ||
+    client.email.toLowerCase().includes(searchLower)
   )
 })
 
@@ -1506,6 +2056,32 @@ const closeCategoryForm = () => {
 </script>
 
 <style scoped>
+/* Encabezado destacado tipo panel */
+.panel-admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  margin-top: 1.5rem;
+}
+.panel-admin-icon {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 1px 2px #2228);
+}
+.panel-admin-title {
+  letter-spacing: -1px;
+  color: #fff;
+  text-shadow: 0 1px 4px #0008;
+}
+.panel-admin-subtitle {
+  text-align: center;
+  color: #3b82f6;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
 .admin-dashboard {
   min-height: 100vh;
   background: var(--brand-gradient);
@@ -1527,7 +2103,7 @@ const closeCategoryForm = () => {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--brand-primary-contrast);
-  margin: 3rem 10px;
+  margin: 3rem 10px 0 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1558,7 +2134,7 @@ const closeCategoryForm = () => {
 .stat-card {
   background: var(--brand-surface);
   border-radius: 16px;
-  padding: 25px;
+  padding: 15px;
   display: flex;
   align-items: center;
   gap: 20px;
@@ -1574,31 +2150,32 @@ const closeCategoryForm = () => {
 }
 
 .stat-icon {
-  font-size: 2.5rem;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #0c515a 0%, #115c80 100%);
   border-radius: 50%;
-  width: 70px;
-  height: 70px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .stat-number {
-  font-size: 2rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: var(--brand-primary-contrast);
   line-height: 1;
 }
 
 .stat-label {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: var(--brand-accent-alt);
   font-weight: 500;
 }
 
 .tabs-container {
   margin-bottom: 30px;
+  align-items: center;
 }
 
 .tabs {
@@ -1628,7 +2205,7 @@ const closeCategoryForm = () => {
 .tab.active {
   background: var(--brand-success);
   color: var(--brand-primary-contrast);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 2px 8px rgba(56, 65, 62, 0.5);
 }
 
 .tab:hover:not(.active) {
@@ -1820,8 +2397,8 @@ const closeCategoryForm = () => {
 }
 
 .status.out-of-stock {
-  background: #fee2e2;
-  color: #991b1b;
+  background: #dbeafe;
+  color: #2563eb;
 }
 
 .status.coming-soon {
@@ -1900,6 +2477,61 @@ const closeCategoryForm = () => {
 .empty-state p {
   margin: 0 0 30px;
   font-size: 1rem;
+}
+
+/* Clientes */
+.clients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.client-card {
+  background: var(--brand-bg-end);
+  border-radius: 16px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 2px solid var(--brand-border);
+  transition: all 0.3s ease;
+}
+
+.client-card:hover {
+  border-color: var(--brand-success);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+  transform: translateY(-2px);
+}
+
+.client-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #f9fafb;
+}
+
+.client-info h3 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+  color: var(--brand-primary-contrast);
+}
+
+.client-email {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  color: var(--brand-accent-alt);
+}
+
+.client-meta {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--brand-accent-alt);
 }
 
 /* Loading and Error States */
@@ -2099,13 +2731,13 @@ const closeCategoryForm = () => {
 }
 
 .btn-danger {
-  background: rgba(239, 68, 68, 0.2);
-  color: var(--brand-danger);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(37, 99, 235, 0.15); /* azul */
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.25);
 }
 
 .btn-danger:hover {
-  background: rgba(239, 68, 68, 0.3);
+  background: rgba(37, 99, 235, 0.25);
 }
 
 .btn-sm {
@@ -2261,7 +2893,7 @@ const closeCategoryForm = () => {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(239, 68, 68, 0.9);
+  background: rgba(37, 99, 235, 0.9); /* azul */
   color: white;
   border: none;
   border-radius: 50%;
@@ -2276,7 +2908,7 @@ const closeCategoryForm = () => {
 }
 
 .remove-image:hover {
-  background: rgba(239, 68, 68, 1);
+  background: rgba(37, 99, 235, 1);
 }
 
 /* Estilos para vista previa de múltiples imágenes */
@@ -2309,7 +2941,7 @@ const closeCategoryForm = () => {
   position: absolute;
   top: 5px;
   right: 5px;
-  background: rgba(239, 68, 68, 0.9);
+  background: rgba(37, 99, 235, 0.9); /* azul */
   color: white;
   border: none;
   border-radius: 50%;
@@ -2324,7 +2956,7 @@ const closeCategoryForm = () => {
 }
 
 .remove-single-image:hover {
-  background: rgba(239, 68, 68, 1);
+  background: rgba(37, 99, 235, 1);
 }
 
 .image-index {
@@ -2688,9 +3320,9 @@ const closeCategoryForm = () => {
 }
 
 .status-badge.cancelled {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(37, 99, 235, 0.15); /* azul */
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.25);
 }
 
 .date {
@@ -3028,9 +3660,9 @@ const closeCategoryForm = () => {
 }
 
 .showcase-status.unavailable {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(37, 99, 235, 0.15); /* azul */
+  color: #2563eb;
+  border: 1px solid rgba(37, 99, 235, 0.25);
 }
 
 .showcase-actions {
@@ -3143,7 +3775,7 @@ const closeCategoryForm = () => {
   position: absolute;
   top: -8px;
   right: -8px;
-  background: #ef4444;
+  background: #2563eb;
   color: white;
   border: none;
   border-radius: 50%;
@@ -3155,7 +3787,7 @@ const closeCategoryForm = () => {
 }
 
 .remove-image:hover {
-  background: #dc2626;
+  background: #1d4ed8;
   transform: scale(1.1);
 }
 
@@ -3367,6 +3999,584 @@ const closeCategoryForm = () => {
 
   .date {
     font-size: 0.65rem;
+  }
+}
+
+/* ============ ESTILOS PROFESIONALES PARA TARJETAS ============ */
+
+/* Grillas para cada sección */
+.clients-grid,
+.services-grid,
+.categories-grid,
+.vehicles-grid,
+.orders-grid,
+.invoices-grid,
+.inventory-grid,
+.employees-grid,
+.agenda-grid {
+  display: grid;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.clients-grid,
+.vehicles-grid,
+.orders-grid,
+.invoices-grid {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.services-grid,
+.categories-grid,
+.employees-grid,
+.agenda-grid {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+.inventory-grid {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Estilos base para tarjetas profesionales */
+.pro-card {
+  background: linear-gradient(135deg, var(--brand-surface) 0%, var(--brand-bg-end) 100%);
+  border: 1px solid var(--brand-border);
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+.pro-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+
+.pro-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  border-color: var(--brand-success);
+}
+
+.pro-card:hover::before {
+  left: 100%;
+}
+
+/* Estructura interna de la tarjeta */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 10px;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+  margin: 0 0 12px;
+  word-break: break-word;
+}
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: var(--brand-accent-alt);
+  position: relative;
+  z-index: 1;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.info-row .label {
+  font-size: 1.1rem;
+  min-width: 20px;
+}
+
+.info-row.highlight {
+  background: rgba(16, 185, 129, 0.1);
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--brand-success);
+  font-weight: 600;
+}
+
+.info-row.note {
+  font-size: 0.85rem;
+  font-style: italic;
+  opacity: 0.9;
+  padding: 6px 8px;
+  background: rgba(107, 114, 128, 0.08);
+  border-radius: 6px;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--brand-border);
+  font-size: 0.85rem;
+  color: var(--brand-accent-alt);
+}
+
+.card-footer .stat {
+  flex: 1;
+  text-align: center;
+}
+
+.card-footer .stat strong {
+  display: block;
+  font-size: 1.2rem;
+  color: var(--brand-success);
+}
+
+/* Avatares */
+.avatar-large {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.emp-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin: 0 auto 12px;
+  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+}
+
+/* Badges de estado */
+.type-badge,
+.status-badge,
+.price-badge,
+.plate-badge,
+.time-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.type-badge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.type-badge.frecuente {
+  background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+  color: #0f5f4d;
+}
+
+.type-badge.moroso {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  color: #5f1f0f;
+}
+
+.type-badge.nuevo {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  color: #3d5a3d;
+}
+
+.status-badge {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge.terminado,
+.status-badge.completed,
+.status-badge.pagado {
+  background: linear-gradient(135deg, #86efac 0%, #4ade80 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+}
+
+.status-badge.en-proceso,
+.status-badge.pending,
+.status-badge.pendiente {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.status-badge.cancelado,
+.status-badge.cancelled {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.status-badge.available {
+  background: linear-gradient(135deg, #86efac 0%, #4ade80 100%);
+  color: white;
+}
+
+.price-badge {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.plate-badge {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  color: #fbbf24;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  border: 2px solid #fbbf24;
+}
+
+.time-badge {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  color: white;
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Estilos específicos por tipo de tarjeta */
+.client-card .card-footer {
+  gap: 15px;
+}
+
+.vehicle-card .card-body p {
+  margin: 4px 0;
+}
+
+.order-card {
+  border-left: 4px solid var(--brand-success);
+}
+
+.order-card .order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.order-id {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--brand-success);
+}
+
+.invoice-card {
+  border-left: 4px solid #f59e0b;
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.invoice-num {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #f59e0b;
+}
+
+.invoice-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--brand-border);
+  gap: 10px;
+}
+
+.total-amount {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--brand-success);
+}
+
+.payment-method {
+  font-size: 0.8rem;
+  color: var(--brand-accent-alt);
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.category-label {
+  font-size: 0.8rem;
+  color: var(--brand-accent-alt);
+  background: rgba(102, 126, 234, 0.1);
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.stock-info {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--brand-success);
+  font-weight: 600;
+}
+
+.stock-info.low {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid var(--brand-border);
+  font-size: 0.85rem;
+}
+
+.cost,
+.price {
+  font-weight: 600;
+}
+
+.cost {
+  color: var(--brand-accent-alt);
+}
+
+.price {
+  color: var(--brand-success);
+}
+
+.role-label {
+  font-size: 0.85rem;
+  color: var(--brand-success);
+  font-weight: 600;
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.emp-stats {
+  text-align: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--brand-border);
+}
+
+.stat-num {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--brand-success);
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--brand-accent-alt);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.agenda-card {
+  border-left: 4px solid #60a5fa;
+}
+
+.date-footer {
+  padding-top: 12px;
+  border-top: 1px solid var(--brand-border);
+  font-size: 0.8rem;
+  color: var(--brand-accent-alt);
+  font-weight: 600;
+}
+
+.report-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.report-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+  margin: 0 0 12px;
+}
+
+.report-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.report-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid var(--brand-success);
+  transition: all 0.2s ease;
+}
+
+.report-item:hover {
+  background: rgba(59, 130, 246, 0.1);
+  transform: translateX(2px);
+}
+
+.report-label {
+  font-size: 0.9rem;
+  color: var(--brand-accent-alt);
+  font-weight: 600;
+}
+
+.report-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--brand-success);
+}
+
+.service-card .card-footer {
+  gap: 10px;
+}
+
+.card-description {
+  color: var(--brand-accent-alt);
+  font-size: 0.9rem;
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+/* Barra de título de sección */
+.section-title-bar {
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, var(--brand-surface) 0%, var(--brand-bg-end) 100%);
+  padding: 20px;
+  border-radius: 12px;
+  border-left: 4px solid var(--brand-success);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 1200px) {
+  .clients-grid,
+  .vehicles-grid,
+  .orders-grid,
+  .invoices-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .reports-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .clients-grid,
+  .vehicles-grid,
+  .orders-grid,
+  .invoices-grid,
+  .services-grid,
+  .categories-grid,
+  .employees-grid,
+  .agenda-grid,
+  .inventory-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pro-card {
+    padding: 16px;
+  }
+
+  .card-footer {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card-footer .stat {
+    text-align: left;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .price-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .invoice-footer {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 </style>
