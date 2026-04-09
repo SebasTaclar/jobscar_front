@@ -14,14 +14,14 @@
   --brand-bg-start: #000000;           /* Negro puro inicio */
   --brand-bg-end: #1a1a1a;             /* Gris muy oscuro fin */
   --brand-surface: #0a0a0a;            /* Superficie cards/nav */
-  --brand-border: rgba(220, 38, 38, 0.3); /* Bordes rojos sutiles */
+  --brand-border:  rgba(13, 26, 71, 0.6); /* Bordes rojos sutiles */
   --brand-accent: #DC2626;             /* Acento rojo */
-  --brand-accent-alt: #EF4444;         /* Acento rojo claro */
+  --brand-accent-alt: rgba(191, 219, 254, 0.95);         /* Acento rojo claro */
   --brand-accent-glow: rgba(220, 38, 38, 0.5);
   --brand-gradient: linear-gradient(135deg, var(--brand-bg-start) 0%, var(--brand-bg-end) 100%);
   --brand-accent-gradient: linear-gradient(135deg, var(--brand-accent) 0%, var(--brand-accent-alt) 100%);
   --brand-danger: #ef4444;
-  --brand-success: #10b981;
+  --brand-success: #17698a;
   --brand-warning: #f59e0b;
   --brand-info: #DC2626;
 

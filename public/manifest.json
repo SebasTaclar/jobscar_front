@@ -1,109 +1,42 @@
 {
-  "name": "SOYDANI",
-  "short_name": "SOYDANI",
-  "description": "Tu tienda de confianza para tecnología, decoración navideña y artículos del hogar. Calidad y atención personalizada.",
+  "name": "Job's Car",
+  "short_name": "Job's Car",
+  "description": "Taller automotriz en Bogotá. Mantenimiento, reparación, diagnóstico y mecánica general para tu vehículo. Atención profesional y personalizada.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#DC2626",
+  "theme_color": "#1E293B",
   "orientation": "portrait-primary",
   "lang": "es-CO",
   "dir": "ltr",
   "scope": "/",
   "icons": [
     {
-      "src": "/icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "/favicon.ico",
+      "sizes": "48x48 32x32 16x16",
+      "type": "image/x-icon"
     }
   ],
-  "categories": ["shopping", "technology", "lifestyle", "home", "seasonal"],
-  "screenshots": [
-    {
-      "src": "/images/screenshot-1.jpg",
-      "sizes": "1280x720",
-      "type": "image/jpeg"
-    }
-  ],
+  "categories": ["taller", "automotriz", "vehículos", "mecánica", "servicio"],
+  "screenshots": [],
   "shortcuts": [
     {
-      "name": "Tecnología",
-      "short_name": "Tech",
-      "description": "Ver productos de tecnología",
-      "url": "/iphone",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
+      "name": "Clientes",
+      "short_name": "Clientes",
+      "description": "Gestión de clientes del taller",
+      "url": "/WorkshopClients"
     },
     {
-      "name": "Navidad",
-      "short_name": "Navidad",
-      "description": "Ver decoración navideña",
-      "url": "/mac",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
+      "name": "Vehículos",
+      "short_name": "Vehículos",
+      "description": "Gestión de vehículos en el taller",
+      "url": "/WorkshopAdminVehicles"
     },
     {
-      "name": "Hogar",
-      "short_name": "Hogar",
-      "description": "Ver artículos del hogar",
-      "url": "/ipad",
-      "icons": [
-        {
-          "src": "/icons/icon-96x96.png",
-          "sizes": "96x96"
-        }
-      ]
+      "name": "Servicios",
+      "short_name": "Servicios",
+      "description": "Servicios ofrecidos por el taller",
+      "url": "/WorkshopAdminServices"
     }
   ],
   "related_applications": [],

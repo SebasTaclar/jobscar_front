@@ -20,6 +20,35 @@ const router = createRouter({
       component: Home,
     },
     {
+      path: '/servicios',
+      name: 'services',
+      component: () => import('../views/ServicesView.vue'),
+    },
+    {
+      path: '/workshop/admin',
+      redirect: '/workshop/admin/clients',
+    },
+    {
+      path: '/workshop/admin/clients',
+      name: 'workshop-admin-clients',
+      component: () => import('../views/WorkshopAdminDashboard.vue'),
+    },
+    {
+      path: '/workshop/admin/services',
+      name: 'workshop-admin-services',
+      component: () => import('../views/WorkshopAdminServices.vue'),
+    },
+    {
+      path: '/workshop/admin/vehicles',
+      name: 'workshop-admin-vehicles',
+      component: () => import('../views/WorkshopAdminVehicles.vue'),
+    },
+    {
+      path: '/workshop/admin/reports',
+      name: 'workshop-admin-reports',
+      component: () => import('../views/WorkshopAdminReports.vue'),
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('../views/Login.vue'),
@@ -29,49 +58,21 @@ const router = createRouter({
     },
 
     {
-      path: '/iphone',
-      name: 'iphone',
-      component: () => import('../views/IphonePage.vue'),
-    },
-
-    {
-      path: '/mac',
-      name: 'mac',
-      component: () => import('../views/MacPage.vue'),
-    },
-
-    {
-      path: '/ipad',
-      name: 'ipad',
-      component: () => import('../views/IpadPage.vue'),
-    },
-
-    {
-      path: '/watch',
-      name: 'watch',
-      component: () => import('../views/AppleWatchPage.vue'),
-    },
-
-    {
       path: '/accesorios',
       name: 'accesorios',
       component: () => import('../views/AccesoriosPage.vue'),
     },
 
     {
-      path: '/airpods',
-      name: 'airpods',
-      component: () => import('../views/AirPodsPage.vue'),
-    },
-
-    {
       path: '/admin/products',
       name: 'admin-products',
       component: () => import('../views/AdminDashboardNew.vue'),
-      meta: {
-        requiresAuth: true,
-        requiredRole: 'admin', // Solo accesible para administradores
-      },
+    },
+
+    {
+      path: '/admin/workshop/clients',
+      name: 'admin-workshop-clients',
+      component: () => import('../views/WorkshopClients.vue'),
     },
 
     {
@@ -118,52 +119,5 @@ const router = createRouter({
   ],
 })
 
-// Guard de navegación global
-router.beforeEach((to, from, next) => {
-  const isAuthenticated = authService.isAuthenticated()
-  const userRole = authService.getUserRole()
-
-  // Redirigir admins autenticados que intenten ir al login
-  if (to.path === '/login' && isAuthenticated && userRole === 'admin') {
-    next('/admin/products')
-    return
-  }
-
-  // Si la ruta requiere estar autenticado
-  if (to.meta.requiresAuth) {
-    if (!isAuthenticated) {
-      // Redirigir al login si no está autenticado
-      next('/login')
-      return
-    }
-
-    // Verificar rol específico si se requiere
-    if (to.meta.requiredRole && userRole !== to.meta.requiredRole) {
-      // Redirigir a home si no tiene el rol requerido
-      next('/')
-      return
-    }
-
-    // Verificar múltiples roles si se requiere
-    if (to.meta.requiredRoles && (!userRole || !to.meta.requiredRoles.includes(userRole))) {
-      // Redirigir a home si no tiene ninguno de los roles requeridos
-      next('/')
-      return
-    }
-  }
-
-  // Si la ruta requiere ser invitado (no autenticado)
-  if (to.meta.requiresGuest && isAuthenticated) {
-    // Si es invitado y autenticado: si es admin va a panel, si no a home
-    if (userRole === 'admin') {
-      next('/admin/products')
-    } else {
-      next('/')
-    }
-    return
-  }
-
-  next()
-})
 
 export default router

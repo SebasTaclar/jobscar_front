@@ -1,657 +1,191 @@
 <template>
-  <section class="hero-carousel">
-    <!-- Carrusel de Imágenes -->
-    <div class="carousel-container">
-      <div
-        v-for="(slide, index) in slides"
-        :key="index"
-        class="carousel-slide"
-        :class="{ 'active': currentSlide === index }"
-      >
-        <img :src="slide.image" :alt="slide.title" />
-        <div class="slide-overlay"></div>
-      </div>
-    </div>
+  <section class="main-banner">
+    <div class="banner-overlay">
+      <div class="banner-content">
+        <p class="banner-eyebrow">Todo para tu vehículo en un solo lugar</p>
+        <h1 class="banner-title">
+          Taller mecánico automotriz en Bogotá
 
-    <!-- Botón Conocer Más Estratégico -->
-    <div class="explore-button-container">
-      <button class="btn-explore" @click="exploreProduct(slides[currentSlide])">
-        Conocer más
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="m9 18 6-6-6-6"/>
-        </svg>
-      </button>
-    </div>
+        </h1>
+        <p class="banner-subtitle">
+          Más de 10 años de experiencia en mantenimiento, diagnóstico y reparación de
+          vehículos particulares y de trabajo.
+        </p>
 
-    <!-- Navegación -->
-    <div class="carousel-navigation">
-      <div class="nav-dots">
-        <button
-          v-for="(_, index) in slides"
-          :key="index"
-          @click="goToSlide(index)"
-          :class="['nav-dot', { 'active': currentSlide === index }]"
-        >
-        </button>
+        <div class="banner-actions">
+          <button type="button" class="banner-btn primary" @click="goToServices">
+            Nuestros servicios
+          </button>
+          <!-- <button type="button" class="banner-btn secondary" @click="scrollToContact">
+            Agenda tu cita por WhatsApp
+          </button> -->
+        </div>
       </div>
-      <div class="nav-arrows">
-        <button @click="previousSlide" class="nav-arrow prev">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="m15 18-6-6 6-6"/>
-          </svg>
-        </button>
-        <button @click="nextSlide" class="nav-arrow next">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="m9 18 6-6-6-6"/>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Indicador de Progreso -->
-    <div class="progress-indicator">
-      <div class="progress-bar" :style="{ width: progressWidth + '%' }"></div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 
-// Tipos
-interface ProductSlide {
-  image: string
-  category: string
-  title: string
-  description: string
-  features: string[]
-  id: string
+const router = useRouter()
+
+const goToServices = () => {
+  router.push('/servicios')
 }
 
-// Estado del carrusel
-const currentSlide = ref(0)
-const autoPlayInterval = ref<ReturnType<typeof setInterval> | null>(null)
-const isPlaying = ref(true)
-
-// Datos de categorías SOYDANI
-const slides = ref<ProductSlide[]>([
-  {
-    id: 'black-week',
-    image: 'https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=1920&h=1080&fit=crop&q=80',
-    category: 'Black Week',
-    title: '⚡ BLACK WEEK - Hasta 50% OFF',
-    description: '¡Ofertas increíbles! Descuentos masivos en tecnología, hogar y más. ¡No te lo pierdas!',
-    features: ['Hasta 50% OFF', 'ENVÍO GRATIS', 'Compra Local', 'Stock Limitado']
-  },
-  {
-    id: 'tecnologia',
-    image: 'https://images.unsplash.com/photo-1601524909162-ae8725290836?w=1920&h=1080&fit=crop&q=80',
-    category: 'Tecnología',
-    title: '📱 Tecnología de Última Generación',
-    description: 'Los mejores smartphones, laptops y gadgets. Garantía oficial y precios increíbles.',
-    features: ['Últimos Modelos', 'Garantía Oficial', 'Envío Gratis', 'Mejor Precio']
-  },
-  {
-    id: 'navidad',
-    image: 'https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=1920&h=1080&fit=crop&q=80',
-    category: 'Navidad',
-    title: '🎄 Especial Navideño',
-    description: 'Decora tu hogar esta Navidad. Luces, árboles, adornos y todo para celebrar en grande.',
-    features: ['Decoración Premium', 'Luces LED', 'Ofertas Navideñas', 'Envío Rápido']
-  },
-  {
-    id: 'hogar',
-    image: 'https://images.unsplash.com/photo-1615529182904-14819c35db37?w=1920&h=1080&fit=crop&q=80',
-    category: 'Hogar',
-    title: '🏠 Renueva Tu Hogar',
-    description: 'Artículos de hogar con estilo. Decoración moderna, organización y confort para cada espacio.',
-    features: ['Diseños Modernos', 'Calidad Premium', 'Variedad', 'Mejores Precios']
-  },
-  {
-    id: 'ofertas',
-    image: 'https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?w=1920&h=1080&fit=crop&q=80',
-    category: 'Ofertas',
-    title: '🔥 OFERTAS IMPERDIBLES',
-    description: '¡Aprovecha ahora! Productos seleccionados con descuentos brutales. Solo por tiempo limitado.',
-    features: ['Descuentos Brutales', 'Entrega Inmediata', '100% Garantizado', 'Compra YA']
-  }
-])
-
-// Computed
-const progressWidth = computed(() => {
-  return ((currentSlide.value + 1) / slides.value.length) * 100
-})
-
-// Funciones de navegación
-const nextSlide = () => {
-  currentSlide.value = (currentSlide.value + 1) % slides.value.length
-  resetAutoPlay()
-}
-
-const previousSlide = () => {
-  currentSlide.value = currentSlide.value === 0
-    ? slides.value.length - 1
-    : currentSlide.value - 1
-  resetAutoPlay()
-}
-
-const goToSlide = (index: number) => {
-  currentSlide.value = index
-  resetAutoPlay()
-}
-
-// Auto-play
-const startAutoPlay = () => {
-  if (!isPlaying.value) return
-  autoPlayInterval.value = setInterval(() => {
-    nextSlide()
-  }, 2000) // Cambia cada 2 segundos
-}
-
-const stopAutoPlay = () => {
-  if (autoPlayInterval.value) {
-    clearInterval(autoPlayInterval.value)
-    autoPlayInterval.value = null
-  }
-}
-
-const resetAutoPlay = () => {
-  stopAutoPlay()
-  setTimeout(() => {
-    startAutoPlay()
-  }, 1000) // Pausa 1 segundo antes de reanudar
-}
-
-// Funciones de producto
-const exploreProduct = (slide: ProductSlide) => {
-  // Scroll hacia la sección ProductShowcase
-  const productShowcaseElement = document.querySelector('.apple-products-showcase');
-  if (productShowcaseElement) {
-    productShowcaseElement.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-  }
-  console.log('Navegando hacia ProductShowcase desde:', slide.title)
-}
-
-// Métodos públicos para control externo
-const pauseCarousel = () => {
-  isPlaying.value = false
-  stopAutoPlay()
-}
-
-const resumeCarousel = () => {
-  isPlaying.value = true
-  startAutoPlay()
-}
-
-// Lifecycle
-onMounted(() => {
-  startAutoPlay()
-})
-
-onUnmounted(() => {
-  stopAutoPlay()
-})
-
-// Exposer métodos para uso externo
-defineExpose({
-  nextSlide,
-  previousSlide,
-  goToSlide,
-  pauseCarousel,
-  resumeCarousel,
-  addSlide: (slide: ProductSlide) => {
-    slides.value.push(slide)
-  }
+defineOptions({
+  name: 'MainBanner',
 })
 </script>
 
 <style scoped>
-/* === CARRUSEL MODERNO SOYDANI === */
-.hero-carousel {
+.main-banner {
   position: relative;
   width: 100%;
-  height: 85vh;
-  min-height: 650px;
-  overflow: hidden;
-  border-radius: 0;
-  box-shadow: 0 20px 60px rgba(220, 38, 38, 0.15), 0 0 100px rgba(0, 0, 0, 0.2);
-  background: linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
-}
-
-/* Contenedor del Carrusel */
-.carousel-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.carousel-slide {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transform: scale(1.1);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1;
-}
-
-.carousel-slide.active {
-  opacity: 1;
-  transform: scale(1);
-  z-index: 2;
-}
-
-.carousel-slide img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  opacity: 0.7;
-}
-
-/* Overlay con acento rojo SOYDANI */
-.slide-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.4) 0%,
-    rgba(220, 38, 38, 0.1) 40%,
-    rgba(0, 0, 0, 0.3) 100%
-  );
-  z-index: 3;
-}
-
-/* Contenedor del botón estratégico */
-.explore-button-container {
-  position: absolute;
-  bottom: 5rem;
-  right: 3rem;
-  z-index: 10;
-}
-
-.btn-explore {
-  background: linear-gradient(135deg, var(--primary-red), var(--dark-red));
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  padding: 1.25rem 3rem;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 12px 40px rgba(220, 38, 38, 0.4), 0 0 60px rgba(220, 38, 38, 0.2);
-  backdrop-filter: blur(20px);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-explore::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: left 0.5s;
-}
-
-.btn-explore:hover::before {
-  left: 100%;
-}
-
-.btn-explore:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 60px rgba(220, 38, 38, 0.6), 0 0 80px rgba(220, 38, 38, 0.3);
-  background: linear-gradient(135deg, var(--secondary-red), var(--primary-red));
-  border-color: rgba(255, 255, 255, 0.4);
-  scale: 1.08;
-}
-
-/* Navegación */
-.carousel-navigation {
-  position: absolute;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.nav-dots {
-  display: flex;
-  gap: 1rem;
-}
-
-.nav-dot {
-  position: relative;
-  background: rgba(255, 255, 255, 0.3);
-  border: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  overflow: visible;
-}
-
-.nav-dot:hover {
-  background: rgba(255, 255, 255, 0.6);
-  transform: scale(1.2);
-}
-
-.nav-dot.active {
-  background: #60a5fa;
-  transform: scale(1.3);
-  box-shadow: 0 0 15px rgba(96, 165, 250, 0.6);
-}
-
-.nav-arrows {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.nav-arrow {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  cursor: pointer;
+  height: 78vh;
+  min-height: 520px;
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.35), transparent 60%),
+    radial-gradient(circle at bottom right, rgba(15, 23, 42, 0.85), #020617);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-}
-
-.nav-arrow:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: scale(1.1);
-}
-
-/* Indicador de Progreso */
-.progress-indicator {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.2);
-  z-index: 10;
-}
-
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #60a5fa, #3b82f6);
-  transition: width 0.3s ease;
-  box-shadow: 0 0 10px rgba(96, 165, 250, 0.5);
-}
-
-/* Animaciones */
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .hero-carousel {
-    height: 70vh;
-    min-height: 500px;
-    border-radius: 0;
-  }
-
-  .explore-button-container {
-    bottom: 4rem;
-    right: 2rem;
-  }
-
-  .carousel-navigation {
-    bottom: 1.5rem;
-    gap: 1.5rem;
-  }
-
-  .nav-arrows {
-    display: none; /* Ocultar flechas en móvil */
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-carousel {
-    height: 60vh;
-    min-height: 450px;
-    border-radius: 0;
-  }
-
-  .explore-button-container {
-    bottom: 3rem;
-    right: 1.5rem;
-  }
-
-  .btn-explore {
-    padding: 0.9rem 2rem;
-    font-size: 0.9rem;
-    border-radius: 12px;
-  }  .carousel-navigation {
-    bottom: 1rem;
-  }
-
-  .nav-dots {
-    gap: 0.8rem;
-  }
-}
-.hero-banner {
-  position: relative;
-  width: 100%;
-  height: 70vh;
-  min-height: 500px;
   overflow: hidden;
-  border-radius: 0 0 24px 24px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-.banner-image {
+.main-banner::before {
+  content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-}
-
-.banner-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transition: transform 0.5s ease;
-}
-
-.hero-banner:hover .banner-image img {
-  transform: scale(1.02);
+  inset: 0;
+  background-image: url('/images/mainbanner.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.65;
+  filter: saturate(1.1);
+  z-index: 0;
+  pointer-events: none;
 }
 
 .banner-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
+  inset: 0;
   width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.4) 0%,
-    rgba(0, 0, 0, 0.1) 50%,
-    rgba(0, 0, 0, 0.3) 100%
-  );
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2;
+  padding: 4rem 1.5rem;
 }
 
 .banner-content {
   text-align: center;
-  color: #ffffff;
-  max-width: 600px;
-  padding: 2rem;
+  max-width: 880px;
+  color: #f9fafb;
+  padding: 2.5rem 2rem;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  text-shadow: 0 3px 18px rgba(15, 23, 42, 0.9);
+}
+
+.banner-eyebrow {
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba(191, 219, 254, 0.95);
+  margin-bottom: 0.75rem;
+  font-weight: 800;
 }
 
 .banner-title {
-  font-size: clamp(3rem, 6vw, 5rem);
+  font-size: clamp(2.6rem, 4.5vw, 3.6rem);
   font-weight: 800;
-  margin: 0 0 1rem 0;
   line-height: 1.1;
-  letter-spacing: -0.02em;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  animation: fadeInUp 1s ease-out;
+  margin: 0 0 0.75rem;
 }
 
 .banner-title .accent {
-  color: #60a5fa;
-  text-shadow: 0 0 30px rgba(96, 165, 250, 0.6);
+  display: block;
+  color: var(--primary-red);
 }
 
-.banner-tagline {
-  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
-  font-weight: 400;
-  margin: 0;
-  opacity: 0.95;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  letter-spacing: 0.05em;
-  animation: fadeInUp 1s ease-out 0.3s both;
+.banner-subtitle {
+  font-size: 1.05rem;
+  color: rgba(209, 213, 219, 0.95);
+  max-width: 36rem;
+  margin: 0 auto 2rem;
+  font-weight: 500;
 }
 
-/* Animaciones */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .hero-banner {
-    height: 60vh;
-    min-height: 400px;
-    border-radius: 0 0 16px 16px;
-  }
-
-  .banner-content {
-    padding: 1.5rem;
-  }
-
-  .banner-title {
-    font-size: clamp(2.5rem, 8vw, 3.5rem);
-  }
-
-  .banner-tagline {
-    font-size: clamp(1rem, 4vw, 1.4rem);
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-banner {
-    height: 50vh;
-    min-height: 350px;
-    border-radius: 0 0 12px 12px;
-  }
-
-  .banner-content {
-    padding: 1rem;
-  }
-
-  .banner-title {
-    font-size: clamp(2rem, 10vw, 3rem);
-    margin-bottom: 0.5rem;
-  }
-
-  .banner-tagline {
-    font-size: clamp(0.9rem, 5vw, 1.2rem);
-  }
-}
-.hero-section {
-  position: relative;
-  min-height: 100vh;
-  background: var(--brand-gradient);
+.banner-actions {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   justify-content: center;
-  padding: 2rem;
-  overflow: hidden;
+  gap: 0.75rem;
 }
 
-.hero-container {
-  max-width: 1200px;
-  width: 100%;
-  text-align: center;
-  z-index: 2;
-}
-
-/* Hero Header */
-.hero-header {
-  margin-bottom: 4rem;
-}
-
-.hero-title {
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  font-weight: 800;
-  color: var(--brand-primary-contrast);
-  margin: 0 0 1rem 0;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-.hero-title .accent {
-  color: var(--brand-accent-alt);
-  text-shadow: 0 0 20px var(--brand-accent-glow);
-}
-
-.hero-subtitle {
-  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+.banner-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 0.8rem 1.7rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  color: var(--brand-accent);
-  margin: 0 0 1.5rem 0;
-  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.hero-tagline {
-  font-size: clamp(1rem, 1.8vw, 1.3rem);
-  color: var(--brand-accent-alt);
-  margin: 0 auto;
-  max-width: 600px;
-  line-height: 1.5;
-  opacity: 0.9;
+.banner-btn.primary {
+  background: rgba(15, 23, 42, 0.7);
+  color: rgba(191, 219, 254, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.9);
 }
+
+.banner-btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 40px rgba(239, 68, 68, 0.8);
+}
+
+.banner-btn.secondary {
+  background: rgba(15, 23, 42, 0.7);
+  color: rgba(191, 219, 254, 0.96);
+  border: 1px solid rgba(148, 163, 184, 0.9);
+}
+
+.banner-btn.secondary:hover {
+  background: rgba(15, 23, 42, 0.95);
+}
+
+@media (max-width: 640px) {
+  .main-banner {
+    height: auto;
+    padding-block: 2.25rem;
+  }
+
+  .banner-actions {
+    flex-direction: column;
+  }
+
+  .banner-btn {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .banner-overlay {
+    padding: 3rem 1.25rem;
+  }
+
+  .banner-content {
+    padding: 1.75rem 1.5rem;
+  }
+
+  .banner-subtitle {
+    font-size: 0.98rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
 
 /* Product Showcase */
 .product-showcase {

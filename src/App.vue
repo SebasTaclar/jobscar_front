@@ -2,36 +2,32 @@
   <header>
     <nav class="navbar">
       <!-- Logo y marca -->
-      <RouterLink class="link-navbar home" to="/" @click="closeMobileMenu">
+      <RouterLink class="link-navbar home" to="/" @click="goToMainBanner">
         <div class="brand-container">
-          <div class="creative-logo">
-            <div class="logo-circle">
-              <span class="logo-letter">S</span>
-              <span class="logo-letter">D</span>
-            </div>
-            <div class="logo-glow"></div>
+          <div class="brand-logo-image">
+            <img src="/images/logo.jpg" alt="Job's Car" />
           </div>
-          <div class="brand-info">
-            <div class="brand-title"><span class="highlight">SOYDANI</span></div>
-            <div class="brand-tagline">Tu tienda virtual</div>
-          </div>
+
         </div>
       </RouterLink>
 
       <!-- Navegación principal -->
       <div class="nav-menu desktop-nav">
-        <RouterLink to="/iphone" class="nav-link" :class="{ active: isCurrentRoute('/iphone') }" @click="closeMobileMenu">Tecnología</RouterLink>
-        <RouterLink to="/mac" class="nav-link" :class="{ active: isCurrentRoute('/mac') }" @click="closeMobileMenu">Navidad</RouterLink>
-        <RouterLink to="/ipad" class="nav-link" :class="{ active: isCurrentRoute('/ipad') }" @click="closeMobileMenu">Hogar</RouterLink>
-        <RouterLink to="/watch" class="nav-link" :class="{ active: isCurrentRoute('/watch') }" @click="closeMobileMenu">Ofertas</RouterLink>
-        <RouterLink to="/airpods" class="nav-link" :class="{ active: isCurrentRoute('/airpods') }" @click="closeMobileMenu">Destacados</RouterLink>
-        <!-- <a href="#products" class="nav-link" @click="closeMobileMenu(); scrollToProductStore()">Compra Ahora</a>
-        <a href="#contact" class="nav-link" @click="closeMobileMenu(); scrollToContact()">Contáctanos</a> -->
+        <RouterLink
+          to="/"
+          class="nav-link"
+          :class="{ active: isCurrentRoute('/') }"
+          @click="goToMainBanner"
+        >
+          Inicio
+        </RouterLink>
+        <a href="#servicios" class="nav-link" @click="goToServicios">Servicios</a>
+        <a href="#contacto" class="nav-link" @click="goToContacto">Contacto</a>
       </div>
 
       <!-- Controles de usuario -->
       <div class="nav-controls desktop-nav">
-        <RouterLink v-if="!isLoggedIn" class="btn access-btn" to="/login">Acceder</RouterLink>
+        <RouterLink class="btn access-btn" to="/admin/products">Acceder</RouterLink>
         <RouterLink v-if="isLoggedIn && isAdmin" class="btn admin-btn" to="/admin/products">⚙️ Panel Admin</RouterLink>
         <RouterLink v-if="isLoggedIn" @click="logout" class="btn logout-btn" to="/">Cerrar sesión</RouterLink>
         <div v-if="isLoggedIn" class="user-greeting">
@@ -50,18 +46,56 @@
       <div class="mobile-menu" :class="{ 'active': isMobileMenuOpen }">
         <div class="mobile-menu-content">
           <div class="mobile-nav-links">
-            <RouterLink to="/iphone" class="mobile-link" :class="{ active: isCurrentRoute('/iphone') }" @click="closeMobileMenu">Tecnología</RouterLink>
-            <RouterLink to="/mac" class="mobile-link" :class="{ active: isCurrentRoute('/mac') }" @click="closeMobileMenu">Navidad</RouterLink>
-            <RouterLink to="/ipad" class="mobile-link" :class="{ active: isCurrentRoute('/ipad') }" @click="closeMobileMenu">Hogar</RouterLink>
-            <RouterLink to="/watch" class="mobile-link" :class="{ active: isCurrentRoute('/watch') }" @click="closeMobileMenu">Ofertas</RouterLink>
-            <RouterLink to="/airpods" class="mobile-link" :class="{ active: isCurrentRoute('/airpods') }" @click="closeMobileMenu">Destacados</RouterLink>
-            <RouterLink to="/accesorios" class="mobile-link" :class="{ active: isCurrentRoute('/accesorios') }" @click="closeMobileMenu">Todos</RouterLink>
-            <!-- <a href="#products" class="mobile-link" @click="closeMobileMenu(); scrollToProductStore()">Compra Ahora</a>
-            <a href="#contact" class="mobile-link" @click="closeMobileMenu(); scrollToContact()">Contáctanos</a> -->
+            <RouterLink
+              to="/"
+              class="mobile-link"
+              :class="{ active: isCurrentRoute('/') }"
+              @click="goToMainBanner"
+            >
+              Inicio
+            </RouterLink>
+            <a href="#servicios" class="mobile-link" @click="goToServicios">Servicios</a>
+            <a href="#contacto" class="mobile-link" @click="goToContacto">Contacto</a>
+            <RouterLink
+              v-if="isWorkshopAdminRoute"
+              to="/workshop/admin/clients"
+              class="mobile-link"
+              :class="{ active: currentRoute.path === '/workshop/admin/clients' }"
+              @click="closeMobileMenu"
+            >
+              Clientes
+            </RouterLink>
+            <RouterLink
+              v-if="isWorkshopAdminRoute"
+              to="/workshop/admin/services"
+              class="mobile-link"
+              :class="{ active: currentRoute.path === '/workshop/admin/services' }"
+              @click="closeMobileMenu"
+            >
+              Servicios
+            </RouterLink>
+            <RouterLink
+              v-if="isWorkshopAdminRoute"
+              to="/workshop/admin/vehicles"
+              class="mobile-link"
+              :class="{ active: currentRoute.path === '/workshop/admin/vehicles' }"
+              @click="closeMobileMenu"
+            >
+              Gestión de vehículos
+            </RouterLink>
+            <RouterLink
+              v-if="isWorkshopAdminRoute"
+              to="/workshop/admin/reports"
+              class="mobile-link"
+              :class="{ active: currentRoute.path === '/workshop/admin/reports' }"
+              @click="closeMobileMenu"
+            >
+              Reportes
+            </RouterLink>
           </div>
 
           <div class="mobile-controls">
-            <RouterLink v-if="!isLoggedIn" class="mobile-btn access-btn" to="/login" @click="closeMobileMenu">
+            <RouterLink class="mobile-btn access-btn" to="/admin/products" @click="closeMobileMenu">
               Acceder
             </RouterLink>
             <div v-if="isLoggedIn" class="mobile-user-greeting">
@@ -77,6 +111,36 @@
         </div>
       </div>
     </nav>
+    <div v-if="isWorkshopAdminRoute" class="admin-tabs-bar desktop-nav">
+        <RouterLink
+          to="/workshop/admin/clients"
+          class="admin-tab-link"
+          :class="{ active: currentRoute.path === '/workshop/admin/clients' }"
+        >
+          Clientes
+        </RouterLink>
+        <RouterLink
+          to="/workshop/admin/services"
+          class="admin-tab-link"
+          :class="{ active: currentRoute.path === '/workshop/admin/services' }"
+        >
+          Servicios
+        </RouterLink>
+        <RouterLink
+          to="/workshop/admin/vehicles"
+          class="admin-tab-link"
+          :class="{ active: currentRoute.path === '/workshop/admin/vehicles' }"
+        >
+          Gestión de vehículos
+        </RouterLink>
+        <RouterLink
+          to="/workshop/admin/reports"
+          class="admin-tab-link"
+          :class="{ active: currentRoute.path === '/workshop/admin/reports' }"
+        >
+          Reportes
+        </RouterLink>
+    </div>
   </header>
 
   <RouterView />
@@ -86,6 +150,58 @@
 </template>
 
 <script setup lang="ts">
+// Función para ir al banner principal (Home)
+const goToMainBanner = (e: Event) => {
+  e.preventDefault();
+  closeMobileMenu();
+  router.push('/');
+  setTimeout(() => {
+    const banner = document.querySelector('.main-banner');
+    if (banner) {
+      banner.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 100);
+};
+
+// Función para ir a la sección de servicios
+const goToServicios = (e: Event) => {
+  e.preventDefault();
+  closeMobileMenu();
+  const scrollToServices = () => {
+    const services = document.getElementById('services');
+    if (services) {
+      services.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+  if (currentRoute.path !== '/') {
+    router.push('/').then(() => {
+      setTimeout(scrollToServices, 300);
+    });
+  } else {
+    scrollToServices();
+  }
+};
+
+// Función para ir a la sección de contacto
+const goToContacto = (e: Event) => {
+  e.preventDefault();
+  closeMobileMenu();
+  if (currentRoute.path !== '/') {
+    router.push('/').then(() => {
+      setTimeout(() => {
+        const contacto = document.getElementById('contacto');
+        if (contacto) {
+          contacto.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300);
+    });
+  } else {
+    const contacto = document.getElementById('contacto');
+    if (contacto) {
+      contacto.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+};
 import { RouterLink, RouterView, useRoute } from 'vue-router';
 import { authService } from '@/services/api';
 import { onMounted, ref, watch, computed } from 'vue';
@@ -98,6 +214,9 @@ const isMobileMenuOpen = ref(false);
 
 // Router hooks
 const currentRoute = useRoute();
+
+// Ruta de panel del taller
+const isWorkshopAdminRoute = computed(() => currentRoute.path.startsWith('/workshop/admin'));
 
 // Verificar si el usuario es administrador
 const isAdmin = computed(() => authService.isAdmin());
@@ -173,7 +292,7 @@ watch(route, () => {
 
 <style scoped>
 .navbar {
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.9) 100%);
+  background: linear-gradient(to right, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.96));
   margin: 0;
   width: 100%;
   display: flex;
@@ -183,18 +302,29 @@ watch(route, () => {
   top: 0;
   left: 0;
   z-index: 1000;
-  height: 75px;
-  padding: 0 clamp(20px, 5vw, 60px);
-  box-shadow: 0 2px 24px rgba(220, 38, 38, 0.15), 0 1px 3px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+  height: 85px;
+  padding: 20px 50px 10px 50px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(18px);
+  border-bottom: 2px solid rgba(220, 38, 38, 0.6);
 }
 
 /* Logo y marca */
 .brand-container {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
+}
+
+.brand-logo-image img {
+  width: 140px;
+  height: 75px;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow:
+    0 12px 32px rgba(15, 23, 42, 0.9),
+    0 0 40px rgba(59, 130, 246, 0.7);
+  border: 3px solid rgba(191, 219, 254, 0.9);
 }
 
 /* Logo creativo */
@@ -312,11 +442,10 @@ watch(route, () => {
 }
 
 .brand-tagline {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-size: 11px;
+  color: rgba(226, 232, 240, 0.8);
+  font-weight: 500;
+  letter-spacing: 0.4px;
 }
 
 .brand-subtitle {
@@ -351,12 +480,12 @@ watch(route, () => {
 .nav-link::after {
   content: '';
   position: absolute;
-  bottom: 5px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 0;
+  left: 0;
+  transform: none;
   width: 0;
   height: 2px;
-  background: var(--primary-red);
+  background: #ffffff;
   transition: width 0.3s ease;
 }
 
@@ -370,14 +499,7 @@ watch(route, () => {
   width: 70%;
 }
 
-.nav-link.active {
-  color: var(--primary-red);
-  background: rgba(220, 38, 38, 0.15);
-}
-
-.nav-link.active::after {
-  width: 70%;
-}
+/* El estado activo visual se mantiene limpio; solo el hover muestra la línea */
 
 .share-btn {
   background: linear-gradient(135deg, #22d3ee 0%, #0891b2 100%);
@@ -414,17 +536,17 @@ watch(route, () => {
 }
 
 .access-btn {
-  background: linear-gradient(135deg, var(--primary-red) 0%, var(--dark-red) 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
+  background: #ffffff;
+  color: var(--primary-red);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.35);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .access-btn:hover {
-  background: linear-gradient(135deg, var(--dark-red) 0%, var(--tertiary-red) 100%);
-  box-shadow: 0 6px 24px rgba(220, 38, 38, 0.5);
+  background: #e5e7eb;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.45);
   transform: translateY(-3px);
 }
 
@@ -590,9 +712,9 @@ watch(route, () => {
 }
 
 .mobile-btn.access-btn {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  background: #ffffff;
+  color: var(--primary-red);
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.35);
 }
 
 .mobile-btn.logout-btn {
@@ -624,6 +746,40 @@ watch(route, () => {
   backdrop-filter: blur(10px);
 }
 
+/* Barra de pestañas del panel de taller (desktop) */
+.admin-tabs-bar {
+  position: fixed;
+  top: 95px;
+  left: 0;
+  width: 100%;
+  z-index: 950;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: linear-gradient(to right, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.96));
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.8);
+}
+
+.admin-tab-link {
+  color: #e5e7eb;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: radial-gradient(circle at top left, rgba(30, 64, 175, 0.4), rgba(15, 23, 42, 1));
+  transition: all 0.2s ease;
+}
+
+.admin-tab-link:hover {
+  border-color: #60a5fa;
+  color: #f9fafb;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.4);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .navbar {
@@ -641,6 +797,10 @@ watch(route, () => {
 
   .mobile-menu {
     display: block;
+  }
+
+  .admin-tabs-bar {
+    display: none;
   }
 
   .brand-title {
@@ -676,6 +836,12 @@ watch(route, () => {
     font-size: 16px;
   }
 
+  .brand-logo-image img
+  {
+    width: 100px;
+    height: 59px;
+  }
+
   .brand-logo {
     width: 38px;
     height: 38px;
@@ -691,38 +857,6 @@ watch(route, () => {
 /* Quitar subrayado del link principal */
 .link-navbar {
   text-decoration: none !important;
-}
-
-/* Estilos para enlaces activos */
-.nav-link.active,
-.mobile-link.active {
-  color: #0071e3;
-  font-weight: 600;
-  position: relative;
-}
-
-.nav-link.active::after,
-.mobile-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background-color: #0071e3;
-  border-radius: 2px;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scaleX(0.5);
-  }
-  to {
-    opacity: 1;
-    transform: scaleX(1);
-  }
 }
 
 .link-navbar:hover {
