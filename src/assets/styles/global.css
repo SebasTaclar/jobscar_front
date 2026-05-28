@@ -443,7 +443,7 @@ body {
 
 /* Cards */
 .card {
-  background-color: var(--white);
+  background-color: var(--brand-bg-end);
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-light);
   padding: 1.5rem;
@@ -511,4 +511,30 @@ body {
   .card {
     padding: 1rem;
   }
+}
+
+/* Ajustes para la tabla de órdenes (histórico) */
+.simple-table.orders-table {
+  width: 100%;
+  table-layout: fixed; /* respetar anchos definidos en colgroup */
+}
+.simple-table.orders-table th,
+.simple-table.orders-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap; /* evitar salto de línea en escritorio */
+}
+
+@media (max-width: 1024px) {
+  .simple-table.orders-table th,
+  .simple-table.orders-table td {
+    white-space: normal; /* permitir ajustes en pantallas pequeñas */
+    word-break: break-word;
+  }
+}
+
+/* Asegurar que la columna de acciones tiene espacio controlado */
+.simple-table.orders-table td[data-label="Acciones"] {
+  display: table-cell;
+  width: 8%;
 }
