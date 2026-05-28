@@ -6,7 +6,7 @@
           <!-- Marca Job's Car -->
           <div class="brand-section">
             <div class="footer-logo-image">
-              <img src="/images/logo.jpg" alt="Job's Car" />
+              <img src="/images/logo.png" alt="Job's Car" />
             </div>
             <p class="footer-brand-name">Job's Car Taller Automotriz</p>
             <p class="footer-description">

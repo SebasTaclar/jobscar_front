@@ -5,7 +5,7 @@
       <RouterLink class="link-navbar home" to="/" @click="goToMainBanner">
         <div class="brand-container">
           <div class="brand-logo-image">
-            <img src="/images/logo.jpg" alt="Job's Car" />
+            <img src="/images/logo.png" alt="Job's Car" />
           </div>
 
         </div>
@@ -321,10 +321,7 @@ watch(route, () => {
   height: 75px;
   border-radius: 16px;
   object-fit: cover;
-  box-shadow:
-    0 12px 32px rgba(15, 23, 42, 0.9),
-    0 0 40px rgba(59, 130, 246, 0.7);
-  border: 3px solid rgba(191, 219, 254, 0.9);
+  border: 2px solid rgba(191, 219, 254, 0.9);
 }
 
 /* Logo creativo */

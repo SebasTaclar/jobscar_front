@@ -50,7 +50,7 @@
             </div>
             <div class="visit-text">
               <span class="visit-label">Correo</span>
-              <span class="visit-value">contacto@jobscar.com</span>
+              <span class="visit-value">feliped1823@gmail.com</span>
               <span class="visit-note">Escríbenos para cotizaciones o dudas sobre tu vehículo.</span>
             </div>
           </div>
@@ -64,8 +64,9 @@
             </div>
             <div class="visit-text">
               <span class="visit-label">Horarios</span>
-              <span class="visit-value">Lunes a Sábado: 8:00 AM - 6:00 PM</span>
-              <span class="visit-note">Domingos y festivos: atención por disponibilidad.</span>
+              <span class="visit-value">Lunes a Viernes: 7:00 AM - 6:00 PM</span>
+              <span class="visit-value">Sabados: 8:00 AM - 3:00 PM</span>
+              <span class="visit-note">Domingos y festivos: Atención por disponibilidad.</span>
             </div>
           </div>
         </div>
