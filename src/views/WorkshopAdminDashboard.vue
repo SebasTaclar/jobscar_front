@@ -425,7 +425,7 @@ const loadClients = async () => {
   try {
     isLoadingClients.value = true;
     const response = await workshopClientService.getClients({});
-    clients.value = response.data || [];
+    clients.value = response.data?.clients || [];
   } catch (error) {
     console.error('Error cargando clientes', error);
   } finally {

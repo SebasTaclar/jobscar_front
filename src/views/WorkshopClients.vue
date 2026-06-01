@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { workshopClientService, type ApiResponse } from '@/services/api'
-import type { WorkshopClient } from '@/types/WorkshopClientType'
+import type { WorkshopClient, WorkshopClientListData } from '@/types/WorkshopClientType'
 
 const isLoading = ref(false)
 const errorMessage = ref<string | null>(null)
@@ -13,12 +13,12 @@ const loadClients = async () => {
   errorMessage.value = null
 
   try {
-    const response: ApiResponse<WorkshopClient[]> = await workshopClientService.getClients({
-      search: search.value || undefined,
+    const response: ApiResponse<WorkshopClientListData> = await workshopClientService.getClients({
+      name: search.value || undefined,
     })
 
     if (response.success) {
-      clients.value = response.data
+      clients.value = response.data.clients
     } else {
       errorMessage.value = response.message || 'No se pudieron cargar los clientes.'
     }
@@ -47,7 +47,7 @@ onMounted(() => {
         <input
           v-model="search"
           type="text"
-          placeholder="Buscar por nombre, teléfono o email"
+            placeholder="Buscar por nombre"
           @keyup.enter="loadClients"
         />
         <button type="button" @click="loadClients">Buscar</button>

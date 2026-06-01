@@ -1,20 +1,21 @@
 import { apiClient, type ApiResponse } from './apiConfig'
 import type {
   WorkshopClient,
+  WorkshopClientListData,
   CreateWorkshopClientRequest,
   UpdateWorkshopClientRequest,
 } from '@/types/WorkshopClientType'
 
 class WorkshopClientService {
-  async getClients(params?: { search?: string; isActive?: boolean }): Promise<
-    ApiResponse<WorkshopClient[]>
+  async getClients(params?: { name?: string; isActive?: boolean }): Promise<
+    ApiResponse<WorkshopClientListData>
   > {
     try {
-      let endpoint = '/workshop/clients'
+      let endpoint = '/clients'
 
       if (params) {
         const queryParams = new URLSearchParams()
-        if (params.search) queryParams.append('search', params.search)
+        if (params.name) queryParams.append('name', params.name)
         if (params.isActive !== undefined)
           queryParams.append('isActive', String(params.isActive))
 
@@ -22,7 +23,7 @@ class WorkshopClientService {
         if (queryString) endpoint += `?${queryString}`
       }
 
-      const result = await apiClient.get<WorkshopClient[]>(endpoint)
+      const result = await apiClient.get<WorkshopClientListData>(endpoint)
       return result
     } catch (error) {
       console.error('❌ [workshopClientService] Error fetching clients:', error)
@@ -32,7 +33,7 @@ class WorkshopClientService {
 
   async getClientById(id: number): Promise<ApiResponse<WorkshopClient>> {
     try {
-      const result = await apiClient.get<WorkshopClient>(`/workshop/clients/${id}`)
+      const result = await apiClient.get<WorkshopClient>(`/clients/${id}`)
       return result
     } catch (error) {
       console.error('❌ [workshopClientService] Error fetching client by ID:', error)
@@ -44,7 +45,7 @@ class WorkshopClientService {
     data: CreateWorkshopClientRequest,
   ): Promise<ApiResponse<WorkshopClient>> {
     try {
-      const result = await apiClient.post<WorkshopClient>('/workshop/clients', data)
+      const result = await apiClient.post<WorkshopClient>('/clients', data)
       return result
     } catch (error) {
       console.error('❌ [workshopClientService] Error creating client:', error)
@@ -57,7 +58,7 @@ class WorkshopClientService {
     data: UpdateWorkshopClientRequest,
   ): Promise<ApiResponse<WorkshopClient>> {
     try {
-      const result = await apiClient.put<WorkshopClient>(`/workshop/clients/${id}`, data)
+      const result = await apiClient.put<WorkshopClient>(`/clients/${id}`, data)
       return result
     } catch (error) {
       console.error('❌ [workshopClientService] Error updating client:', error)
@@ -65,9 +66,19 @@ class WorkshopClientService {
     }
   }
 
+  async deleteClient(id: number): Promise<ApiResponse<WorkshopClient>> {
+    try {
+      const result = await apiClient.delete<WorkshopClient>(`/clients/${id}`)
+      return result
+    } catch (error) {
+      console.error('❌ [workshopClientService] Error deleting client:', error)
+      throw error
+    }
+  }
+
   async deactivateClient(id: number): Promise<ApiResponse<WorkshopClient>> {
     try {
-      const result = await apiClient.put<WorkshopClient>(`/workshop/clients/${id}/deactivate`)
+      const result = await apiClient.put<WorkshopClient>(`/clients/${id}`, { isActive: false })
       return result
     } catch (error) {
       console.error('❌ [workshopClientService] Error deactivating client:', error)

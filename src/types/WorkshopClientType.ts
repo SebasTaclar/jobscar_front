@@ -3,10 +3,15 @@ export interface WorkshopClient {
   name: string
   phone: string
   email: string
-  notes?: string
+  notes?: string | null
   isActive: boolean
   createdAt: string
-  updatedAt?: string
+  updatedAt: string
+}
+
+export interface WorkshopClientListData {
+  count: number
+  clients: WorkshopClient[]
 }
 
 export interface CreateWorkshopClientRequest {
@@ -20,6 +25,6 @@ export interface UpdateWorkshopClientRequest {
   name?: string
   phone?: string
   email?: string
-  notes?: string
+  notes?: string | null
   isActive?: boolean
 }

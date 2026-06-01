@@ -7,16 +7,11 @@
       </h1>
       <p class="dashboard-subtitle">Gestiona clientes, servicios, vehículos y reportes del taller</p>
     </div>
-<!-- Navegación por pestañas -->
+    <!-- Navegación por pestañas -->
     <div class="tabs-container">
       <div class="tabs">
-        <button
-          v-for="tab in tabs"
-          :key="tab.id"
-          type="button"
-          :class="['tab', { active: activeTab === tab.id } ]"
-          @click="selectTab(tab.id)"
-        >
+        <button v-for="tab in tabs" :key="tab.id" type="button" :class="['tab', { active: activeTab === tab.id }]"
+          @click="selectTab(tab.id)">
           <span class="tab-icon">{{ tab.icon }}</span>
           {{ tab.name }}
         </button>
@@ -165,21 +160,19 @@
 
     <!-- Pestaña: Vehículos -->
     <div v-if="activeTab === 'vehicles'" class="content-section">
-      <div class="section-title-bar" style="display:grid;grid-template-columns:1fr minmax(320px,420px) auto;align-items:center;gap:12px;">
+      <div class="section-title-bar"
+        style="display:grid;grid-template-columns:1fr minmax(320px,420px) auto;align-items:center;gap:12px;">
         <h2 class="section-title">Vehículos</h2>
         <div style="justify-self:center;">
           <div class="search-input-wrapper" style="max-width:420px;">
             <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-              <path fill="currentColor" d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z"/>
+              <path fill="currentColor"
+                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
             </svg>
-            <input
-              type="search"
-              v-model="searchVehicles"
-              placeholder="Buscar por cliente, placa, marca..."
-              aria-label="Buscar vehículos"
-              class="search-input"
-            />
-            <button v-if="searchVehicles" class="search-clear" @click.prevent="searchVehicles = ''" aria-label="Limpiar búsqueda">X</button>
+            <input type="search" v-model="searchVehicles" placeholder="Buscar por cliente, placa, marca..."
+              aria-label="Buscar vehículos" class="search-input" />
+            <button v-if="searchVehicles" class="search-clear" @click.prevent="searchVehicles = ''"
+              aria-label="Limpiar búsqueda">X</button>
           </div>
         </div>
         <div style="justify-self:end;">
@@ -219,22 +212,25 @@
           </thead>
           <tbody>
             <tr v-for="(v, idx) in burnedVehicles.filter(vehicle => {
-                if (!searchVehicles) return true
-                const q = searchVehicles.toLowerCase()
-                return (vehicle.client && vehicle.client.toLowerCase().includes(q)) ||
-                       (vehicle.plate && vehicle.plate.toLowerCase().includes(q)) ||
-                       (vehicle.brand && vehicle.brand.toLowerCase().includes(q)) ||
-                       (vehicle.model && vehicle.model.toLowerCase().includes(q))
-              })" :key="v.plate || idx">
+              if (!searchVehicles) return true
+              const q = searchVehicles.toLowerCase()
+              return (vehicle.client && vehicle.client.toLowerCase().includes(q)) ||
+                (vehicle.plate && vehicle.plate.toLowerCase().includes(q)) ||
+                (vehicle.brand && vehicle.brand.toLowerCase().includes(q)) ||
+                (vehicle.model && vehicle.model.toLowerCase().includes(q))
+            })" :key="v.plate || idx">
               <td data-label="ID">{{ v.id || (idx + 1) }}</td>
               <td data-label="Nombre Cliente">{{ v.client || '-' }}</td>
               <td data-label="Placa">{{ v.plate || '-' }}</td>
               <td data-label="Marca">{{ v.brand || '-' }}</td>
               <td data-label="Modelo">{{ v.model || '-' }}</td>
               <td data-label="Tipo Vehículo">{{ v.vehicleType || '-' }}</td>
-              <td data-label="Fecha Registro">{{ v.registrationDate ? formatShortDate(new Date(v.registrationDate)) : '-' }}</td>
-              <td data-label="Km Actual">{{ typeof v.km === 'number' ? v.km.toLocaleString() + '' : (v.km || '-') }}</td>
-              <td data-label="Último Servicio">{{ v.lastServiceDate ? formatShortDate(new Date(v.lastServiceDate)) : '-' }}</td>
+              <td data-label="Fecha Registro">{{ v.registrationDate ? formatShortDate(new Date(v.registrationDate)) :
+                '-' }}</td>
+              <td data-label="Km Actual">{{ typeof v.km === 'number' ? v.km.toLocaleString() + '' : (v.km || '-') }}
+              </td>
+              <td data-label="Último Servicio">{{ v.lastServiceDate ? formatShortDate(new Date(v.lastServiceDate)) : '-'
+                }}</td>
               <td data-label="Observaciones"><span class="client-notes">{{ v.observations || '-' }}</span></td>
               <td data-label="Acciones">
                 <div class="actions" style="display:flex;gap:6px;justify-content:center;">
@@ -335,20 +331,32 @@
       <div class="orders-grid orders-row">
         <div v-if="activeWorkOrders.length === 0" class="empty">No hay órdenes de trabajo activas.</div>
         <template v-else>
-          <div v-for="order in activeWorkOrders" :key="order.id" :class="['pro-card','order-card', statusClass(order.status)]">
+          <div v-for="order in activeWorkOrders" :key="order.id"
+            :class="['pro-card', 'order-card', statusClass(order.status)]">
             <div class="order-top-row">
               <span class="order-id-badge">#{{ order.id }}</span>
               <div class="order-action-row">
                 <button class="order-action-btn" @click="editOrder(order)" aria-label="Editar orden">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25Zm14.71-9.54a.996.996 0 0 0 0-1.41l-1.99-1.99a.996.996 0 1 0-1.41 1.41l1.99 1.99c.39.39 1.02.39 1.41 0Z" fill="currentColor"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25Zm14.71-9.54a.996.996 0 0 0 0-1.41l-1.99-1.99a.996.996 0 1 0-1.41 1.41l1.99 1.99c.39.39 1.02.39 1.41 0Z"
+                      fill="currentColor" />
+                  </svg>
                   Editar
                 </button>
                 <button class="order-action-btn pdf" @click="exportOrderPdf(order)" aria-label="Exportar a PDF">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 2h7l5 5v15H6V2Zm7 1.5V8h4.5L13 3.5ZM8 12h8v1.5H8V12Zm0 3h8v1.5H8V15Zm0-6h4.5v1.5H8V9Z" fill="currentColor"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M6 2h7l5 5v15H6V2Zm7 1.5V8h4.5L13 3.5ZM8 12h8v1.5H8V12Zm0 3h8v1.5H8V15Zm0-6h4.5v1.5H8V9Z"
+                      fill="currentColor" />
+                  </svg>
                   Exportar a PDF
                 </button>
                 <button class="order-action-btn danger" @click="deleteOrder(order.id)" aria-label="Eliminar orden">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 3.75A1.75 1.75 0 0 1 9.75 2h4.5A1.75 1.75 0 0 1 16 3.75V5h3.25a.75.75 0 0 1 0 1.5h-1.04l-.7 12.25A2.25 2.25 0 0 1 15.27 21H8.73a2.25 2.25 0 0 1-2.24-2.25L5.8 6.5H4.75a.75.75 0 0 1 0-1.5H8V3.75Zm1.5 0V5h5V3.75a.25.25 0 0 0-.25-.25h-4.5a.25.25 0 0 0-.25.25ZM9 9.25a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0V10a.75.75 0 0 1 .75-.75Zm6 0a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0V10a.75.75 0 0 1 .75-.75Z" fill="currentColor"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M8 3.75A1.75 1.75 0 0 1 9.75 2h4.5A1.75 1.75 0 0 1 16 3.75V5h3.25a.75.75 0 0 1 0 1.5h-1.04l-.7 12.25A2.25 2.25 0 0 1 15.27 21H8.73a2.25 2.25 0 0 1-2.24-2.25L5.8 6.5H4.75a.75.75 0 0 1 0-1.5H8V3.75Zm1.5 0V5h5V3.75a.25.25 0 0 0-.25-.25h-4.5a.25.25 0 0 0-.25.25ZM9 9.25a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0V10a.75.75 0 0 1 .75-.75Zm6 0a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0V10a.75.75 0 0 1 .75-.75Z"
+                      fill="currentColor" />
+                  </svg>
                   Eliminar
                 </button>
               </div>
@@ -356,7 +364,11 @@
 
             <div class="order-title-row">
               <div class="order-icon-box" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none"><path d="M7 3.75A1.75 1.75 0 0 1 8.75 2h6.5A1.75 1.75 0 0 1 17 3.75V4h1.25A2.75 2.75 0 0 1 21 6.75v11.5A2.75 2.75 0 0 1 18.25 21H5.75A2.75 2.75 0 0 1 3 18.25V6.75A2.75 2.75 0 0 1 5.75 4H7v-.25Zm1.5.25h7V4a.25.25 0 0 0-.25-.25h-6.5A.25.25 0 0 0 8.5 4v0ZM5.75 5.5A1.25 1.25 0 0 0 4.5 6.75v11.5c0 .69.56 1.25 1.25 1.25h12.5c.69 0 1.25-.56 1.25-1.25V6.75c0-.69-.56-1.25-1.25-1.25H5.75Zm2.25 5h8.25a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1 0-1.5Zm0 3.25h5.75a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1 0-1.5Z" fill="currentColor"/></svg>
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M7 3.75A1.75 1.75 0 0 1 8.75 2h6.5A1.75 1.75 0 0 1 17 3.75V4h1.25A2.75 2.75 0 0 1 21 6.75v11.5A2.75 2.75 0 0 1 18.25 21H5.75A2.75 2.75 0 0 1 3 18.25V6.75A2.75 2.75 0 0 1 5.75 4H7v-.25Zm1.5.25h7V4a.25.25 0 0 0-.25-.25h-6.5A.25.25 0 0 0 8.5 4v0ZM5.75 5.5A1.25 1.25 0 0 0 4.5 6.75v11.5c0 .69.56 1.25 1.25 1.25h12.5c.69 0 1.25-.56 1.25-1.25V6.75c0-.69-.56-1.25-1.25-1.25H5.75Zm2.25 5h8.25a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1 0-1.5Zm0 3.25h5.75a.75.75 0 0 1 0 1.5H8a.75.75 0 0 1 0-1.5Z"
+                    fill="currentColor" />
+                </svg>
               </div>
               <h3 class="card-title">{{ order.vehicle }} - {{ order.client }}</h3>
             </div>
@@ -366,24 +378,39 @@
             <div class="order-info-grid">
               <div class="order-info-card">
                 <div class="order-info-icon blue">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 2.75a.75.75 0 0 1 1.5 0V4H15V2.75a.75.75 0 0 1 1.5 0V4H18a2 2 0 0 1 2 2v2H4V6a2 2 0 0 1 2-2h1V2.75Zm14 6.75H3v8.5A2.25 2.25 0 0 0 5.25 20h13.5A2.25 2.25 0 0 0 21 17.75V9.5Zm-13 3h3v3H8v-3Z" fill="currentColor"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M7 2.75a.75.75 0 0 1 1.5 0V4H15V2.75a.75.75 0 0 1 1.5 0V4H18a2 2 0 0 1 2 2v2H4V6a2 2 0 0 1 2-2h1V2.75Zm14 6.75H3v8.5A2.25 2.25 0 0 0 5.25 20h13.5A2.25 2.25 0 0 0 21 17.75V9.5Zm-13 3h3v3H8v-3Z"
+                      fill="currentColor" />
+                  </svg>
                 </div>
                 <span class="order-info-label">Fecha creación</span>
-                <strong class="order-info-value">{{ order.createdDate ? formatShortDate(new Date(order.createdDate)) : '-' }}</strong>
+                <strong class="order-info-value">{{ order.createdDate ? formatShortDate(new Date(order.createdDate)) :
+                  '-' }}</strong>
               </div>
               <div class="order-info-card">
                 <div class="order-info-icon green">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 2.75a.75.75 0 0 1 1.5 0V4H15V2.75a.75.75 0 0 1 1.5 0V4H18a2 2 0 0 1 2 2v2H4V6a2 2 0 0 1 2-2h1V2.75ZM4 10h16v7.75A2.25 2.25 0 0 1 17.75 20H6.25A2.25 2.25 0 0 1 4 17.75V10Z" fill="currentColor"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M7 2.75a.75.75 0 0 1 1.5 0V4H15V2.75a.75.75 0 0 1 1.5 0V4H18a2 2 0 0 1 2 2v2H4V6a2 2 0 0 1 2-2h1V2.75ZM4 10h16v7.75A2.25 2.25 0 0 1 17.75 20H6.25A2.25 2.25 0 0 1 4 17.75V10Z"
+                      fill="currentColor" />
+                  </svg>
                 </div>
                 <span class="order-info-label">Fecha entrega</span>
-                <strong class="order-info-value">{{ order.deliveryDate ? formatShortDate(new Date(order.deliveryDate)) : '-' }}</strong>
+                <strong class="order-info-value">{{ order.deliveryDate ? formatShortDate(new Date(order.deliveryDate)) :
+                  '-' }}</strong>
               </div>
               <div class="order-info-card">
                 <div class="order-info-icon orange">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 12 2.5Zm0 1.5a8 8 0 1 1-8 8 8.01 8.01 0 0 1 8-8Zm-.75 4.25a.75.75 0 0 1 1.5 0v4.25h3.25a.75.75 0 0 1 0 1.5h-4a.75.75 0 0 1-.75-.75V8.25Z" fill="currentColor"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M12 2.5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 12 2.5Zm0 1.5a8 8 0 1 1-8 8 8.01 8.01 0 0 1 8-8Zm-.75 4.25a.75.75 0 0 1 1.5 0v4.25h3.25a.75.75 0 0 1 0 1.5h-4a.75.75 0 0 1-.75-.75V8.25Z"
+                      fill="currentColor" />
+                  </svg>
                 </div>
                 <span class="order-info-label">Estado</span>
-                <span class="status-badge order-status-pill" :class="statusClass(order.status)">{{ order.status }}</span>
+                <span class="status-badge order-status-pill" :class="statusClass(order.status)">{{ order.status
+                  }}</span>
               </div>
             </div>
 
@@ -396,8 +423,10 @@
                 </span>
               </div>
               <div class="type-list flag-list" style="margin-top:8px;">
-                <span v-if="order.gases" class="type-chip flag-chip flag-gases"><span class="type-chip-dot" aria-hidden="true">•</span><span>Gases</span></span>
-                <span v-if="order.escaner" class="type-chip flag-chip flag-escaner"><span class="type-chip-dot" aria-hidden="true">•</span><span>Escaner</span></span>
+                <span v-if="order.gases" class="type-chip flag-chip flag-gases"><span class="type-chip-dot"
+                    aria-hidden="true">•</span><span>Gases</span></span>
+                <span v-if="order.escaner" class="type-chip flag-chip flag-escaner"><span class="type-chip-dot"
+                    aria-hidden="true">•</span><span>Escaner</span></span>
               </div>
             </div>
 
@@ -423,7 +452,11 @@
               <span class="order-total-label">Total</span>
               <span class="order-total-value">${{ Number(order.total || 0).toLocaleString('en-US') }}</span>
               <span class="order-total-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none"><path d="M12 2.75A9.25 9.25 0 1 0 21.25 12 9.26 9.26 0 0 0 12 2.75Zm0 1.5A7.75 7.75 0 1 1 4.25 12 7.76 7.76 0 0 1 12 4.25Zm-1.1 3.75h2.7a2.35 2.35 0 0 1 0 4.7h-1.1a.85.85 0 0 0 0 1.7h1.8a.75.75 0 0 1 0 1.5h-1.1v1a.75.75 0 0 1-1.5 0v-1h-1.8a.75.75 0 0 1 0-1.5h2.7a.85.85 0 0 0 0-1.7h-1.8a2.35 2.35 0 1 1 0-4.7Z" fill="currentColor"/></svg>
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M12 2.75A9.25 9.25 0 1 0 21.25 12 9.26 9.26 0 0 0 12 2.75Zm0 1.5A7.75 7.75 0 1 1 4.25 12 7.76 7.76 0 0 1 12 4.25Zm-1.1 3.75h2.7a2.35 2.35 0 0 1 0 4.7h-1.1a.85.85 0 0 0 0 1.7h1.8a.75.75 0 0 1 0 1.5h-1.1v1a.75.75 0 0 1-1.5 0v-1h-1.8a.75.75 0 0 1 0-1.5h2.7a.85.85 0 0 0 0-1.7h-1.8a2.35 2.35 0 1 1 0-4.7Z"
+                    fill="currentColor" />
+                </svg>
               </span>
             </div>
           </div>
@@ -436,18 +469,18 @@
       <div class="table-responsive" style="margin-top:16px;">
         <table class="simple-table orders-table compact">
           <colgroup>
-            <col style="width:8%" />   <!-- ID -->
-            <col style="width:10%" />   <!-- Placa -->
-            <col style="width:12%" />   <!-- Fecha creación -->
-            <col style="width:12%" />   <!-- Fecha entrega -->
-            <col style="width:12%" />  <!-- Cliente -->
-            <col style="width:16%" />   <!-- Estado -->
-            <col style="width:11%" />  <!-- Tipo servicio -->
-            <col style="width:10%" />   <!-- Técnico -->
+            <col style="width:8%" /> <!-- ID -->
+            <col style="width:10%" /> <!-- Placa -->
+            <col style="width:12%" /> <!-- Fecha creación -->
+            <col style="width:12%" /> <!-- Fecha entrega -->
+            <col style="width:12%" /> <!-- Cliente -->
+            <col style="width:16%" /> <!-- Estado -->
+            <col style="width:11%" /> <!-- Tipo servicio -->
+            <col style="width:10%" /> <!-- Técnico -->
             <!-- Kilometraje column removed -->
-            <col style="width:12%" />   <!-- Total -->
-            <col style="width:15%" />  <!-- Diagnóstico / Servicios -->
-            <col style="width:12%" />   <!-- Acciones -->
+            <col style="width:12%" /> <!-- Total -->
+            <col style="width:15%" /> <!-- Diagnóstico / Servicios -->
+            <col style="width:12%" /> <!-- Acciones -->
           </colgroup>
           <thead class="table-header">
             <tr>
@@ -470,12 +503,19 @@
               <td data-label="ID">#{{ order.id }}</td>
               <td data-label="Placa">{{ order.vehicle || '-' }}</td>
               <td data-label="Cliente">{{ order.client || '-' }}</td>
-              <td data-label="Fecha creación">{{ order.createdDate ? formatShortDate(new Date(order.createdDate)) : '-' }}</td>
-              <td data-label="Fecha entrega">{{ order.deliveryDate ? formatShortDate(new Date(order.deliveryDate)) : '-' }}</td>
-              <td data-label="Estado"><span class="status-badge" :class="statusClass(order.status)">{{ order.status }}</span></td>
+              <td data-label="Fecha creación">{{ order.createdDate ? formatShortDate(new Date(order.createdDate)) : '-'
+                }}
+              </td>
+              <td data-label="Fecha entrega">{{ order.deliveryDate ? formatShortDate(new Date(order.deliveryDate)) : '-'
+                }}
+              </td>
+              <td data-label="Estado"><span class="status-badge" :class="statusClass(order.status)">{{ order.status
+                  }}</span>
+              </td>
               <td data-label="Tipo servicio">
                 <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
-                  <button class="btn btn-sm btn-secondary" type="button" @click.prevent="openServicesModal(order)">ver</button>
+                  <button class="btn btn-sm btn-secondary" type="button"
+                    @click.prevent="openServicesModal(order)">ver</button>
                 </div>
               </td>
               <td data-label="Técnico">{{ order.mechanic || '-' }}</td>
@@ -483,7 +523,8 @@
               <td data-label="Total">${{ (order.total || 0).toLocaleString() }}</td>
               <td data-label="Diagnóstico / Servicios">
                 <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
-                  <button class="btn btn-sm btn-secondary" type="button" @click.prevent="openDiagnosisModal(order)">ver</button>
+                  <button class="btn btn-sm btn-secondary" type="button"
+                    @click.prevent="openDiagnosisModal(order)">ver</button>
                 </div>
               </td>
               <td data-label="Acciones">
@@ -512,11 +553,18 @@
         <div class="modal-body">
           <form @submit.prevent="createOrder">
             <div class="form-row">
-              <div class="form-group"><label>Buscar placa</label><input v-model="orderPlateSearch" type="search" class="form-input" placeholder="Escribe placa, cliente o marca" /></div>
-              <div class="form-group"><label>Placa</label><select v-model="newOrder.vehicle" class="form-input"><option value="">Seleccionar placa</option><option v-for="v in getOrderPlateOptions(newOrder.vehicle)" :key="v.plate" :value="v.plate">{{ v.plate }} · {{ v.client || 'Sin cliente' }} · {{ v.brand || 'Sin marca' }}</option></select></div>
+              <div class="form-group"><label>Buscar placa</label><input v-model="orderPlateSearch" type="search"
+                  class="form-input" placeholder="Escribe placa, cliente o marca" /></div>
+              <div class="form-group"><label>Placa</label><select v-model="newOrder.vehicle" class="form-input">
+                  <option value="">Seleccionar placa</option>
+                  <option v-for="v in getOrderPlateOptions(newOrder.vehicle)" :key="v.plate" :value="v.plate">{{ v.plate
+                    }}
+                    · {{ v.client || 'Sin cliente' }} · {{ v.brand || 'Sin marca' }}</option>
+                </select></div>
             </div>
             <div class="form-row">
-              <div class="form-group"><label>Cliente</label><input v-model="newOrder.client" class="form-input" placeholder="Se completará si existe placa" /></div>
+              <div class="form-group"><label>Cliente</label><input v-model="newOrder.client" class="form-input"
+                  placeholder="Se completará si existe placa" /></div>
               <div class="form-group"><label>Estado</label>
                 <select v-model="newOrder.status" class="form-input">
                   <option>Recepción</option>
@@ -526,27 +574,33 @@
                 </select>
               </div>
             </div>
-                    <div class="form-group">
-                      <label>Tipo de servicio</label>
-                      <div style="display:flex;gap:8px;align-items:center;">
-                        <input v-model="newServiceItem" class="form-input" placeholder="Agregar servicio (ej: Alineación)" />
-                        <button type="button" class="btn btn-secondary" @click.prevent="addNewService">➕</button>
-                      </div>
-                      <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;">
-                        <span v-for="(s, idx) in newOrder.services" :key="idx" class="chip" style="background:#eef2ff;padding:6px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;">{{ s }} <button type="button" class="btn btn-sm" style="padding:0 6px;margin-left:6px;" @click.prevent="removeNewService(idx)">✕</button></span>
-                        <small v-if="!newOrder.services || !newOrder.services.length" style="color:var(--muted);">Usar 'General' si no se agrega ninguno</small>
-                      </div>
+            <div class="form-group">
+              <label>Tipo de servicio</label>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <input v-model="newServiceItem" class="form-input" placeholder="Agregar servicio (ej: Alineación)" />
+                <button type="button" class="btn btn-secondary" @click.prevent="addNewService">➕</button>
+              </div>
+              <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;">
+                <span v-for="(s, idx) in newOrder.services" :key="idx" class="chip"
+                  style="background:#eef2ff;padding:6px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;">{{
+                  s }} <button type="button" class="btn btn-sm" style="padding:0 6px;margin-left:6px;"
+                    @click.prevent="removeNewService(idx)">✕</button></span>
+                <small v-if="!newOrder.services || !newOrder.services.length" style="color:var(--muted);">Usar 'General'
+                  si
+                  no se agrega ninguno</small>
+              </div>
 
-                      <div style="margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-                        <label style="display:inline-flex;align-items:center;gap:8px;font-weight:600;">
-                          <input type="checkbox" v-model="newOrder.gases" /> Gases
-                        </label>
-                        <label style="display:inline-flex;align-items:center;gap:8px;font-weight:600;">
-                          <input type="checkbox" v-model="newOrder.escaner" /> Escaner
-                        </label>
-                      </div>
-                    </div>
-            <div class="form-group"><label>Observaciones</label><textarea v-model="newOrder.observations" class="form-input" rows="3" placeholder="Notas adicionales de la orden"></textarea></div>
+              <div style="margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+                <label style="display:inline-flex;align-items:center;gap:8px;font-weight:600;">
+                  <input type="checkbox" v-model="newOrder.gases" /> Gases
+                </label>
+                <label style="display:inline-flex;align-items:center;gap:8px;font-weight:600;">
+                  <input type="checkbox" v-model="newOrder.escaner" /> Escaner
+                </label>
+              </div>
+            </div>
+            <div class="form-group"><label>Observaciones</label><textarea v-model="newOrder.observations"
+                class="form-input" rows="3" placeholder="Notas adicionales de la orden"></textarea></div>
             <div class="form-row">
 
               <div class="form-group">
@@ -556,14 +610,18 @@
                   <option v-for="emp in burnedEmployees" :key="emp.id" :value="emp.name">{{ emp.name }}</option>
                 </select>
               </div>
-              <div class="form-group"><label>Fecha entrega (opcional)</label><input v-model="newOrder.deliveryDate" type="date" class="form-input" /></div>
+              <div class="form-group"><label>Fecha entrega (opcional)</label><input v-model="newOrder.deliveryDate"
+                  type="date" class="form-input" /></div>
             </div>
-            <div class="form-group"><label>Diagnóstico</label><textarea v-model="newOrder.diagnosis" class="form-input" rows="3" placeholder="Escribe el diagnóstico"></textarea></div>
+            <div class="form-group"><label>Diagnóstico</label><textarea v-model="newOrder.diagnosis" class="form-input"
+                rows="3" placeholder="Escribe el diagnóstico"></textarea></div>
             <div class="form-row">
             </div>
             <div class="form-row">
-              <div class="form-group"><label>Garantía (# veces)</label><input v-model.number="newOrder.garantia" type="number" min="0" class="form-input" /></div>
-              <div class="form-group"><label>Total</label><input v-model.number="newOrder.total" type="number" class="form-input" /></div>
+              <div class="form-group"><label>Garantía (# veces)</label><input v-model.number="newOrder.garantia"
+                  type="number" min="0" class="form-input" /></div>
+              <div class="form-group"><label>Total</label><input v-model.number="newOrder.total" type="number"
+                  class="form-input" /></div>
             </div>
             <div class="form-actions">
               <button type="button" class="btn btn-secondary" @click="showCreateOrder = false">Cancelar</button>
@@ -583,8 +641,10 @@
         </div>
         <div class="modal-body">
           <div style="margin-bottom:8px;display:flex;gap:8px;align-items:center;">
-            <span v-if="servicesModalOrder && servicesModalOrder.gases" class="chip chip-flag" style="background:#FFF4E5;color:#92400e;padding:6px 10px;border-radius:999px;font-size:0.9rem;">Gases</span>
-            <span v-if="servicesModalOrder && servicesModalOrder.escaner" class="chip chip-flag" style="background:#ECFDF5;color:#065f46;padding:6px 10px;border-radius:999px;font-size:0.9rem;">Escaner</span>
+            <span v-if="servicesModalOrder && servicesModalOrder.gases" class="chip chip-flag"
+              style="background:#FFF4E5;color:#92400e;padding:6px 10px;border-radius:999px;font-size:0.9rem;">Gases</span>
+            <span v-if="servicesModalOrder && servicesModalOrder.escaner" class="chip chip-flag"
+              style="background:#ECFDF5;color:#065f46;padding:6px 10px;border-radius:999px;font-size:0.9rem;">Escaner</span>
           </div>
           <div v-if="servicesModalOrder && servicesModalOrder.services && servicesModalOrder.services.length">
             <ul style="padding-left:18px;margin:0;">
@@ -601,26 +661,26 @@
       </div>
     </div>
 
-      <!-- Modal ver diagnóstico de una orden -->
-      <div v-if="showDiagnosisModal" class="modal-overlay" @click="closeDiagnosisModal()">
-        <div class="modal" @click.stop>
-          <div class="modal-header">
-            <h3>Diagnóstico - Orden #{{ diagnosisModalOrder && diagnosisModalOrder.id }}</h3>
-            <button class="modal-close" @click="closeDiagnosisModal()">✕</button>
+    <!-- Modal ver diagnóstico de una orden -->
+    <div v-if="showDiagnosisModal" class="modal-overlay" @click="closeDiagnosisModal()">
+      <div class="modal" @click.stop>
+        <div class="modal-header">
+          <h3>Diagnóstico - Orden #{{ diagnosisModalOrder && diagnosisModalOrder.id }}</h3>
+          <button class="modal-close" @click="closeDiagnosisModal()">✕</button>
+        </div>
+        <div class="modal-body">
+          <div v-if="diagnosisModalOrder && diagnosisModalOrder.diagnosis">
+            <pre style="white-space:pre-wrap;word-break:break-word;margin:0">{{ diagnosisModalOrder.diagnosis }}</pre>
           </div>
-          <div class="modal-body">
-            <div v-if="diagnosisModalOrder && diagnosisModalOrder.diagnosis">
-              <pre style="white-space:pre-wrap;word-break:break-word;margin:0">{{ diagnosisModalOrder.diagnosis }}</pre>
-            </div>
-            <div v-else>
-              <p>No hay diagnóstico registrado.</p>
-            </div>
-          </div>
-          <div class="form-actions" style="margin-top:12px;text-align:right;">
-            <button type="button" class="btn btn-secondary" @click="closeDiagnosisModal()">Cerrar</button>
+          <div v-else>
+            <p>No hay diagnóstico registrado.</p>
           </div>
         </div>
+        <div class="form-actions" style="margin-top:12px;text-align:right;">
+          <button type="button" class="btn btn-secondary" @click="closeDiagnosisModal()">Cerrar</button>
+        </div>
       </div>
+    </div>
 
     <div v-if="showEditOrder && editingOrder" class="modal-overlay" @click="showEditOrder = false">
       <div class="modal" @click.stop>
@@ -631,11 +691,18 @@
         <div class="modal-body">
           <form @submit.prevent="saveEditedOrder">
             <div class="form-row">
-              <div class="form-group"><label>Buscar placa</label><input v-model="orderPlateSearch" type="search" class="form-input" placeholder="Escribe placa, cliente o marca" /></div>
-              <div class="form-group"><label>Placa</label><select v-model="editingOrder.vehicle" class="form-input"><option value="">Seleccionar placa</option><option v-for="v in getOrderPlateOptions(editingOrder.vehicle)" :key="v.plate" :value="v.plate">{{ v.plate }} · {{ v.client || 'Sin cliente' }} · {{ v.brand || 'Sin marca' }}</option></select></div>
+              <div class="form-group"><label>Buscar placa</label><input v-model="orderPlateSearch" type="search"
+                  class="form-input" placeholder="Escribe placa, cliente o marca" /></div>
+              <div class="form-group"><label>Placa</label><select v-model="editingOrder.vehicle" class="form-input">
+                  <option value="">Seleccionar placa</option>
+                  <option v-for="v in getOrderPlateOptions(editingOrder.vehicle)" :key="v.plate" :value="v.plate">{{
+                    v.plate
+                    }} · {{ v.client || 'Sin cliente' }} · {{ v.brand || 'Sin marca' }}</option>
+                </select></div>
             </div>
             <div class="form-row">
-              <div class="form-group"><label>Cliente</label><input v-model="editingOrder.client" class="form-input" placeholder="Se completará si existe placa" /></div>
+              <div class="form-group"><label>Cliente</label><input v-model="editingOrder.client" class="form-input"
+                  placeholder="Se completará si existe placa" /></div>
               <div class="form-group"><label>Estado</label>
                 <select v-model="editingOrder.status" class="form-input">
                   <option>Recepción</option>
@@ -648,12 +715,17 @@
             <div class="form-group">
               <label>Tipo de servicio</label>
               <div style="display:flex;gap:8px;align-items:center;">
-                <input v-model="editingServiceItem" class="form-input" placeholder="Agregar servicio (ej: Alineación)" />
+                <input v-model="editingServiceItem" class="form-input"
+                  placeholder="Agregar servicio (ej: Alineación)" />
                 <button type="button" class="btn btn-secondary" @click.prevent="addEditingService">➕</button>
               </div>
               <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;">
-                <span v-for="(s, idx) in (editingOrder.services || [])" :key="idx" class="chip" style="background:#eef2ff;padding:6px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;">{{ s }} <button type="button" class="btn btn-sm" style="padding:0 6px;margin-left:6px;" @click.prevent="removeEditingService(idx)">✕</button></span>
-                <small v-if="!(editingOrder.services && editingOrder.services.length)" style="color:var(--muted);">Usar 'General' si no se agrega ninguno</small>
+                <span v-for="(s, idx) in (editingOrder.services || [])" :key="idx" class="chip"
+                  style="background:#eef2ff;padding:6px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;">{{
+                  s }} <button type="button" class="btn btn-sm" style="padding:0 6px;margin-left:6px;"
+                    @click.prevent="removeEditingService(idx)">✕</button></span>
+                <small v-if="!(editingOrder.services && editingOrder.services.length)" style="color:var(--muted);">Usar
+                  'General' si no se agrega ninguno</small>
               </div>
               <div style="margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
                 <label style="display:inline-flex;align-items:center;gap:8px;font-weight:600;">
@@ -664,7 +736,8 @@
                 </label>
               </div>
             </div>
-            <div class="form-group"><label>Observaciones</label><textarea v-model="editingOrder.observations" class="form-input" rows="3" placeholder="Notas adicionales de la orden"></textarea></div>
+            <div class="form-group"><label>Observaciones</label><textarea v-model="editingOrder.observations"
+                class="form-input" rows="3" placeholder="Notas adicionales de la orden"></textarea></div>
             <div class="form-row">
 
               <div class="form-group">
@@ -674,14 +747,18 @@
                   <option v-for="emp in burnedEmployees" :key="emp.id" :value="emp.name">{{ emp.name }}</option>
                 </select>
               </div>
-              <div class="form-group"><label>Fecha entrega (opcional)</label><input v-model="editingOrder.deliveryDate" type="date" class="form-input" /></div>
+              <div class="form-group"><label>Fecha entrega (opcional)</label><input v-model="editingOrder.deliveryDate"
+                  type="date" class="form-input" /></div>
             </div>
-            <div class="form-group"><label>Diagnóstico</label><textarea v-model="editingOrder.diagnosis" class="form-input" rows="3" placeholder="Escribe el diagnóstico"></textarea></div>
+            <div class="form-group"><label>Diagnóstico</label><textarea v-model="editingOrder.diagnosis"
+                class="form-input" rows="3" placeholder="Escribe el diagnóstico"></textarea></div>
             <div class="form-row">
             </div>
             <div class="form-row">
-              <div class="form-group"><label>Garantía (# veces)</label><input v-model.number="editingOrder.garantia" type="number" min="0" class="form-input" /></div>
-              <div class="form-group"><label>Total</label><input v-model.number="editingOrder.total" type="number" class="form-input" /></div>
+              <div class="form-group"><label>Garantía (# veces)</label><input v-model.number="editingOrder.garantia"
+                  type="number" min="0" class="form-input" /></div>
+              <div class="form-group"><label>Total</label><input v-model.number="editingOrder.total" type="number"
+                  class="form-input" /></div>
             </div>
             <div class="form-actions">
               <button type="button" class="btn btn-secondary" @click="showEditOrder = false">Cancelar</button>
@@ -741,11 +818,14 @@
           </div>
           <div class="so-panel">
             <div class="so-panel-title">Trabajo a realizar</div>
-            <div class="so-panel-body">{{ [ (printOrder.services && printOrder.services.length) ? printOrder.services.join(', ') : (printOrder.serviceType || '-'), (printOrder.gases ? 'Gases: Sí' : ''), (printOrder.escaner ? 'Escaner: Sí' : '') ].filter(Boolean).join('\n') }}</div>
+            <div class="so-panel-body">{{ [(printOrder.services && printOrder.services.length) ?
+              printOrder.services.join(', ') : (printOrder.serviceType || '-'), (printOrder.gases ? 'Gases: Sí' : ''),
+            (printOrder.escaner ? 'Escaner: Sí' : '')].filter(Boolean).join('\n') }}</div>
           </div>
           <div class="so-panel so-panel-wide">
             <div class="so-panel-title">Observaciones</div>
-            <div class="so-panel-body">{{ [printOrder.observations, (printOrder.parts && printOrder.parts.length) ? ('Repuestos: ' + printOrder.parts.join(', ')) : ''].filter(Boolean).join('\n') || '-' }}</div>
+            <div class="so-panel-body">{{ [printOrder.observations, (printOrder.parts && printOrder.parts.length) ?
+              ('Repuestos: ' + printOrder.parts.join(', ')) : ''].filter(Boolean).join('\n') || '-' }}</div>
           </div>
         </div>
       </div>
@@ -754,7 +834,8 @@
     <!-- Pestaña: Facturación -->
     <div v-if="activeTab === 'invoices'" class="content-section">
       <div class="section-title-bar">
-        <div class="section-top" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;">
+        <div class="section-top"
+          style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;">
           <h2 class="section-title">💵 Facturación</h2>
           <div class="header-actions" style="display:flex;gap:8px;align-items:center;justify-content:flex-end;">
             <button class="btn btn-secondary header-action" @click="exportInvoicesCsv">Exportar CSV</button>
@@ -763,7 +844,8 @@
         </div>
         <div class="section-controls" style="margin-top:10px;">
           <div class="header-controls">
-            <input type="search" v-model="invoiceSearch" placeholder="Buscar por cliente, vehículo o id..." class="search-input header-search-input" />
+            <input type="search" v-model="invoiceSearch" placeholder="Buscar por cliente, vehículo o id..."
+              class="search-input header-search-input" />
             <select v-model="invoiceFilterStatus" class="form-input">
               <option value="">Todos</option>
               <option value="Pendiente">Pendiente</option>
@@ -794,30 +876,44 @@
           <thead class="table-header">
             <tr>
               <th><input type="checkbox" :checked="selectAllChecked" @change="toggleSelectAllVisible" /></th>
-              <th @click="setSort('id')" style="cursor:pointer">ID <span v-if="sortKey==='id'">{{ sortDir===-1 ? '▼' : '▲' }}</span></th>
-              <th @click="setSort('createdAt')" style="cursor:pointer">Fecha <span v-if="sortKey==='createdAt'">{{ sortDir===-1 ? '▼' : '▲' }}</span></th>
-              <th @click="setSort('client')" style="cursor:pointer">Cliente <span v-if="sortKey==='client'">{{ sortDir===-1 ? '▼' : '▲' }}</span></th>
-              <th @click="setSort('vehicle')" style="cursor:pointer">Vehículo <span v-if="sortKey==='vehicle'">{{ sortDir===-1 ? '▼' : '▲' }}</span></th>
+              <th @click="setSort('id')" style="cursor:pointer">ID <span v-if="sortKey === 'id'">{{ sortDir === -1 ? '▼' :
+                  '▲'
+                  }}</span></th>
+              <th @click="setSort('createdAt')" style="cursor:pointer">Fecha <span v-if="sortKey === 'createdAt'">{{
+                sortDir === -1 ? '▼' : '▲' }}</span></th>
+              <th @click="setSort('client')" style="cursor:pointer">Cliente <span v-if="sortKey === 'client'">{{
+                sortDir === -1
+                  ? '▼' : '▲' }}</span></th>
+              <th @click="setSort('vehicle')" style="cursor:pointer">Vehículo <span v-if="sortKey === 'vehicle'">{{
+                sortDir === -1 ? '▼' : '▲' }}</span></th>
               <th>Items</th>
-              <th @click="setSort('subtotal')" style="cursor:pointer">Subtotal <span v-if="sortKey==='subtotal'">{{ sortDir===-1 ? '▼' : '▲' }}</span></th>
+              <th @click="setSort('subtotal')" style="cursor:pointer">Subtotal <span v-if="sortKey === 'subtotal'">{{
+                sortDir === -1 ? '▼' : '▲' }}</span></th>
               <th>IVA</th>
-              <th @click="setSort('total')" style="cursor:pointer">Total <span v-if="sortKey==='total'">{{ sortDir===-1 ? '▼' : '▲' }}</span></th>
-              <th @click="setSort('status')" style="cursor:pointer">Estado <span v-if="sortKey==='status'">{{ sortDir===-1 ? '▼' : '▲' }}</span></th>
+              <th @click="setSort('total')" style="cursor:pointer">Total <span v-if="sortKey === 'total'">{{ sortDir === -1
+                  ?
+                  '▼' : '▲' }}</span></th>
+              <th @click="setSort('status')" style="cursor:pointer">Estado <span v-if="sortKey === 'status'">{{
+                sortDir === -1 ?
+                  '▼' : '▲' }}</span></th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="invoice in paginatedInvoices" :key="invoice.id">
-              <td data-label="Sel"><input type="checkbox" :checked="selectedInvoices.includes(invoice.id)" @change="toggleSelectInvoice(invoice.id)" /></td>
+              <td data-label="Sel"><input type="checkbox" :checked="selectedInvoices.includes(invoice.id)"
+                  @change="toggleSelectInvoice(invoice.id)" /></td>
               <td data-label="ID">#{{ invoice.id }}</td>
               <td data-label="Fecha">{{ invoice.createdAt ? formatShortDate(new Date(invoice.createdAt)) : '-' }}</td>
               <td data-label="Cliente">{{ invoice.client }}</td>
               <td data-label="Vehículo">{{ invoice.vehicle || '-' }}</td>
-              <td data-label="Items">{{ Array.isArray(invoice.items) ? invoice.items.length : (invoice.items || '').toString().split(',').length }}</td>
+              <td data-label="Items">{{ Array.isArray(invoice.items) ? invoice.items.length : (invoice.items ||
+                '').toString().split(',').length }}</td>
               <td data-label="Subtotal">${{ invoiceSubtotal(invoice).toLocaleString() }}</td>
               <td data-label="IVA">${{ invoiceTax(invoice).toLocaleString() }}</td>
               <td data-label="Total">${{ invoiceTotal(invoice).toLocaleString() }}</td>
-              <td data-label="Estado"><span class="status-badge" :class="invoice.status.toLowerCase()">{{ invoice.status }}</span></td>
+              <td data-label="Estado"><span class="status-badge" :class="invoice.status.toLowerCase()">{{ invoice.status
+                  }}</span></td>
               <td data-label="Acciones">
                 <div class="actions-vertical" style="display:flex;flex-direction:column;gap:6px;align-items:center;">
                   <div class="actions-row" style="display:flex;gap:6px;justify-content:center;">
@@ -826,7 +922,8 @@
                     <button class="btn btn-sm btn-primary" @click="viewInvoice(invoice)">📄</button>
                   </div>
                   <div class="actions-row" style="display:flex;gap:6px;justify-content:center;">
-                    <button class="btn btn-sm btn-success" @click="toggleInvoicePaid(invoice)">{{ invoice.status === 'Pagado' ? 'Marcar Pendiente' : 'Marcar Pagado' }}</button>
+                    <button class="btn btn-sm btn-success" @click="toggleInvoicePaid(invoice)">{{ invoice.status ===
+                      'Pagado' ? 'Marcar Pendiente' : 'Marcar Pagado' }}</button>
                     <button class="btn btn-sm btn-danger" @click="deleteInvoice(invoice.id)">🗑️</button>
                   </div>
                 </div>
@@ -837,15 +934,22 @@
             </tr>
           </tbody>
         </table>
-        <div class="table-footer" style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:12px;flex-wrap:wrap;">
+        <div class="table-footer"
+          style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:12px;flex-wrap:wrap;">
           <div style="display:flex;gap:8px;align-items:center;">
             <button class="btn btn-secondary" @click="exportSelectedCsv">Exportar Seleccionadas</button>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <button class="btn" :disabled="currentPage<=1" @click.prevent="goToPage(currentPage-1)">Anterior</button>
+            <button class="btn" :disabled="currentPage <= 1" @click.prevent="goToPage(currentPage - 1)">Anterior</button>
             <span>Página {{ currentPage }} / {{ totalPages }}</span>
-            <button class="btn" :disabled="currentPage>=totalPages" @click.prevent="goToPage(currentPage+1)">Siguiente</button>
-            <select v-model.number="pageSize" class="form-input"><option :value="5">5</option><option :value="8">8</option><option :value="15">15</option><option :value="50">50</option></select>
+            <button class="btn" :disabled="currentPage >= totalPages"
+              @click.prevent="goToPage(currentPage + 1)">Siguiente</button>
+            <select v-model.number="pageSize" class="form-input">
+              <option :value="5">5</option>
+              <option :value="8">8</option>
+              <option :value="15">15</option>
+              <option :value="50">50</option>
+            </select>
           </div>
         </div>
       </div>
@@ -869,7 +973,8 @@
               </div>
               <div class="form-group">
                 <label>Items</label>
-                <div v-for="(it, idx) in formInvoice.items" :key="idx" class="form-row" style="gap:8px;align-items:center;">
+                <div v-for="(it, idx) in formInvoice.items" :key="idx" class="form-row"
+                  style="gap:8px;align-items:center;">
                   <input v-model="it.description" placeholder="Descripción" class="form-input" />
                   <input v-model.number="it.qty" type="number" min="1" class="form-input" style="width:80px" />
                   <input v-model.number="it.price" type="number" min="0" class="form-input" style="width:120px" />
@@ -878,12 +983,20 @@
                 <button type="button" class="btn btn-secondary" @click="addInvoiceItem">➕ Agregar item</button>
               </div>
               <div class="form-row" style="gap:12px;">
-                <div class="form-group"><label>% IVA</label><input v-model.number="formInvoice.taxPct" type="number" min="0" class="form-input" /></div>
-                <div class="form-group"><label>Pagos</label><input v-model="formInvoice.payments" placeholder="Ej: Efectivo, Transferencia" class="form-input" /></div>
-                <div class="form-group"><label>Estado</label><select v-model="formInvoice.status" class="form-input"><option>Pendiente</option><option>Pagado</option><option>Anulado</option></select></div>
+                <div class="form-group"><label>% IVA</label><input v-model.number="formInvoice.taxPct" type="number"
+                    min="0" class="form-input" /></div>
+                <div class="form-group"><label>Pagos</label><input v-model="formInvoice.payments"
+                    placeholder="Ej: Efectivo, Transferencia" class="form-input" /></div>
+                <div class="form-group"><label>Estado</label><select v-model="formInvoice.status" class="form-input">
+                    <option>Pendiente</option>
+                    <option>Pagado</option>
+                    <option>Anulado</option>
+                  </select></div>
               </div>
               <div class="form-row" style="justify-content:space-between;align-items:center;margin-top:8px;">
-                <div><strong>Subtotal:</strong> ${{ invoiceSubtotal(formInvoice).toLocaleString() }} <strong>IVA:</strong> ${{ invoiceTax(formInvoice).toLocaleString() }}</div>
+                <div><strong>Subtotal:</strong> ${{ invoiceSubtotal(formInvoice).toLocaleString() }}
+                  <strong>IVA:</strong>
+                  ${{ invoiceTax(formInvoice).toLocaleString() }}</div>
                 <div><strong>Total:</strong> ${{ invoiceTotal(formInvoice).toLocaleString() }}</div>
               </div>
               <div class="form-actions" style="margin-top:12px;">
@@ -905,15 +1018,26 @@
           <div class="modal-body">
             <p><strong>Cliente:</strong> {{ previewInvoice?.client }}</p>
             <p><strong>Vehículo:</strong> {{ previewInvoice?.vehicle || '-' }}</p>
-            <p><strong>Fecha:</strong> {{ previewInvoice?.createdAt ? formatShortDate(new Date(previewInvoice.createdAt)) : '-' }}</p>
+            <p><strong>Fecha:</strong> {{ previewInvoice?.createdAt ? formatShortDate(new
+              Date(previewInvoice.createdAt)) :
+              '-' }}</p>
             <table style="width:100%;border-collapse:collapse;margin-top:8px;">
-              <thead><tr><th style="text-align:left;border-bottom:1px solid #ccc;padding:6px;">Descripción</th><th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Cantidad</th><th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Precio</th><th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Total</th></tr></thead>
+              <thead>
+                <tr>
+                  <th style="text-align:left;border-bottom:1px solid #ccc;padding:6px;">Descripción</th>
+                  <th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Cantidad</th>
+                  <th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Precio</th>
+                  <th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Total</th>
+                </tr>
+              </thead>
               <tbody>
                 <tr v-for="(it, idx) in (previewInvoice?.items || [])" :key="idx">
                   <td style="padding:6px 4px;">{{ it.description || it }}</td>
                   <td style="padding:6px 4px;text-align:right;">{{ it.qty ?? 1 }}</td>
                   <td style="padding:6px 4px;text-align:right;">${{ (it.price ?? 0).toLocaleString() }}</td>
-                  <td style="padding:6px 4px;text-align:right;">${{ ((it.qty ?? 1) * (it.price ?? 0)).toLocaleString() }}</td>
+                  <td style="padding:6px 4px;text-align:right;">${{ ((it.qty ?? 1) * (it.price ?? 0)).toLocaleString()
+                    }}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -922,7 +1046,8 @@
               <div><strong>IVA:</strong> ${{ invoiceTax(previewInvoice).toLocaleString() }}</div>
               <div><strong>Total:</strong> ${{ invoiceTotal(previewInvoice).toLocaleString() }}</div>
             </div>
-            <div style="margin-top:8px;"><strong>Pagos:</strong> {{ Array.isArray(previewInvoice?.payments) ? previewInvoice.payments.join(', ') : (previewInvoice?.payments || '') }}</div>
+            <div style="margin-top:8px;"><strong>Pagos:</strong> {{ Array.isArray(previewInvoice?.payments) ?
+              previewInvoice.payments.join(', ') : (previewInvoice?.payments || '') }}</div>
             <div style="margin-top:8px;"><strong>Notas:</strong> {{ previewInvoice?.notes || '-' }}</div>
           </div>
           <div class="modal-footer form-actions" style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px;">
@@ -938,19 +1063,31 @@
         <div class="invoice-print-card">
           <div class="ip-header">
             <img class="ip-logo" src="/images/logo.png" alt="Jobs Car logo" />
-            <div class="ip-title"><h1>FACTURA - JOB'S CAR</h1><div class="ip-meta">Factura #{{ printInvoice.id }} — Fecha: {{ new Date(printInvoice.createdAt || Date.now()).toLocaleDateString() }}</div></div>
+            <div class="ip-title">
+              <h1>FACTURA - JOB'S CAR</h1>
+              <div class="ip-meta">Factura #{{ printInvoice.id }} — Fecha: {{ new Date(printInvoice.createdAt ||
+                Date.now()).toLocaleDateString() }}</div>
+            </div>
           </div>
           <div class="ip-section">
             <p><strong>Cliente:</strong> {{ printInvoice.client }}</p>
             <p><strong>Vehículo:</strong> {{ printInvoice.vehicle || '-' }}</p>
             <table style="width:100%;border-collapse:collapse;margin-top:8px;">
-              <thead><tr><th style="text-align:left;border-bottom:1px solid #ccc;padding:6px;">Descripción</th><th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Cantidad</th><th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Precio</th><th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Total</th></tr></thead>
+              <thead>
+                <tr>
+                  <th style="text-align:left;border-bottom:1px solid #ccc;padding:6px;">Descripción</th>
+                  <th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Cantidad</th>
+                  <th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Precio</th>
+                  <th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Total</th>
+                </tr>
+              </thead>
               <tbody>
                 <tr v-for="(it, idx) in (printInvoice.items || [])" :key="idx">
                   <td style="padding:6px 4px;">{{ it.description || '' }}</td>
                   <td style="padding:6px 4px;text-align:right;">{{ it.qty ?? 1 }}</td>
                   <td style="padding:6px 4px;text-align:right;">${{ (Number(it.price) || 0).toLocaleString() }}</td>
-                  <td style="padding:6px 4px;text-align:right;">${{ ((Number(it.qty) || 1) * (Number(it.price) || 0)).toLocaleString() }}</td>
+                  <td style="padding:6px 4px;text-align:right;">${{ ((Number(it.qty) || 1) * (Number(it.price) ||
+                    0)).toLocaleString() }}</td>
                 </tr>
               </tbody>
             </table>
@@ -1003,8 +1140,10 @@
               <td data-label="Ganancia Neta Repuestos">${{ item.netProfit.toLocaleString('es-CO') }}</td>
               <td data-label="Acciones">
                 <div style="display:flex;gap:6px;justify-content:center;">
-                  <button class="btn btn-sm btn-secondary" type="button" @click="editInventoryItem(item)" aria-label="Editar inventario">✏️</button>
-                  <button class="btn btn-sm btn-danger" type="button" @click="deleteInventoryItem(item.id)" aria-label="Eliminar inventario">🗑️</button>
+                  <button class="btn btn-sm btn-secondary" type="button" @click="editInventoryItem(item)"
+                    aria-label="Editar inventario">✏️</button>
+                  <button class="btn btn-sm btn-danger" type="button" @click="deleteInventoryItem(item.id)"
+                    aria-label="Eliminar inventario">🗑️</button>
                 </div>
               </td>
             </tr>
@@ -1048,7 +1187,8 @@
             <div class="form-row">
               <div class="form-group">
                 <label>Valor Repuestos en Factura</label>
-                <input v-model.number="newInventoryItem.invoiceValue" type="number" min="0" class="form-input" required />
+                <input v-model.number="newInventoryItem.invoiceValue" type="number" min="0" class="form-input"
+                  required />
               </div>
               <div class="form-group">
                 <label>Ganancia Neta Repuestos</label>
@@ -1096,7 +1236,8 @@
             <div class="form-row">
               <div class="form-group">
                 <label>Valor Repuestos en Factura</label>
-                <input v-model.number="editingInventory.invoiceValue" type="number" min="0" class="form-input" required />
+                <input v-model.number="editingInventory.invoiceValue" type="number" min="0" class="form-input"
+                  required />
               </div>
               <div class="form-group">
                 <label>Ganancia Neta Repuestos</label>
@@ -1148,7 +1289,9 @@
               <td data-label="Nombre">{{ entry.name }}</td>
               <td data-label="Conceptos">{{ entry.concept }}</td>
               <td data-label="Movimiento">
-                <span class="status-badge" :class="entry.movement === 'Ingreso' ? 'available' : 'danger'">{{ entry.movement }}</span>
+                <span class="status-badge" :class="entry.movement === 'Ingreso' ? 'available' : 'danger'">{{
+                  entry.movement
+                  }}</span>
               </td>
               <td data-label="Valor">${{ Number(entry.amount).toLocaleString('es-CO') }}</td>
               <td data-label="Cuenta">{{ entry.account }}</td>
@@ -1164,21 +1307,19 @@
 
     <!-- Pestaña: Empleados -->
     <div v-if="activeTab === 'employees'" class="content-section">
-      <div class="section-title-bar" style="display:grid;grid-template-columns:1fr minmax(320px,420px) auto;align-items:center;gap:12px;">
+      <div class="section-title-bar"
+        style="display:grid;grid-template-columns:1fr minmax(320px,420px) auto;align-items:center;gap:12px;">
         <h2 class="section-title">Empleados</h2>
         <div style="justify-self:center;">
           <div class="search-input-wrapper" style="max-width:420px;">
             <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-              <path fill="currentColor" d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z"/>
+              <path fill="currentColor"
+                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
             </svg>
-            <input
-              type="search"
-              v-model="searchEmployees"
-              placeholder="Buscar empleados..."
-              aria-label="Buscar empleados"
-              class="search-input"
-            />
-            <button v-if="searchEmployees" class="search-clear" @click.prevent="searchEmployees = ''" aria-label="Limpiar búsqueda">X</button>
+            <input type="search" v-model="searchEmployees" placeholder="Buscar empleados..."
+              aria-label="Buscar empleados" class="search-input" />
+            <button v-if="searchEmployees" class="search-clear" @click.prevent="searchEmployees = ''"
+              aria-label="Limpiar búsqueda">X</button>
           </div>
         </div>
         <div style="justify-self:end;">
@@ -1194,11 +1335,11 @@
             <col style="width:11%" /> <!-- Cargo -->
             <col style="width:13%" /> <!-- Especialidad -->
             <col style="width:12%" /> <!-- Teléfono -->
-            <col style="width:12%" />  <!-- Estado -->
+            <col style="width:12%" /> <!-- Estado -->
             <col style="width:11%" /> <!-- Fecha Ingreso -->
-            <col style="width:10%" />  <!-- OT Activas -->
+            <col style="width:10%" /> <!-- OT Activas -->
             <col style="width:13%" /> <!-- Observaciones -->
-            <col style="width:9%" />  <!-- Acciones -->
+            <col style="width:9%" /> <!-- Acciones -->
           </colgroup>
           <thead class="table-header">
             <tr>
@@ -1216,14 +1357,14 @@
           </thead>
           <tbody>
             <tr v-for="emp in burnedEmployees.filter(emp => {
-                if (!searchEmployees) return true
-                const q = searchEmployees.toLowerCase().trim()
-                return (emp.name && emp.name.toLowerCase().includes(q)) ||
-                       (emp.role && emp.role.toLowerCase().includes(q)) ||
-                       (emp.specialty && emp.specialty.toLowerCase().includes(q)) ||
-                       (emp.phone && emp.phone.toLowerCase().includes(q)) ||
-                       (emp.notes && emp.notes.toLowerCase().includes(q))
-              })" :key="emp.id">
+              if (!searchEmployees) return true
+              const q = searchEmployees.toLowerCase().trim()
+              return (emp.name && emp.name.toLowerCase().includes(q)) ||
+                (emp.role && emp.role.toLowerCase().includes(q)) ||
+                (emp.specialty && emp.specialty.toLowerCase().includes(q)) ||
+                (emp.phone && emp.phone.toLowerCase().includes(q)) ||
+                (emp.notes && emp.notes.toLowerCase().includes(q))
+            })" :key="emp.id">
               <td data-label="ID Empleado">{{ emp.id }}</td>
               <td data-label="Nombre">{{ emp.name }}</td>
               <td data-label="Cargo">{{ emp.role }}</td>
@@ -1247,7 +1388,8 @@
         </table>
       </div>
 
-      <div class="section-title-bar" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+      <div class="section-title-bar"
+        style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
         <h2 class="section-title">💼 Nómina</h2>
         <div style="font-weight:600;">
           50% taller / 50% técnico
@@ -1412,7 +1554,8 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Órdenes asignadas</label>
-                  <input :value="editingEmployee ? getEmployeeActiveOrders(editingEmployee) : 0" type="number" class="form-input" min="0" disabled />
+                  <input :value="editingEmployee ? getEmployeeActiveOrders(editingEmployee) : 0" type="number"
+                    class="form-input" min="0" disabled />
                 </div>
                 <div class="form-group">
                   <label>Estado</label>
@@ -1453,46 +1596,67 @@
 
       <div style="display:grid;grid-template-columns:1fr 340px;gap:16px;margin-top:12px;">
         <div class="pro-card" style="padding:12px;">
-          <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-weight:700;padding:8px 0;gap:6px;">
-            <div>Dom</div><div>Lun</div><div>Mar</div><div>Mié</div><div>Jue</div><div>Vie</div><div>Sáb</div>
+          <div
+            style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-weight:700;padding:8px 0;gap:6px;">
+            <div>Dom</div>
+            <div>Lun</div>
+            <div>Mar</div>
+            <div>Mié</div>
+            <div>Jue</div>
+            <div>Vie</div>
+            <div>Sáb</div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px;">
-            <div v-for="cell in monthDays" :key="cell.iso" :class="['calendar-cell', { 'other-month': !cell.inMonth }]" style="min-height:90px;padding:8px;border-radius:8px;background:var(--brand-bg-end);">
+            <div v-for="cell in monthDays" :key="cell.iso" :class="['calendar-cell', { 'other-month': !cell.inMonth }]"
+              style="min-height:90px;padding:8px;border-radius:8px;background:var(--brand-bg-end);">
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div :style="{ opacity: cell.inMonth ? 1 : 0.4 }">{{ cell.day }}</div>
                 <button class="btn btn-sm" style="padding:4px 6px" @click="openScheduleModal(null, cell.iso)">+</button>
               </div>
               <div style="margin-top:6px;display:flex;flex-direction:column;gap:6px;">
-                <div v-for="(ev, idx) in (eventsByDate[cell.iso] || []).slice(0,3)" :key="idx" :style="{ padding:'6px', borderRadius:'8px', fontSize:'0.85rem', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', background: (ev.type==='order' ? 'rgba(59,130,246,0.08)' : 'rgba(16,185,129,0.08)') }">
-                    <span v-if="ev.type==='order'">🧾 {{ ev.client || ev.vehicle }}</span>
-                    <span v-else>📅 {{ ev.service || ev.client || ev.vehicle }}</span>
-                  </div>
-                <div v-if="(eventsByDate[cell.iso] || []).length > 3"><small>+{{ (eventsByDate[cell.iso]||[]).length - 3 }} más</small></div>
+                <div v-for="(ev, idx) in (eventsByDate[cell.iso] || []).slice(0, 3)" :key="idx"
+                  :style="{ padding: '6px', borderRadius: '8px', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: (ev.type === 'order' ? 'rgba(59,130,246,0.08)' : 'rgba(16,185,129,0.08)') }">
+                  <span v-if="ev.type === 'order'">🧾 {{ ev.client || ev.vehicle }}</span>
+                  <span v-else>📅 {{ ev.service || ev.client || ev.vehicle }}</span>
+                </div>
+                <div v-if="(eventsByDate[cell.iso] || []).length > 3"><small>+{{ (eventsByDate[cell.iso] || []).length - 3
+                    }}
+                    más</small></div>
               </div>
             </div>
           </div>
         </div>
 
         <div class="pro-card" style="padding:12px;overflow:auto;max-height:640px;">
-          <h3 style="margin-top:0;margin-bottom:8px;">Órdenes activas — {{ monthNames[calendarDate.getMonth()] }} ({{ activeOrdersForMonth.length }})</h3>
-          <div v-if="activeOrdersForMonth.length === 0" style="color:var(--muted);margin-bottom:8px;">No hay órdenes activas para este mes.</div>
-          <div v-for="order in activeOrdersForMonth" :key="order.id" style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--brand-border);">
+          <h3 style="margin-top:0;margin-bottom:8px;">Órdenes activas — {{ monthNames[calendarDate.getMonth()] }} ({{
+            activeOrdersForMonth.length }})</h3>
+          <div v-if="activeOrdersForMonth.length === 0" style="color:var(--muted);margin-bottom:8px;">No hay órdenes
+            activas
+            para este mes.</div>
+          <div v-for="order in activeOrdersForMonth" :key="order.id"
+            style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--brand-border);">
             <div>
-              <div style="font-weight:700">#{{order.id}} — {{order.client || '-'}}</div>
-              <div style="color:var(--brand-accent-alt);font-size:0.9rem">{{ order.vehicle || '-' }} · {{ (order.services && order.services.length) ? order.services.join(', ') : (order.serviceType || 'General') }}</div>
-              <div v-if="order.deliveryDate" style="color:var(--brand-success);font-weight:700">Entrega: {{ order.deliveryDate }}</div>
+              <div style="font-weight:700">#{{ order.id }} — {{ order.client || '-' }}</div>
+              <div style="color:var(--brand-accent-alt);font-size:0.9rem">{{ order.vehicle || '-' }} · {{
+                (order.services &&
+                  order.services.length) ? order.services.join(', ') : (order.serviceType || 'General') }}</div>
+              <div v-if="order.deliveryDate" style="color:var(--brand-success);font-weight:700">Entrega: {{
+                order.deliveryDate }}</div>
             </div>
             <div style="display:flex;flex-direction:column;gap:6px;">
               <button class="btn btn-sm btn-secondary" @click="autoScheduleOrder(order.id)">Agendar IA</button>
               <button class="btn btn-sm btn-primary" @click="openScheduleModal(order.id)">Agendar</button>
             </div>
           </div>
-          <div v-if="unassignedActiveWorkOrders.length" style="margin-top:12px;border-top:1px dashed var(--brand-border);padding-top:8px;">
+          <div v-if="unassignedActiveWorkOrders.length"
+            style="margin-top:12px;border-top:1px dashed var(--brand-border);padding-top:8px;">
             <h4 style="margin:4px 0;">Sin fecha asignada ({{ unassignedActiveWorkOrders.length }})</h4>
-            <div v-for="o in unassignedActiveWorkOrders" :key="o.id" style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.03);">
+            <div v-for="o in unassignedActiveWorkOrders" :key="o.id"
+              style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.03);">
               <div>
                 <div style="font-weight:700">#{{ o.id }} — {{ o.client || '-' }}</div>
-                <div style="font-size:0.9rem;color:var(--brand-accent-alt)">{{ o.vehicle || '-' }} · {{ (o.services && o.services.length) ? o.services.join(', ') : (o.serviceType || 'General') }}</div>
+                <div style="font-size:0.9rem;color:var(--brand-accent-alt)">{{ o.vehicle || '-' }} · {{ (o.services &&
+                  o.services.length) ? o.services.join(', ') : (o.serviceType || 'General') }}</div>
               </div>
               <div style="display:flex;flex-direction:column;gap:6px;">
                 <button class="btn btn-sm btn-secondary" @click="autoScheduleOrder(o.id)">Agendar IA</button>
@@ -1504,32 +1668,38 @@
       </div>
 
       <!-- Modal agendar -->
-      <div v-if="showScheduleModal" class="modal-overlay" @click="showScheduleModal=false">
+      <div v-if="showScheduleModal" class="modal-overlay" @click="showScheduleModal = false">
         <div class="modal" @click.stop>
           <div class="modal-header">
             <h3>{{ scheduleSelectedOrderId ? 'Agendar Orden' : 'Crear Cita' }}</h3>
-            <button class="modal-close" @click="showScheduleModal=false">✕</button>
-              </div>
+            <button class="modal-close" @click="showScheduleModal = false">✕</button>
+          </div>
           <div class="modal-body">
             <div style="margin-bottom:8px;">
               <label><strong>Fecha:</strong></label>
               <input type="date" v-model="scheduleDateIso" class="form-input" />
             </div>
-              <div class="form-group">
-                <label>Orden</label>
-                <select v-model="scheduleSelectedOrderId" class="form-input">
-                  <option :value="null">Seleccionar orden</option>
-                  <option v-for="o in activeWorkOrders" :key="o.id" :value="o.id">#{{o.id}} — {{o.client}}</option>
-                </select>
-              </div>
-            <div v-if="!scheduleSelectedOrderId" style="margin-top:8px;border-top:1px dashed var(--brand-border);padding-top:8px;">
+            <div class="form-group">
+              <label>Orden</label>
+              <select v-model="scheduleSelectedOrderId" class="form-input">
+                <option :value="null">Seleccionar orden</option>
+                <option v-for="o in activeWorkOrders" :key="o.id" :value="o.id">#{{ o.id }} — {{ o.client }}</option>
+              </select>
+            </div>
+            <div v-if="!scheduleSelectedOrderId"
+              style="margin-top:8px;border-top:1px dashed var(--brand-border);padding-top:8px;">
               <small>Crear nueva cita/evento en la agenda</small>
               <div class="form-row">
-                <div class="form-group"><label>Placa</label><input v-model="newCalendarOrder.vehicle" class="form-input" /></div>
-                <div class="form-group"><label>Cliente</label><input v-model="newCalendarOrder.client" class="form-input" /></div>
+                <div class="form-group"><label>Placa</label><input v-model="newCalendarOrder.vehicle"
+                    class="form-input" />
+                </div>
+                <div class="form-group"><label>Cliente</label><input v-model="newCalendarOrder.client"
+                    class="form-input" />
+                </div>
               </div>
               <div class="form-row">
-                <div class="form-group"><label>Asunto / Servicio</label><input v-model="newCalendarOrder.serviceType" class="form-input" /></div>
+                <div class="form-group"><label>Asunto / Servicio</label><input v-model="newCalendarOrder.serviceType"
+                    class="form-input" /></div>
                 <div class="form-group"><label>Técnico</label>
                   <select v-model="newCalendarOrder.mechanic" class="form-input">
                     <option value="">Seleccionar técnico</option>
@@ -1538,16 +1708,18 @@
                 </div>
               </div>
               <div class="form-row">
-                <div class="form-group"><label>Total</label><input v-model.number="newCalendarOrder.total" type="number" class="form-input" /></div>
-                <div class="form-group"><label>Diagnóstico</label><input v-model="newCalendarOrder.diagnosis" class="form-input" /></div>
+                <div class="form-group"><label>Total</label><input v-model.number="newCalendarOrder.total" type="number"
+                    class="form-input" /></div>
+                <div class="form-group"><label>Diagnóstico</label><input v-model="newCalendarOrder.diagnosis"
+                    class="form-input" /></div>
               </div>
             </div>
             <div class="form-group">
               <label>Hora</label>
-              <input type="time" v-model="scheduleTime" class="form-input"/>
+              <input type="time" v-model="scheduleTime" class="form-input" />
             </div>
             <div class="form-actions" style="margin-top:12px;">
-              <button class="btn btn-secondary" @click="showScheduleModal=false">Cancelar</button>
+              <button class="btn btn-secondary" @click="showScheduleModal = false">Cancelar</button>
               <button class="btn btn-primary" @click="confirmSchedule">Guardar</button>
             </div>
           </div>
@@ -1590,7 +1762,7 @@
         </div>
       </div>
     </div> -->
-      <div class="tab-content">
+    <div class="tab-content">
 
       <!-- Pestaña de Clientes (tabla) -->
       <div v-if="activeTab === 'clients'" class="content-section">
@@ -1602,16 +1774,13 @@
           <div style="width:100%;display:flex;justify-content:center;margin-top:12px;">
             <div class="search-input-wrapper" style="max-width:520px;">
               <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                <path fill="currentColor" d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z"/>
+                <path fill="currentColor"
+                  d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
               </svg>
-              <input
-                type="search"
-                v-model="searchClients"
-                placeholder="Buscar clientes..."
-                aria-label="Buscar clientes"
-                class="search-input"
-              />
-              <button v-if="searchClients" class="search-clear" @click.prevent="searchClients = ''" aria-label="Limpiar búsqueda">X</button>
+              <input type="search" v-model="searchClients" placeholder="Buscar clientes..." aria-label="Buscar clientes"
+                class="search-input" />
+              <button v-if="searchClients" class="search-clear" @click.prevent="searchClients = ''"
+                aria-label="Limpiar búsqueda">X</button>
             </div>
           </div>
         </div>
@@ -1627,7 +1796,8 @@
               <form @submit.prevent="addBurnedClient">
                 <div class="form-group">
                   <label>Nombre *</label>
-                  <input v-model="newClient.name" type="text" class="form-input" required placeholder="Ej: Juan Pérez" />
+                  <input v-model="newClient.name" type="text" class="form-input" required
+                    placeholder="Ej: Juan Pérez" />
                 </div>
                 <div class="form-group">
                   <label>Teléfono</label>
@@ -1639,7 +1809,8 @@
                 </div>
                 <div class="form-group">
                   <label>Notas internas</label>
-                  <textarea v-model="newClient.notes" class="form-input" rows="2" placeholder="Ej: Cliente exigente, siempre paga tarde"></textarea>
+                  <textarea v-model="newClient.notes" class="form-input" rows="2"
+                    placeholder="Ej: Cliente exigente, siempre paga tarde"></textarea>
                 </div>
                 <!-- Campos de aviso removidos según requerimiento -->
                 <div class="form-group">
@@ -1702,7 +1873,7 @@
               <col style="width:18%" /> <!-- Nombre -->
               <col style="width:12%" /> <!-- Teléfono -->
               <col style="width:18%" /> <!-- Correo -->
-              <col style="width:12%" />  <!-- Fecha registro -->
+              <col style="width:12%" /> <!-- Fecha registro -->
               <col style="width:22%" /> <!-- Notas -->
               <col style="width:12%" /> <!-- Acciones (fijo) -->
             </colgroup>
@@ -1719,15 +1890,16 @@
             </thead>
             <tbody>
               <tr v-for="client in burnedClients.filter(c => {
-                  if (!searchClients) return true
-                  const q = searchClients.toLowerCase()
-                  return (c.name && c.name.toLowerCase().includes(q)) || (c.email && c.email.toLowerCase().includes(q)) || (c.phone && c.phone.toLowerCase().includes(q))
-                })" :key="client.id">
+                if (!searchClients) return true
+                const q = searchClients.toLowerCase()
+                return (c.name && c.name.toLowerCase().includes(q)) || (c.email && c.email.toLowerCase().includes(q)) || (c.phone && c.phone.toLowerCase().includes(q))
+              })" :key="client.id">
                 <td data-label="ID">{{ client.id }}</td>
                 <td data-label="Nombre"><span class="client-name">{{ client.name }}</span></td>
                 <td data-label="Teléfono">{{ client.phone }}</td>
                 <td data-label="Correo"><span class="client-email">{{ client.email }}</span></td>
-                <td data-label="Fecha de Registro">{{ client.registrationDate ? formatShortDate(new Date(client.registrationDate)) : '-' }}</td>
+                <td data-label="Fecha de Registro">{{ client.registrationDate ? formatShortDate(new
+                  Date(client.registrationDate)) : '-' }}</td>
                 <td data-label="Notas"><span class="client-notes">{{ client.notes }}</span></td>
                 <td data-label="Acciones">
                   <div class="actions">
@@ -1758,16 +1930,13 @@
         <div class="search-bar">
           <div class="search-input-wrapper">
             <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-              <path fill="currentColor" d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z"/>
+              <path fill="currentColor"
+                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
             </svg>
-            <input
-              type="search"
-              v-model="searchProducts"
-              placeholder="Buscar productos por nombre..."
-              aria-label="Buscar productos"
-              class="search-input"
-            />
-            <button v-if="searchProducts" class="search-clear" @click.prevent="searchProducts = ''" aria-label="Limpiar búsqueda">X</button>
+            <input type="search" v-model="searchProducts" placeholder="Buscar productos por nombre..."
+              aria-label="Buscar productos" class="search-input" />
+            <button v-if="searchProducts" class="search-clear" @click.prevent="searchProducts = ''"
+              aria-label="Limpiar búsqueda">X</button>
           </div>
         </div>
 
@@ -1826,16 +1995,13 @@
         <div class="search-bar">
           <div class="search-input-wrapper">
             <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-              <path fill="currentColor" d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z"/>
+              <path fill="currentColor"
+                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
             </svg>
-            <input
-              type="search"
-              v-model="searchCategories"
-              placeholder="Buscar categorías por nombre..."
-              aria-label="Buscar categorías"
-              class="search-input"
-            />
-            <button v-if="searchCategories" class="search-clear" @click.prevent="searchCategories = ''" aria-label="Limpiar búsqueda">X</button>
+            <input type="search" v-model="searchCategories" placeholder="Buscar categorías por nombre..."
+              aria-label="Buscar categorías" class="search-input" />
+            <button v-if="searchCategories" class="search-clear" @click.prevent="searchCategories = ''"
+              aria-label="Limpiar búsqueda">X</button>
           </div>
         </div>
 
@@ -1887,16 +2053,13 @@
         <div class="search-bar">
           <div class="search-input-wrapper">
             <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-              <path fill="currentColor" d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z"/>
+              <path fill="currentColor"
+                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
             </svg>
-            <input
-              type="search"
-              v-model="searchShowcase"
-              placeholder="Buscar novedades por nombre..."
-              aria-label="Buscar novedades"
-              class="search-input"
-            />
-            <button v-if="searchShowcase" class="search-clear" @click.prevent="searchShowcase = ''" aria-label="Limpiar búsqueda">X</button>
+            <input type="search" v-model="searchShowcase" placeholder="Buscar novedades por nombre..."
+              aria-label="Buscar novedades" class="search-input" />
+            <button v-if="searchShowcase" class="search-clear" @click.prevent="searchShowcase = ''"
+              aria-label="Limpiar búsqueda">X</button>
           </div>
         </div>
 
@@ -2048,7 +2211,8 @@
               <div class="chart-card upcoming-card">
                 <h3>Próximas Citas</h3>
                 <ul class="upcoming-list">
-                  <li v-for="appt in upcomingAppointments" :key="appt.id">{{ appt.date ? formatShortDate(new Date(appt.date)) : '—' }} · {{ appt.time }} · {{ appt.client }}</li>
+                  <li v-for="appt in upcomingAppointments" :key="appt.id">{{ appt.date ? formatShortDate(new
+                    Date(appt.date)) : '—' }} · {{ appt.time }} · {{ appt.client }}</li>
                   <li v-if="upcomingAppointments.length === 0">Sin próximas citas</li>
                 </ul>
               </div>
@@ -2082,7 +2246,8 @@
                     </td>
                     <td class="tech-orders">
                       <div class="orders-count">{{ row.warrantyOrders }}</div>
-                      <div class="orders-bar" role="progressbar" :aria-valuenow="row.warrantyPct" aria-valuemin="0" aria-valuemax="100">
+                      <div class="orders-bar" role="progressbar" :aria-valuenow="row.warrantyPct" aria-valuemin="0"
+                        aria-valuemax="100">
                         <div class="orders-bar-fill" :style="{ width: row.warrantyPct + '%' }"></div>
                       </div>
                     </td>
@@ -2095,13 +2260,20 @@
             <div class="card tech-card">
               <h3>Desempeño de Técnicos</h3>
               <table class="table small-table tech-table">
-                <thead><tr><th>Técnico</th><th>Trabajos</th><th style="text-align:right">Ingresos</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>Técnico</th>
+                    <th>Trabajos</th>
+                    <th style="text-align:right">Ingresos</th>
+                  </tr>
+                </thead>
                 <tbody>
                   <tr v-for="t in techniciansPerformanceEnhanced" :key="t.name">
                     <td class="tech-name">{{ t.name }}</td>
                     <td class="tech-orders">
                       <div class="orders-count">{{ t.orders }}</div>
-                      <div class="orders-bar" role="progressbar" :aria-valuenow="t.ordersPct" aria-valuemin="0" aria-valuemax="100">
+                      <div class="orders-bar" role="progressbar" :aria-valuenow="t.ordersPct" aria-valuemin="0"
+                        aria-valuemax="100">
                         <div class="orders-bar-fill" :style="{ width: t.ordersPct + '%' }"></div>
                       </div>
                     </td>
@@ -2143,12 +2315,14 @@
           <form @submit.prevent="saveProduct">
             <div class="form-group">
               <label>Nombre del Producto *</label>
-              <input v-model="productForm.name" type="text" class="form-input" required placeholder="Ej: iPhone 15 Pro" />
+              <input v-model="productForm.name" type="text" class="form-input" required
+                placeholder="Ej: iPhone 15 Pro" />
             </div>
 
             <div class="form-group">
               <label>Descripción</label>
-              <textarea v-model="productForm.description" class="form-input" rows="3" placeholder="Describe las características principales del producto"></textarea>
+              <textarea v-model="productForm.description" class="form-input" rows="3"
+                placeholder="Describe las características principales del producto"></textarea>
             </div>
 
             <div class="form-row">
@@ -2156,14 +2330,16 @@
                 <label>Precio *</label>
                 <div class="price-input">
                   <span class="currency">$</span>
-                  <input v-model.number="productForm.price" type="number" class="form-input" step="1000" min="0" required placeholder="0" />
+                  <input v-model.number="productForm.price" type="number" class="form-input" step="1000" min="0"
+                    required placeholder="0" />
                 </div>
               </div>
               <div class="form-group">
                 <label>Precio Original (descuento)</label>
                 <div class="price-input">
                   <span class="currency">$</span>
-                  <input v-model.number="productForm.originalPrice" type="number" class="form-input" step="1000" min="0" placeholder="0" />
+                  <input v-model.number="productForm.originalPrice" type="number" class="form-input" step="1000" min="0"
+                    placeholder="0" />
                 </div>
               </div>
             </div>
@@ -2193,13 +2369,8 @@
               <label>Colores Disponibles</label>
               <div class="colors-selector">
                 <div class="colors-grid">
-                  <div
-                    v-for="color in appleColors"
-                    :key="color.name"
-                    class="color-option"
-                    :class="{ selected: isColorSelected(color.name) }"
-                    @click="toggleProductColor(color.name)"
-                  >
+                  <div v-for="color in appleColors" :key="color.name" class="color-option"
+                    :class="{ selected: isColorSelected(color.name) }" @click="toggleProductColor(color.name)">
                     <div class="color-circle" :style="{ background: color.hex }">
                       <span v-if="isColorSelected(color.name)" class="check-icon">✓</span>
                     </div>
@@ -2219,86 +2390,49 @@
 
               <!-- Tabs para elegir método de imagen -->
               <div class="image-tabs">
-                <button
-                  type="button"
-                  class="tab-btn"
-                  :class="{ active: productImageUploadMethod === 'url' }"
-                  @click="productImageUploadMethod = 'url'"
-                >
+                <button type="button" class="tab-btn" :class="{ active: productImageUploadMethod === 'url' }"
+                  @click="productImageUploadMethod = 'url'">
                   URL de Imagen
                 </button>
-                <button
-                  type="button"
-                  class="tab-btn"
-                  :class="{ active: productImageUploadMethod === 'file' }"
-                  @click="productImageUploadMethod = 'file'"
-                >
+                <button type="button" class="tab-btn" :class="{ active: productImageUploadMethod === 'file' }"
+                  @click="productImageUploadMethod = 'file'">
                   Subir Archivo
                 </button>
               </div>
 
               <!-- Campo URL -->
               <div v-if="productImageUploadMethod === 'url'" class="image-input-section">
-                <input
-                  :value="productForm.images[0] || ''"
+                <input :value="productForm.images[0] || ''"
                   @input="(e) => { productForm.images = [(e.target as HTMLInputElement).value]; updateImagePreview(); }"
-                  type="url"
-                  class="form-input"
-                  required
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                />
+                  type="url" class="form-input" required placeholder="https://ejemplo.com/imagen.jpg" />
               </div>
 
               <!-- Campo de archivo -->
               <div v-if="productImageUploadMethod === 'file'" class="image-input-section">
-                <input
-                  ref="fileInput"
-                  type="file"
-                  class="file-input"
-                  accept="image/*"
-                  multiple
-                  @change="handleMultipleFileSelect"
-                />
+                <input ref="fileInput" type="file" class="file-input" accept="image/*" multiple
+                  @change="handleMultipleFileSelect" />
                 <div class="file-upload-area" @click="fileInput?.click()">
                   <div v-if="productForm.images.length === 0" class="upload-placeholder">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                      <circle cx="9" cy="9" r="2"/>
-                      <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <circle cx="9" cy="9" r="2" />
+                      <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                     </svg>
                     <p>Haz clic para seleccionar imágenes</p>
                     <span>JPG, PNG, GIF hasta 5MB (máximo 5 imágenes)</span>
                   </div>
                   <div v-if="productForm.images.length > 0" class="images-preview-grid">
-                    <div
-                      v-for="(image, index) in productForm.images"
-                      :key="index"
-                      class="image-preview-item"
-                    >
+                    <div v-for="(image, index) in productForm.images" :key="index" class="image-preview-item">
                       <img :src="image" :alt="`Preview ${index + 1}`" />
-                      <button
-                        type="button"
-                        class="remove-single-image"
-                        @click.stop="removeSingleImage(index)"
-                      >
+                      <button type="button" class="remove-single-image" @click.stop="removeSingleImage(index)">
                         ✕
                       </button>
                       <span class="image-index">{{ index + 1 }}</span>
                       <div class="image-actions">
-                        <button
-                          type="button"
-                          class="img-action-btn"
-                          :disabled="index === 0"
-                          @click.stop="moveImageLeft(index)"
-                          title="Mover a la izquierda"
-                        >←</button>
-                        <button
-                          type="button"
-                          class="img-action-btn"
-                          :disabled="index === productForm.images.length - 1"
-                          @click.stop="moveImageRight(index)"
-                          title="Mover a la derecha"
-                        >→</button>
+                        <button type="button" class="img-action-btn" :disabled="index === 0"
+                          @click.stop="moveImageLeft(index)" title="Mover a la izquierda">←</button>
+                        <button type="button" class="img-action-btn" :disabled="index === productForm.images.length - 1"
+                          @click.stop="moveImageRight(index)" title="Mover a la derecha">→</button>
                         <!-- Botón Portada removido temporalmente -->
                       </div>
                     </div>
@@ -2308,9 +2442,12 @@
             </div>
 
             <!-- Información adicional -->
-            <div v-if="productForm.originalPrice && productForm.originalPrice > productForm.price" class="discount-info">
+            <div v-if="productForm.originalPrice && productForm.originalPrice > productForm.price"
+              class="discount-info">
               <span class="discount-badge">
-                💰 Descuento: {{ Math.round(((productForm.originalPrice - productForm.price) / productForm.originalPrice) * 100) }}%
+                💰 Descuento: {{ Math.round(((productForm.originalPrice - productForm.price) /
+                  productForm.originalPrice) *
+                100) }}%
               </span>
             </div>
 
@@ -2378,50 +2515,32 @@
 
               <!-- Tabs para elegir método de imagen -->
               <div class="image-tabs">
-                <button
-                  type="button"
-                  class="tab-btn"
-                  :class="{ active: imageUploadMethod === 'url' }"
-                  @click="imageUploadMethod = 'url'"
-                >
+                <button type="button" class="tab-btn" :class="{ active: imageUploadMethod === 'url' }"
+                  @click="imageUploadMethod = 'url'">
                   URL de Imagen
                 </button>
-                <button
-                  type="button"
-                  class="tab-btn"
-                  :class="{ active: imageUploadMethod === 'file' }"
-                  @click="imageUploadMethod = 'file'"
-                >
+                <button type="button" class="tab-btn" :class="{ active: imageUploadMethod === 'file' }"
+                  @click="imageUploadMethod = 'file'">
                   Subir Archivo
                 </button>
               </div>
 
               <!-- Campo URL -->
               <div v-if="imageUploadMethod === 'url'" class="image-input-section">
-                <input
-                  v-model="showcaseForm.image"
-                  type="url"
-                  class="form-input"
-                  required
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                />
+                <input v-model="showcaseForm.image" type="url" class="form-input" required
+                  placeholder="https://ejemplo.com/imagen.jpg" />
               </div>
 
               <!-- Campo de archivo -->
               <div v-if="imageUploadMethod === 'file'" class="image-input-section">
-                <input
-                  ref="showcaseFileInput"
-                  type="file"
-                  class="file-input"
-                  accept="image/*"
-                  @change="handleShowcaseFileSelect"
-                />
+                <input ref="showcaseFileInput" type="file" class="file-input" accept="image/*"
+                  @change="handleShowcaseFileSelect" />
                 <div class="file-upload-area" @click="showcaseFileInput?.click()">
                   <div v-if="!showcaseImagePreview" class="upload-placeholder">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                      <circle cx="9" cy="9" r="2"/>
-                      <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <circle cx="9" cy="9" r="2" />
+                      <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                     </svg>
                     <p>Haz clic para seleccionar una imagen</p>
                     <span>JPG, PNG, GIF hasta 5MB</span>
@@ -2461,8 +2580,14 @@ import { reactive, ref, computed, onMounted, onBeforeUnmount, watch, nextTick, t
 import { useProducts, type ShowcaseProduct } from '@/composables/useProducts'
 import type { Product } from '@/types/ProductType'
 import type { Category, CreateCategoryRequest } from '@/types/CategoryType'
+import { workshopClientService } from '@/services/api'
 import { paymentService } from '@/services/api/paymentService'
 import type { Purchase, ProductPaymentItem } from '@/services/api/paymentService'
+import type {
+  WorkshopClient,
+  CreateWorkshopClientRequest,
+  UpdateWorkshopClientRequest,
+} from '@/types/WorkshopClientType'
 
 // Estado para modal y formulario de cliente quemado
 const showCreateClient = ref(false)
@@ -2478,131 +2603,72 @@ const newClient = reactive({
   registrationDate: ''
 })
 
-// Ejemplos quemados
-const burnedClients = ref<any[]>([
-  {
-    id: 1,
-    name: 'Juan Pérez',
-    phone: '3001234567',
-    email: 'juan@email.com',
-    notes: 'Cliente exigente',
-    reminder: 'SOAT',
-    reminderType: '',
-    reminderDate: '',
-    reminderNote: '',
-    registrationDate: '2024-06-12T10:00:00Z',
-    type: 'frecuente',
-    totalOrders: 5,
-    totalSpent: 1200000
-  },
-  {
-    id: 2,
-    name: 'María Gómez',
-    phone: '3209876543',
-    email: 'maria@email.com',
-    notes: 'Siempre paga tarde.',
-    reminder: 'Mantenimiento',
-    reminderType: '',
-    reminderDate: '',
-    reminderNote: '',
-    registrationDate: '2025-01-23T12:30:00Z',
-    type: 'moroso',
-    totalOrders: 2,
-    totalSpent: 450000
-  },
-  {
-    id: 3,
-    name: 'Carlos Ramírez',
-    phone: '3105551122',
-    email: 'carlos@email.com',
-    notes: 'Solicita repuestos originales.',
-    reminder: 'Tecnomecánica',
-    reminderType: '',
-    reminderDate: '',
-    reminderNote: '',
-    registrationDate: '2026-02-10T09:15:00Z',
-    type: 'nuevo',
-    totalOrders: 1,
-    totalSpent: 350000
-  },
-  {
-    id: 4,
-    name: 'Felipe Acosta',
-    phone: '3103608519',
-    email: 'felipe.acosta94@gmail.com',
-    notes: 'El mejor Cliente',
-    reminder: 'Tecnomecánica',
-    registrationDate: '2026-02-10T09:15:00Z',
-    type: 'nuevo',
-    totalOrders: 1,
-    totalSpent: 350000
-  },
-  {
-    id: 5,
-    name: 'Miguel Angel Bustos',
-    phone: '3107695856',
-    email: 'miguel.angel.bustos@email.com',
-    notes: 'Capi',
-    reminder: 'SOAT',
-    reminderType: '',
-    reminderDate: '',
-    reminderNote: '',
-    registrationDate: '2026-02-10T09:15:00Z',
-    type: 'nuevo',
-    totalOrders: 1,
-    totalSpent: 350000
+interface WorkshopClientRow extends WorkshopClient {
+  reminder?: string
+  reminderType?: string
+  reminderDate?: string
+  reminderNote?: string
+  registrationDate?: string
+  type?: string
+  totalOrders?: number
+  totalSpent?: number
+}
+
+const burnedClients = ref<WorkshopClientRow[]>([])
+
+const mapClientToRow = (client: WorkshopClient): WorkshopClientRow => ({
+  ...client,
+  reminder: '',
+  reminderType: '',
+  reminderDate: '',
+  reminderNote: '',
+  registrationDate: client.createdAt,
+  type: client.isActive ? 'activo' : 'inactivo',
+  totalOrders: 0,
+  totalSpent: 0,
+})
+
+const loadBurnedClients = async () => {
+  try {
+    const response = await workshopClientService.getClients({})
+    burnedClients.value = response.data?.clients.map(mapClientToRow) || []
+  } catch (error) {
+    console.error('Error cargando clientes desde el backend', error)
+    burnedClients.value = []
   }
-])
+}
 
-function addBurnedClient() {
-  if (!newClient.name) return
+async function addBurnedClient() {
+  if (!newClient.name.trim()) return
 
-  // Calcular siguiente ID consecutivo.
-  const ids = burnedClients.value
-    .map((c: any) => Number(c.id))
-    .filter((n: number) => Number.isFinite(n) && n > 0)
-
-  const smallIds = ids.filter((n: number) => n > 0 && n < 1e9)
-  let nextId = 1
-  if (smallIds.length > 0) {
-    nextId = Math.max(...smallIds) + 1
-  } else if (ids.length > 0) {
-    nextId = Math.max(...ids) + 1
+  const payload: CreateWorkshopClientRequest = {
+    name: newClient.name.trim(),
+    phone: newClient.phone.trim(),
+    email: newClient.email.trim(),
+    notes: newClient.notes.trim() || undefined,
   }
 
-  // No se almacenan avisos (tipo/fecha) por requerimiento: dejar campos vacíos
-  const regDateISO = newClient.registrationDate ? new Date(newClient.registrationDate).toISOString() : new Date().toISOString()
-
-  burnedClients.value.push({
-    id: nextId,
-    name: newClient.name,
-    phone: newClient.phone,
-    email: newClient.email,
-    notes: newClient.notes,
-    reminder: '',
-    reminderType: '',
-    reminderDate: '',
-    reminderNote: '',
-    registrationDate: regDateISO,
-    type: 'nuevo',
-    totalOrders: 0,
-    totalSpent: 0
-  })
-
-  // Resetear formulario (sin campos de aviso)
-  newClient.name = ''
-  newClient.phone = ''
-  newClient.email = ''
-  newClient.notes = ''
-  newClient.registrationDate = ''
-  showCreateClient.value = false
+  try {
+    const response = await workshopClientService.createClient(payload)
+    if (response.data) {
+      burnedClients.value.unshift(mapClientToRow(response.data))
+      newClient.name = ''
+      newClient.phone = ''
+      newClient.email = ''
+      newClient.notes = ''
+      newClient.registrationDate = ''
+      showCreateClient.value = false
+    }
+  } catch (error) {
+    console.error('Error creando cliente en el backend', error)
+  }
 }
 
 // Edición y eliminación de clientes quemados
-const editingClient: Ref<any | null> = ref(null)
+const editingClient: Ref<WorkshopClientRow | null> = ref(null)
 const showEditClient = ref(false)
 
-const editClient = (client: any) => {
+const editClient = (client: WorkshopClientRow) => {
   // Preparar clon para edición y normalizar fechas a YYYY-MM-DD para inputs
   const clone: any = { ...client }
   // registrationDate -> YYYY-MM-DD
@@ -2639,7 +2705,7 @@ const editClient = (client: any) => {
       const dateMatch = right.match(/(\d{1,2}\/\d{1,2}\/\d{4})/)
       if (dateMatch) {
         const [d, m, y] = dateMatch[0].split('/')
-        clone.reminderDate = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`
+        clone.reminderDate = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`
       } else {
         clone.reminderNote = right || ''
       }
@@ -2662,32 +2728,40 @@ const closeEditClient = () => {
   editingClient.value = null
 }
 
-const saveEditedClient = () => {
+const saveEditedClient = async () => {
   if (!editingClient.value) return
-  // No se guardan avisos para clientes: normalizar a vacío
-  const ec: any = { ...editingClient.value }
-  ec.reminder = ''
-  ec.reminderType = ''
-  ec.reminderDate = ''
-  ec.reminderNote = ''
-
-  // Normalizar registrationDate a ISO
-  if (ec.registrationDate) {
-    ec.registrationDate = ec.registrationDate.includes('T') ? ec.registrationDate : new Date(ec.registrationDate).toISOString()
-  } else {
-    ec.registrationDate = new Date().toISOString()
+  const ec = editingClient.value
+  const payload: UpdateWorkshopClientRequest = {
+    name: ec.name.trim(),
+    phone: ec.phone.trim(),
+    email: ec.email.trim(),
+    notes: ec.notes?.trim() || undefined,
+    isActive: ec.isActive,
   }
 
-  const idx = burnedClients.value.findIndex((c: any) => c.id === ec.id)
-  if (idx > -1) {
-    burnedClients.value.splice(idx, 1, ec)
+  try {
+    const response = await workshopClientService.updateClient(ec.id, payload)
+    if (response.data) {
+      const updatedRow = mapClientToRow(response.data)
+      const idx = burnedClients.value.findIndex((c) => c.id === ec.id)
+      if (idx > -1) {
+        burnedClients.value.splice(idx, 1, updatedRow)
+      }
+      closeEditClient()
+    }
+  } catch (error) {
+    console.error('Error actualizando cliente en el backend', error)
   }
-  closeEditClient()
 }
 
-const deleteClient = (id: number) => {
+const deleteClient = async (id: number) => {
   if (!confirm('¿Estás seguro de eliminar este cliente?')) return
-  burnedClients.value = burnedClients.value.filter((c: any) => c.id !== id)
+  try {
+    await workshopClientService.deleteClient(id)
+    burnedClients.value = burnedClients.value.filter((c) => c.id !== id)
+  } catch (error) {
+    console.error('Error eliminando cliente en el backend', error)
+  }
 }
 
 // Tipos
@@ -2722,7 +2796,6 @@ interface Employee {
 // Estado reactivo (persistente)
 const ACTIVE_TAB_KEY = 'admin_active_tab'
 // Local storage keys para datos temporales
-const CLIENTS_STORAGE_KEY = 'jobscar_admin_clients'
 const VEHICLES_STORAGE_KEY = 'jobscar_admin_vehicles'
 const activeTab = ref<string>(localStorage.getItem(ACTIVE_TAB_KEY) || 'clients')
 const showProductForm = ref(false)
@@ -2778,7 +2851,7 @@ function addBurnedVehicle() {
   const regISO = newVehicle.registrationDate ? new Date(newVehicle.registrationDate).toISOString() : new Date().toISOString()
   const lastServiceISO = newVehicle.lastServiceDate ? new Date(newVehicle.lastServiceDate).toISOString() : ''
 
-    burnedVehicles.push({
+  burnedVehicles.push({
     id: nextId,
     plate: newVehicle.plate || '',
     brand: newVehicle.brand || '',
@@ -2794,7 +2867,7 @@ function addBurnedVehicle() {
   })
 
   // Resetear formulario
-  Object.keys(newVehicle).forEach((k) => { ;(newVehicle as any)[k] = '' })
+  Object.keys(newVehicle).forEach((k) => { ; (newVehicle as any)[k] = '' })
   showCreateVehicle.value = false
 }
 
@@ -2883,40 +2956,29 @@ const products = regularProducts
 
 // Cargar categorías y productos desde el backend al montar el componente
 onMounted(async () => {
-  // Restaurar clientes desde localStorage si existen
+  // Restaurar vehículos desde localStorage si existen (fusionar con defaults)
   try {
-    const stored = localStorage.getItem(CLIENTS_STORAGE_KEY)
-    if (stored) {
-      const parsed = JSON.parse(stored)
-      if (Array.isArray(parsed)) {
-        burnedClients.value = parsed
-        console.log('✅ Clientes cargados desde localStorage:', burnedClients.value.length)
+    const storedV = localStorage.getItem(VEHICLES_STORAGE_KEY)
+    if (storedV) {
+      const parsedV = JSON.parse(storedV)
+      if (Array.isArray(parsedV)) {
+        // fusionar: conservar lo guardado por el usuario y añadir defaults faltantes
+        const defaults = Array.isArray(burnedVehicles) ? [...(burnedVehicles as any)] : []
+        const existingPlates = new Set(parsedV.map((v: any) => (v.plate || '').toString().toUpperCase()))
+        defaults.forEach((d: any) => {
+          const p = (d.plate || '').toString().toUpperCase()
+          if (p && !existingPlates.has(p)) parsedV.push(d)
+        })
+        // Reemplazar el contenido reactivo con la lista fusionada
+        burnedVehicles.splice(0, burnedVehicles.length, ...parsedV)
+        console.log('✅ Vehículos cargados y fusionados desde localStorage:', burnedVehicles.length)
       }
     }
   } catch (e) {
-    console.warn('No se pudo restaurar clientes desde localStorage', e)
+    console.warn('No se pudo restaurar/ fusionar vehículos desde localStorage', e)
   }
-    // Restaurar vehículos desde localStorage si existen (fusionar con defaults)
-    try {
-      const storedV = localStorage.getItem(VEHICLES_STORAGE_KEY)
-      if (storedV) {
-        const parsedV = JSON.parse(storedV)
-        if (Array.isArray(parsedV)) {
-          // fusionar: conservar lo guardado por el usuario y añadir defaults faltantes
-          const defaults = Array.isArray(burnedVehicles) ? [...(burnedVehicles as any)] : []
-          const existingPlates = new Set(parsedV.map((v: any) => (v.plate || '').toString().toUpperCase()))
-          defaults.forEach((d: any) => {
-            const p = (d.plate || '').toString().toUpperCase()
-            if (p && !existingPlates.has(p)) parsedV.push(d)
-          })
-          // Reemplazar el contenido reactivo con la lista fusionada
-          burnedVehicles.splice(0, burnedVehicles.length, ...parsedV)
-          console.log('✅ Vehículos cargados y fusionados desde localStorage:', burnedVehicles.length)
-        }
-      }
-    } catch (e) {
-      console.warn('No se pudo restaurar/ fusionar vehículos desde localStorage', e)
-    }
+
+  await loadBurnedClients()
 
   console.log('🔄 Cargando categorías y productos al montar el componente...')
   await loadCategories()
@@ -2931,16 +2993,6 @@ onMounted(async () => {
 // Watcher para debug: observar cambios en categorías
 watch(categories, (newCategories) => {
   console.log('🔔 [Watch] Categorías cambiaron:', newCategories.length, newCategories)
-}, { deep: true })
-
-// Persistir clientes en localStorage cuando cambien
-watch(burnedClients, (newVal) => {
-  try {
-    localStorage.setItem(CLIENTS_STORAGE_KEY, JSON.stringify(newVal))
-    console.log('✅ Clientes guardados en localStorage:', newVal.length)
-  } catch (e) {
-    console.warn('No se pudo persistir clientes en localStorage', e)
-  }
 }, { deep: true })
 
 // Sales / Purchases data
@@ -3140,7 +3192,7 @@ const burnedOrders = reactive(_storedOrders || [
 watch(burnedOrders, (newVal) => {
   try {
     localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(newVal))
-    try { localStorage.setItem(ORDERS_STORAGE_VERSION_KEY, ORDERS_SEED_VERSION) } catch (e) {}
+    try { localStorage.setItem(ORDERS_STORAGE_VERSION_KEY, ORDERS_SEED_VERSION) } catch (e) { }
     console.log('✅ Órdenes guardadas en localStorage:', newVal.length)
   } catch (e) {
     console.warn('No se pudo persistir órdenes en localStorage', e)
@@ -3213,7 +3265,7 @@ const printInvoice: Ref<any | null> = ref(null)
 const showInvoicePreview = ref(false)
 const previewInvoice: Ref<any | null> = ref(null)
 
-function previewInvoiceFn(inv:any) {
+function previewInvoiceFn(inv: any) {
   previewInvoice.value = { ...inv }
   showInvoicePreview.value = true
 }
@@ -3288,9 +3340,9 @@ function saveInvoice() {
         ...editingInvoice.value,
         client: String(formInvoice.client),
         vehicle: formInvoice.vehicle || '',
-        items: formInvoice.items.map((it:any) => ({ ...it })),
+        items: formInvoice.items.map((it: any) => ({ ...it })),
         taxPct: formInvoice.taxPct,
-        payments: Array.isArray(formInvoice.payments) ? formInvoice.payments : String(formInvoice.payments).split(',').map((s:any) => s.trim()),
+        payments: Array.isArray(formInvoice.payments) ? formInvoice.payments : String(formInvoice.payments).split(',').map((s: any) => s.trim()),
         status: formInvoice.status || 'Pendiente',
         notes: formInvoice.notes || '',
         subtotal,
@@ -3307,9 +3359,9 @@ function saveInvoice() {
       id,
       client: String(formInvoice.client),
       vehicle: formInvoice.vehicle || '',
-      items: formInvoice.items.map((it:any) => ({ ...it })),
+      items: formInvoice.items.map((it: any) => ({ ...it })),
       taxPct: formInvoice.taxPct,
-      payments: Array.isArray(formInvoice.payments) ? formInvoice.payments : String(formInvoice.payments).split(',').map((s:any) => s.trim()),
+      payments: Array.isArray(formInvoice.payments) ? formInvoice.payments : String(formInvoice.payments).split(',').map((s: any) => s.trim()),
       status: formInvoice.status || 'Pendiente',
       subtotal,
       tax,
@@ -3327,41 +3379,41 @@ function editInvoice(inv: any) {
   formInvoice.id = inv.id
   formInvoice.client = inv.client || ''
   formInvoice.vehicle = inv.vehicle || ''
-  formInvoice.items = Array.isArray(inv.items) && inv.items.length ? inv.items.map((it:any)=>({ ...it })) : [{ description: '', qty: 1, price: 0 }]
+  formInvoice.items = Array.isArray(inv.items) && inv.items.length ? inv.items.map((it: any) => ({ ...it })) : [{ description: '', qty: 1, price: 0 }]
   formInvoice.taxPct = inv.taxPct || 19
-  formInvoice.payments = Array.isArray(inv.payments) ? inv.payments.slice() : (inv.payments ? String(inv.payments).split(',').map((s:any)=>s.trim()) : [])
+  formInvoice.payments = Array.isArray(inv.payments) ? inv.payments.slice() : (inv.payments ? String(inv.payments).split(',').map((s: any) => s.trim()) : [])
   formInvoice.status = inv.status || 'Pendiente'
   formInvoice.notes = inv.notes || ''
   formInvoice.createdAt = inv.createdAt || new Date().toISOString()
   showInvoiceModal.value = true
 }
 
-function viewInvoice(inv:any) {
+function viewInvoice(inv: any) {
   printInvoice.value = { ...inv }
   nextTick(() => window.print())
 }
 
-function deleteInvoice(id:any) {
+function deleteInvoice(id: any) {
   if (!confirm('¿Eliminar factura?')) return
-  const idx = burnedInvoices.findIndex((i:any)=>i.id === id)
-  if (idx > -1) burnedInvoices.splice(idx,1)
+  const idx = burnedInvoices.findIndex((i: any) => i.id === id)
+  if (idx > -1) burnedInvoices.splice(idx, 1)
 }
 
-function toggleInvoicePaid(inv:any) {
+function toggleInvoicePaid(inv: any) {
   inv.status = (inv.status === 'Pagado') ? 'Pendiente' : 'Pagado'
-  const idx = burnedInvoices.findIndex((i:any)=>i.id === inv.id)
-  if (idx > -1) burnedInvoices.splice(idx,1, { ...inv })
+  const idx = burnedInvoices.findIndex((i: any) => i.id === inv.id)
+  if (idx > -1) burnedInvoices.splice(idx, 1, { ...inv })
 }
 
 function exportInvoicesCsv() {
   try {
-    const rows = sortedInvoices.value.map((inv:any) => {
+    const rows = sortedInvoices.value.map((inv: any) => {
       return {
         id: inv.id,
         date: inv.createdAt || '',
         client: inv.client,
         vehicle: inv.vehicle || '',
-        items: Array.isArray(inv.items) ? inv.items.map((it:any)=> typeof it === 'string' ? it : (it.description || '') ).join('; ') : String(inv.items || ''),
+        items: Array.isArray(inv.items) ? inv.items.map((it: any) => typeof it === 'string' ? it : (it.description || '')).join('; ') : String(inv.items || ''),
         subtotal: invoiceSubtotal(inv),
         tax: invoiceTax(inv),
         total: invoiceTotal(inv),
@@ -3369,14 +3421,14 @@ function exportInvoicesCsv() {
       }
     })
     const csv = [
-      ['id','date','client','vehicle','items','subtotal','tax','total','status'],
-      ...rows.map((r: any) => [r.id, r.date, `"${(r.client || '').replace(/"/g,'""')}"`, `"${(r.vehicle||'').replace(/"/g,'""')}"`, `"${(r.items||'').replace(/"/g,'""')}"`, r.subtotal, r.tax, r.total, r.status])
+      ['id', 'date', 'client', 'vehicle', 'items', 'subtotal', 'tax', 'total', 'status'],
+      ...rows.map((r: any) => [r.id, r.date, `"${(r.client || '').replace(/"/g, '""')}"`, `"${(r.vehicle || '').replace(/"/g, '""')}"`, `"${(r.items || '').replace(/"/g, '""')}"`, r.subtotal, r.tax, r.total, r.status])
     ].map((r: any) => r.join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `facturas_${new Date().toISOString().slice(0,10)}.csv`
+    a.download = `facturas_${new Date().toISOString().slice(0, 10)}.csv`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3401,13 +3453,13 @@ const baseFilteredInvoices = computed(() => {
     if (dateFrom.value) {
       const invDate = inv.createdAt ? new Date(inv.createdAt) : null
       if (!invDate) return false
-      const from = new Date(dateFrom.value); from.setHours(0,0,0,0)
+      const from = new Date(dateFrom.value); from.setHours(0, 0, 0, 0)
       if (invDate < from) return false
     }
     if (dateTo.value) {
       const invDate = inv.createdAt ? new Date(inv.createdAt) : null
       if (!invDate) return false
-      const to = new Date(dateTo.value); to.setHours(23,59,59,999)
+      const to = new Date(dateTo.value); to.setHours(23, 59, 59, 999)
       if (invDate > to) return false
     }
     if (!q) return true
@@ -3416,7 +3468,7 @@ const baseFilteredInvoices = computed(() => {
     const vehicleMatch = inv.vehicle && String(inv.vehicle).toLowerCase().includes(q)
     let itemsText = ''
     if (Array.isArray(inv.items)) {
-      itemsText = inv.items.map((it:any) => (typeof it === 'string' ? it : (it.description || '')) ).join(' ').toLowerCase()
+      itemsText = inv.items.map((it: any) => (typeof it === 'string' ? it : (it.description || ''))).join(' ').toLowerCase()
     } else {
       itemsText = String(inv.items || '').toLowerCase()
     }
@@ -3457,8 +3509,8 @@ watch([invoiceSearch, invoiceFilterStatus, dateFrom, dateTo], () => {
 })
 
 const selectAllChecked = computed(() => {
-  const ids = paginatedInvoices.value.map((i:any) => i.id)
-  return ids.length > 0 && ids.every((id:any) => selectedInvoices.value.includes(id))
+  const ids = paginatedInvoices.value.map((i: any) => i.id)
+  return ids.length > 0 && ids.every((id: any) => selectedInvoices.value.includes(id))
 })
 
 function setSort(k: string) {
@@ -3468,9 +3520,9 @@ function setSort(k: string) {
 }
 
 function toggleSelectAllVisible() {
-  const ids = paginatedInvoices.value.map((i:any) => i.id)
-  const all = ids.every((id:any) => selectedInvoices.value.includes(id))
-  if (all) selectedInvoices.value = selectedInvoices.value.filter((id:any) => !ids.includes(id))
+  const ids = paginatedInvoices.value.map((i: any) => i.id)
+  const all = ids.every((id: any) => selectedInvoices.value.includes(id))
+  if (all) selectedInvoices.value = selectedInvoices.value.filter((id: any) => !ids.includes(id))
   else {
     const set = new Set(selectedInvoices.value)
     ids.forEach((id: any) => set.add(id))
@@ -3486,35 +3538,35 @@ function toggleSelectInvoice(id: any) {
 
 function bulkMarkPaid() {
   if (!selectedInvoices.value.length) { alert('Ninguna factura seleccionada'); return }
-  selectedInvoices.value.forEach((id:any) => {
-    const inv = burnedInvoices.find((i:any) => i.id === id)
-    if (inv) { inv.status = 'Pagado'; const idx = burnedInvoices.findIndex((i:any) => i.id === id); if (idx > -1) burnedInvoices.splice(idx, 1, { ...inv }) }
+  selectedInvoices.value.forEach((id: any) => {
+    const inv = burnedInvoices.find((i: any) => i.id === id)
+    if (inv) { inv.status = 'Pagado'; const idx = burnedInvoices.findIndex((i: any) => i.id === id); if (idx > -1) burnedInvoices.splice(idx, 1, { ...inv }) }
   })
   selectedInvoices.value = []
 }
 
 function exportSelectedCsv() {
   try {
-    const rows = burnedInvoices.filter((i:any) => selectedInvoices.value.includes(i.id)).map((inv:any) => ({
+    const rows = burnedInvoices.filter((i: any) => selectedInvoices.value.includes(i.id)).map((inv: any) => ({
       id: inv.id,
       date: inv.createdAt || '',
       client: inv.client,
       vehicle: inv.vehicle || '',
-      items: Array.isArray(inv.items) ? inv.items.map((it:any) => typeof it === 'string' ? it : (it.description || '')).join('; ') : String(inv.items || ''),
+      items: Array.isArray(inv.items) ? inv.items.map((it: any) => typeof it === 'string' ? it : (it.description || '')).join('; ') : String(inv.items || ''),
       subtotal: invoiceSubtotal(inv),
       tax: invoiceTax(inv),
       total: invoiceTotal(inv),
       status: inv.status
     }))
     const csv = [
-      ['id','date','client','vehicle','items','subtotal','tax','total','status'],
-      ...rows.map((r:any) => [r.id, r.date, `"${(r.client || '').replace(/"/g,'""')}"`, `"${(r.vehicle||'').replace(/"/g,'""')}"`, `"${(r.items||'').replace(/"/g,'""')}"`, r.subtotal, r.tax, r.total, r.status])
-    ].map((r:any) => r.join(',')).join('\n')
+      ['id', 'date', 'client', 'vehicle', 'items', 'subtotal', 'tax', 'total', 'status'],
+      ...rows.map((r: any) => [r.id, r.date, `"${(r.client || '').replace(/"/g, '""')}"`, `"${(r.vehicle || '').replace(/"/g, '""')}"`, `"${(r.items || '').replace(/"/g, '""')}"`, r.subtotal, r.tax, r.total, r.status])
+    ].map((r: any) => r.join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `facturas_seleccionadas_${new Date().toISOString().slice(0,10)}.csv`
+    a.download = `facturas_seleccionadas_${new Date().toISOString().slice(0, 10)}.csv`
     document.body.appendChild(a)
     a.click()
     a.remove()
@@ -3525,8 +3577,8 @@ function exportSelectedCsv() {
 function bulkDeleteSelected() {
   if (!selectedInvoices.value.length) { alert('Ninguna factura seleccionada'); return }
   if (!confirm(`¿Eliminar ${selectedInvoices.value.length} facturas?`)) return
-  selectedInvoices.value.forEach((id:any) => {
-    const idx = burnedInvoices.findIndex((i:any) => i.id === id)
+  selectedInvoices.value.forEach((id: any) => {
+    const idx = burnedInvoices.findIndex((i: any) => i.id === id)
     if (idx > -1) burnedInvoices.splice(idx, 1)
   })
   selectedInvoices.value = []
@@ -3715,7 +3767,7 @@ const burnedAgenda = reactive(_storedAgenda || [
 watch(burnedAgenda, (newVal) => {
   try {
     localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(newVal))
-  } catch (e) {}
+  } catch (e) { }
 }, { deep: true })
 
 // ---------- Calendar / Agenda helpers ----------
@@ -3747,7 +3799,7 @@ function getOrderPlateOptions(selectedPlate = '') {
   return filtered
 }
 
-const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 
 const monthDays = computed(() => {
   const year = calendarDate.value.getFullYear()
@@ -3824,7 +3876,7 @@ function nextMonth() {
 function openScheduleModal(orderId = null, dateIso = '') {
   scheduleSelectedOrderId.value = orderId || null
   // si no viene fecha, usar fecha actual
-  scheduleDateIso.value = dateIso || (new Date()).toISOString().slice(0,10)
+  scheduleDateIso.value = dateIso || (new Date()).toISOString().slice(0, 10)
   scheduleTime.value = '09:00'
   showScheduleModal.value = true
 }
@@ -3892,7 +3944,7 @@ function autoScheduleOrder(orderId: number | string) {
 function createOrderFromCalendar(dateIso: string, time: string, payload: any) {
   // payload: vehicle, client, serviceType, mechanic, total, diagnosis
   const id = nextOrderId()
-  const todayIso = (new Date()).toISOString().slice(0,10)
+  const todayIso = (new Date()).toISOString().slice(0, 10)
   const orderObj = {
     id,
     vehicle: String(payload.vehicle || ''),
@@ -3909,7 +3961,7 @@ function createOrderFromCalendar(dateIso: string, time: string, payload: any) {
     deliveryDate: dateIso,
     deliveryTime: time
   }
-    burnedOrders.push(orderObj)
+  burnedOrders.push(orderObj)
   // limpiar form
   Object.assign(newCalendarOrder, { vehicle: '', client: '', serviceType: '', mechanic: '', total: 0, diagnosis: '' })
   alert('Orden creada y agendada: #' + id)
@@ -4376,7 +4428,7 @@ function exportOrderPdf(order: any) {
     try {
       const supportsSrcdoc = typeof (iframe as any).srcdoc !== 'undefined'
       if (supportsSrcdoc) {
-        ;(iframe as any).srcdoc = html
+        ; (iframe as any).srcdoc = html
         iframe.onload = onLoaded
       } else {
         const doc = iframe.contentDocument ?? iframe.contentWindow?.document ?? null
@@ -4431,7 +4483,7 @@ function openCreateOrder() {
 function createOrder() {
   if (!newOrder.vehicle || !newOrder.client) { alert('Placa y cliente son requeridos'); return }
   const id = nextOrderId()
-  const todayIso = (new Date()).toISOString().slice(0,10)
+  const todayIso = (new Date()).toISOString().slice(0, 10)
   const created = newOrder.createdDate ? String(newOrder.createdDate) : todayIso
   burnedOrders.push({ id, vehicle: String(newOrder.vehicle), client: String(newOrder.client), status: String(newOrder.status), serviceType: String(newOrder.serviceType), services: Array.isArray(newOrder.services) ? newOrder.services.slice() : [], parts: Array.isArray(newOrder.parts) ? newOrder.parts.slice() : [], mechanic: String(newOrder.mechanic), mileage: newOrder.mileage || 0, total: Number(newOrder.total) || 0, diagnosis: String(newOrder.diagnosis), observations: String(newOrder.observations || ''), garantia: Number(newOrder.garantia) || 0, gases: Boolean(newOrder.gases), escaner: Boolean(newOrder.escaner), createdDate: created, deliveryDate: newOrder.deliveryDate || null })
   // limpiar formulario
@@ -5020,8 +5072,8 @@ const closeShowcaseForm = () => {
 // Computed para validación de formulario
 const isFormValid = computed(() => {
   return productForm.value.name.trim() !== '' &&
-         productForm.value.price > 0 &&
-         productForm.value.category !== ''
+    productForm.value.price > 0 &&
+    productForm.value.category !== ''
 })
 
 const handleMultipleFileSelect = (event: Event) => {
@@ -5096,7 +5148,7 @@ const removeSingleImage = (index: number) => {
 const moveImageLeft = (index: number) => {
   if (index <= 0) return
   const imgs = productForm.value.images
-  ;[imgs[index - 1], imgs[index]] = [imgs[index], imgs[index - 1]]
+    ;[imgs[index - 1], imgs[index]] = [imgs[index], imgs[index - 1]]
   imagePreview.value = imgs[0] || ''
 }
 
@@ -5104,7 +5156,7 @@ const moveImageLeft = (index: number) => {
 const moveImageRight = (index: number) => {
   const imgs = productForm.value.images
   if (index >= imgs.length - 1) return
-  ;[imgs[index + 1], imgs[index]] = [imgs[index], imgs[index + 1]]
+    ;[imgs[index + 1], imgs[index]] = [imgs[index], imgs[index + 1]]
   imagePreview.value = imgs[0] || ''
 }
 
@@ -5257,21 +5309,25 @@ const closeCategoryForm = () => {
   margin-bottom: 0.25rem;
   margin-top: 1.5rem;
 }
+
 .panel-admin-icon {
   font-size: 2.2rem;
   filter: drop-shadow(0 1px 2px #2228);
 }
+
 .panel-admin-title {
   letter-spacing: -1px;
   color: #fff;
   text-shadow: 0 1px 4px #0008;
 }
+
 .panel-admin-subtitle {
   text-align: center;
   color: #3b82f6;
   font-size: 1rem;
   margin-bottom: 1.5rem;
 }
+
 .admin-dashboard {
   min-height: 100vh;
   background: var(--brand-gradient);
@@ -5377,6 +5433,7 @@ const closeCategoryForm = () => {
   justify-content: center !important;
   gap: 6px !important;
 }
+
 .actions button,
 .actions .btn {
   display: inline-flex !important;
@@ -5397,7 +5454,11 @@ const closeCategoryForm = () => {
   padding: 0 8px;
   font-size: 0.72rem;
 }
-.order-action-btn svg { width: 12px; height: 12px; }
+
+.order-action-btn svg {
+  width: 12px;
+  height: 12px;
+}
 
 .tabs {
   display: flex;
@@ -5470,18 +5531,22 @@ const closeCategoryForm = () => {
   padding: 9px 12px;
   text-align: center;
 }
+
 .vehicles-table.compact th {
   font-size: 14px;
   font-weight: 700;
   color: var(--brand-accent-alt);
 }
+
 .vehicles-table.compact td {
   color: var(--brand-primary-contrast);
 }
+
 .vehicles-table.compact td .client-notes {
   font-size: 13px;
   color: var(--brand-accent-alt);
 }
+
 .vehicles-table.compact td[data-label="Km Actual"],
 .vehicles-table.compact td[data-label="Próximo Servicio (km)"] {
   text-align: right;
@@ -5493,6 +5558,7 @@ const closeCategoryForm = () => {
   max-width: auto;
   margin: 0 auto;
 }
+
 .header-search-input {
   max-width: 340px;
   min-width: 180px;
@@ -5509,44 +5575,54 @@ const closeCategoryForm = () => {
   -webkit-overflow-scrolling: touch;
 }
 
-.header-controls > .form-input,
-.header-controls > input[type="date"],
-.header-controls > select {
+.header-controls>.form-input,
+.header-controls>input[type="date"],
+.header-controls>select {
   flex: 0 0 auto;
   min-width: 110px;
   max-width: 260px;
 }
 
-.header-controls > .header-action {
+.header-controls>.header-action {
   flex: 0 0 auto;
   min-width: 60px;
   padding: 6px 10px;
   white-space: nowrap;
 }
 
-.header-controls > .header-search-input {
+.header-controls>.header-search-input {
   flex: 0 1 260px;
   min-width: 140px;
   max-width: 340px;
 }
 
-.header-controls::-webkit-scrollbar { height: 8px }
-.header-controls::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 6px }
+.header-controls::-webkit-scrollbar {
+  height: 8px
+}
+
+.header-controls::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 6px
+}
+
 .invoices-table.compact th,
 .invoices-table.compact td {
   font-size: 14px;
   padding: 10px 12px;
   vertical-align: middle;
 }
+
 .invoices-table.compact th {
   font-weight: 700;
   color: var(--brand-accent-alt);
   text-align: center;
 }
+
 .invoices-table.compact td {
   color: var(--brand-primary-contrast);
   text-align: center;
 }
+
 .invoices-table.compact td[data-label="Subtotal"],
 .invoices-table.compact td[data-label="IVA"],
 .invoices-table.compact td[data-label="Total"] {
@@ -5563,14 +5639,24 @@ const closeCategoryForm = () => {
   align-items: center;
   white-space: nowrap;
 }
-.table-footer .form-input { width: auto; padding:6px 8px }
+
+.table-footer .form-input {
+  width: auto;
+  padding: 6px 8px
+}
 
 @media (max-width: 880px) {
+
   .invoices-table.compact thead th:nth-child(n+6):not(:last-child),
   .invoices-table.compact td:nth-child(n+6):not(:last-child) {
     display: none;
   }
-  .invoices-table.compact td:first-child { position: sticky; left: 0; background: inherit }
+
+  .invoices-table.compact td:first-child {
+    position: sticky;
+    left: 0;
+    background: inherit
+  }
 }
 
 
@@ -5635,7 +5721,7 @@ const closeCategoryForm = () => {
   background: var(--brand-bg-end);
   font-size: 1rem;
   color: var(--brand-primary-contrast);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
   outline: none;
 }
@@ -5901,12 +5987,14 @@ const closeCategoryForm = () => {
 }
 
 /* Loading and Error States */
-.loading-state, .error-state {
+.loading-state,
+.error-state {
   text-align: center;
   padding: 60px 20px;
 }
 
-.loading-state p, .error-state p {
+.loading-state p,
+.error-state p {
   margin-top: 20px;
   font-size: 1rem;
   color: var(--brand-accent-alt);
@@ -6026,9 +6114,11 @@ const closeCategoryForm = () => {
   0% {
     transform: scale(0);
   }
+
   50% {
     transform: scale(1.2);
   }
+
   100% {
     transform: scale(1);
   }
@@ -6097,7 +6187,8 @@ const closeCategoryForm = () => {
 }
 
 .btn-danger {
-  background: rgba(37, 99, 235, 0.15); /* azul */
+  background: rgba(37, 99, 235, 0.15);
+  /* azul */
   color: #2563eb;
   border: 1px solid rgba(37, 99, 235, 0.25);
 }
@@ -6259,7 +6350,8 @@ const closeCategoryForm = () => {
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(37, 99, 235, 0.9); /* azul */
+  background: rgba(37, 99, 235, 0.9);
+  /* azul */
   color: white;
   border: none;
   border-radius: 50%;
@@ -6307,7 +6399,8 @@ const closeCategoryForm = () => {
   position: absolute;
   top: 5px;
   right: 5px;
-  background: rgba(37, 99, 235, 0.9); /* azul */
+  background: rgba(37, 99, 235, 0.9);
+  /* azul */
   color: white;
   border: none;
   border-radius: 50%;
@@ -6351,7 +6444,7 @@ const closeCategoryForm = () => {
 }
 
 .img-action-btn {
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.55);
   color: #fff;
   border: none;
   padding: 2px 6px;
@@ -6363,7 +6456,7 @@ const closeCategoryForm = () => {
 }
 
 .img-action-btn:hover:not(:disabled) {
-  background: rgba(0,0,0,0.8);
+  background: rgba(0, 0, 0, 0.8);
   transform: translateY(-1px);
 }
 
@@ -6578,15 +6671,21 @@ const closeCategoryForm = () => {
 
 /* Ajustes específicos para filas de órdenes */
 @media (max-width: 1200px) {
-  .orders-row { grid-template-columns: repeat(3, 1fr); }
+  .orders-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @media (max-width: 992px) {
-  .orders-row { grid-template-columns: repeat(2, 1fr); }
+  .orders-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 480px) {
-  .orders-row { grid-template-columns: 1fr; }
+  .orders-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Estilos para la sección de ventas */
@@ -6597,46 +6696,68 @@ const closeCategoryForm = () => {
   gap: 12px;
   margin-top: 12px;
 }
+
 .enhanced-bar-row {
   display: flex;
   gap: 12px;
   align-items: center;
 }
+
 .bar-left {
   flex: 0 0 38%;
   min-width: 160px;
 }
+
 .bar-label {
   font-weight: 700;
   color: var(--brand-primary-contrast);
   font-size: 0.95rem;
 }
+
 .bar-meta {
   color: var(--brand-accent-alt);
   font-size: 0.85rem;
   margin-top: 4px;
 }
+
 .bar-track {
   flex: 1 1 auto;
   height: 14px;
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.03);
+  border: 1px solid rgba(255, 255, 255, 0.03);
 }
+
 .bar-fill {
   height: 100%;
   border-radius: 8px;
   border-radius: 8px;
   transition: width 0.5s ease;
-  box-shadow: inset 0 -2px 6px rgba(0,0,0,0.18);
+  box-shadow: inset 0 -2px 6px rgba(0, 0, 0, 0.18);
 }
-.bar-number { min-width: 40px; text-align: right; font-weight: 800; color: var(--brand-primary-contrast); margin-left: 10px; }
+
+.bar-number {
+  min-width: 40px;
+  text-align: right;
+  font-weight: 800;
+  color: var(--brand-primary-contrast);
+  margin-left: 10px;
+}
 
 /* Bottom row layout: services left, tech right */
-.bottom-row { display: flex; gap: 18px; }
-.card.services-card { flex: 1 1 60%; }
-.card.tech-card { flex: 0 0 40%; }
+.bottom-row {
+  display: flex;
+  gap: 18px;
+}
+
+.card.services-card {
+  flex: 1 1 60%;
+}
+
+.card.tech-card {
+  flex: 0 0 40%;
+}
 
 /* Tech table polished styling */
 .tech-table thead th {
@@ -6647,44 +6768,165 @@ const closeCategoryForm = () => {
   text-align: left;
   border-bottom: 1px solid var(--brand-border);
 }
+
 .tech-table tbody tr {
   background: transparent;
   color: var(--brand-accent-alt);
-  border-bottom: 1px solid rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
-.tech-table tbody tr:hover { background: rgba(255,255,255,0.02); }
-.tech-table tbody td { padding: 12px; vertical-align: middle; }
-.tech-table .tech-income { text-align: right; font-weight: 700; color: var(--brand-primary-contrast); }
-.tech-table .tech-name { font-weight: 700; color: var(--brand-primary-contrast); }
-.tech-card { background: var(--brand-bg-end); border: 1px solid var(--brand-border); }
+
+.tech-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.tech-table tbody td {
+  padding: 12px;
+  vertical-align: middle;
+}
+
+.tech-table .tech-income {
+  text-align: right;
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+}
+
+.tech-table .tech-name {
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+}
+
+.tech-card {
+  background: var(--brand-bg-end);
+  border: 1px solid var(--brand-border);
+}
+
 .donut-card .donut-area,
-.donut-card .donut-wrap { display: flex; align-items: center; gap: 12px; }
-.donut-card .donut-wrap { justify-content: center; }
-.donut-legend { min-width: 160px; }
-.donut-legend .status-list { list-style:none; padding:0; margin:0; }
-.donut-legend li { display:flex; align-items:center; gap:8px; padding:6px 0; color:var(--brand-accent-alt); }
-.legend-color { width:12px; height:12px; border-radius:3px; display:inline-block; }
-.legend-text { font-weight:600; margin-left:6px; }
-.legend-value { margin-left:auto; font-weight:800; color:var(--brand-primary-contrast); }
+.donut-card .donut-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.donut-card .donut-wrap {
+  justify-content: center;
+}
+
+.donut-legend {
+  min-width: 160px;
+}
+
+.donut-legend .status-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.donut-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  color: var(--brand-accent-alt);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.legend-text {
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+.legend-value {
+  margin-left: auto;
+  font-weight: 800;
+  color: var(--brand-primary-contrast);
+}
 
 /* Small cards on the right */
-.small-cards .chart-card { margin-bottom: 12px; }
-.upcoming-card h3 { background: linear-gradient(90deg,#1e3a8a,#2563eb); color: #fff; padding: 8px; border-radius: 8px; }
-.alerts-card h3 { background: linear-gradient(90deg,#b91c1c,#ef4444); color: #fff; padding: 8px; border-radius: 8px; }
-.upcoming-list { list-style:none; padding:8px 12px; margin:0; color:var(--brand-accent-alt); }
+.small-cards .chart-card {
+  margin-bottom: 12px;
+}
+
+.upcoming-card h3 {
+  background: linear-gradient(90deg, #1e3a8a, #2563eb);
+  color: #fff;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.alerts-card h3 {
+  background: linear-gradient(90deg, #b91c1c, #ef4444);
+  color: #fff;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.upcoming-list {
+  list-style: none;
+  padding: 8px 12px;
+  margin: 0;
+  color: var(--brand-accent-alt);
+}
 
 /* Financial row */
-.financial-row { display:flex; gap:18px; margin-top:18px; align-items:flex-start; }
-.financial-row .card.wide { flex: 1 1 50%; }
-.financial-row .card.small { flex: 0 0 50%; }
-.sold-count { font-weight: 600; margin-right: 6px; color: var(--brand-accent-alt); }
-.pct { color: var(--brand-accent-alt); font-weight: 600; }
+.financial-row {
+  display: flex;
+  gap: 18px;
+  margin-top: 18px;
+  align-items: flex-start;
+}
+
+.financial-row .card.wide {
+  flex: 1 1 50%;
+}
+
+.financial-row .card.small {
+  flex: 0 0 50%;
+}
+
+.sold-count {
+  font-weight: 600;
+  margin-right: 6px;
+  color: var(--brand-accent-alt);
+}
+
+.pct {
+  color: var(--brand-accent-alt);
+  font-weight: 600;
+}
 
 /* Technicians performance bars */
-.tech-table td.tech-orders { width: 40%; text-align: left; padding-left: 12px; }
-.orders-count { font-weight: 700; color: var(--brand-primary-contrast); margin-bottom: 6px; }
-.orders-bar { height: 10px; background: rgba(255,255,255,0.03); border-radius: 6px; overflow: hidden; border: 1px solid rgba(255,255,255,0.03); }
-.orders-bar-fill { height: 100%; background: linear-gradient(90deg,#16a34a,#86efac); transition: width 0.4s ease; box-shadow: inset 0 -1px 3px rgba(0,0,0,0.18); }
+.tech-table td.tech-orders {
+  width: 40%;
+  text-align: left;
+  padding-left: 12px;
+}
+
+.orders-count {
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+  margin-bottom: 6px;
+}
+
+.orders-bar {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.orders-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #16a34a, #86efac);
+  transition: width 0.4s ease;
+  box-shadow: inset 0 -1px 3px rgba(0, 0, 0, 0.18);
+}
 
 .sales-stats {
   display: grid;
@@ -6795,7 +7037,8 @@ const closeCategoryForm = () => {
 }
 
 .status-badge.cancelled {
-  background: rgba(37, 99, 235, 0.15); /* azul */
+  background: rgba(37, 99, 235, 0.15);
+  /* azul */
   color: #2563eb;
   border: 1px solid rgba(37, 99, 235, 0.25);
 }
@@ -7135,7 +7378,8 @@ const closeCategoryForm = () => {
 }
 
 .showcase-status.unavailable {
-  background: rgba(37, 99, 235, 0.15); /* azul */
+  background: rgba(37, 99, 235, 0.15);
+  /* azul */
   color: #2563eb;
   border: 1px solid rgba(37, 99, 235, 0.25);
 }
@@ -7502,6 +7746,7 @@ const closeCategoryForm = () => {
   align-items: start;
   padding-bottom: 6px;
 }
+
 .orders-row .pro-card {
   width: 100%;
   min-width: 0;
@@ -7634,6 +7879,7 @@ const closeCategoryForm = () => {
   display: block;
   padding: 4px 0;
 }
+
 .info-row.stacked .label {
   display: block;
   margin-bottom: 6px;
@@ -7641,6 +7887,7 @@ const closeCategoryForm = () => {
   font-size: 0.95rem;
   color: var(--brand-accent-alt);
 }
+
 .type-list-ul {
   margin: 0;
   padding: 0;
@@ -7649,8 +7896,9 @@ const closeCategoryForm = () => {
   gap: 6px;
   list-style: none;
 }
+
 .type-item {
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--brand-accent-alt);
   padding: 6px 9px;
   border-radius: 999px;
@@ -7781,7 +8029,7 @@ const closeCategoryForm = () => {
 .status-badge.recepcion {
   background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
   color: white;
-  box-shadow: 0 2px 8px rgba(59,130,246,0.25);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
 }
 
 /* Ajuste compacto para el estado 'Pendiente' (columna más estrecha) */
@@ -7817,13 +8065,24 @@ const closeCategoryForm = () => {
 .status-badge.diagnostico {
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: white;
-  box-shadow: 0 2px 8px rgba(124,58,237,0.25);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.25);
 }
 
-.order-card.recepcion { border-left-color: #60a5fa; }
-.order-card.diagnostico { border-left-color: #7c3aed; }
-.order-card.en-proceso { border-left-color: #f59e0b; }
-.order-card.terminado { border-left-color: #16a34a; }
+.order-card.recepcion {
+  border-left-color: #60a5fa;
+}
+
+.order-card.diagnostico {
+  border-left-color: #7c3aed;
+}
+
+.order-card.en-proceso {
+  border-left-color: #f59e0b;
+}
+
+.order-card.terminado {
+  border-left-color: #16a34a;
+}
 
 .order-card {
   border-left: 1px solid rgba(56, 189, 248, 0.32);
@@ -7999,9 +8258,17 @@ const closeCategoryForm = () => {
   height: 18px;
 }
 
-.order-info-icon.blue { color: #60a5fa; }
-.order-info-icon.green { color: #34d399; }
-.order-info-icon.orange { color: #f59e0b; }
+.order-info-icon.blue {
+  color: #60a5fa;
+}
+
+.order-info-icon.green {
+  color: #34d399;
+}
+
+.order-info-icon.orange {
+  color: #f59e0b;
+}
 
 .order-info-label {
   display: block;
@@ -8157,8 +8424,13 @@ const closeCategoryForm = () => {
   height: 18px;
 }
 
-.order-extra-icon.purple { color: #8b5cf6; }
-.order-extra-icon.blue { color: #38bdf8; }
+.order-extra-icon.purple {
+  color: #8b5cf6;
+}
+
+.order-extra-icon.blue {
+  color: #38bdf8;
+}
 
 .order-extra-label {
   color: #cbd5e1;
@@ -8170,27 +8442,33 @@ const closeCategoryForm = () => {
 }
 
 .flag-chip {
-  background: rgba(96,165,250,0.06);
-  border: 1px solid rgba(96,165,250,0.12);
+  background: rgba(96, 165, 250, 0.06);
+  border: 1px solid rgba(96, 165, 250, 0.12);
   color: #cfe8ff;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 0 8px rgba(96,165,250,0.03);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02), 0 0 8px rgba(96, 165, 250, 0.03);
 }
 
 .flag-gases {
-  background: rgba(245,158,11,0.06);
-  border: 1px solid rgba(245,158,11,0.12);
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.12);
   color: #ffdc9f;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 0 8px rgba(245,158,11,0.03);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02), 0 0 8px rgba(245, 158, 11, 0.03);
 }
-.flag-gases .type-chip-dot { color: #f59e0b; }
+
+.flag-gases .type-chip-dot {
+  color: #f59e0b;
+}
 
 .flag-escaner {
-  background: rgba(16,185,129,0.06);
-  border: 1px solid rgba(16,185,129,0.10);
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.10);
   color: #c8f8e6;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 0 8px rgba(16,185,129,0.03);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02), 0 0 8px rgba(16, 185, 129, 0.03);
 }
-.flag-escaner .type-chip-dot { color: #10b981; }
+
+.flag-escaner .type-chip-dot {
+  color: #10b981;
+}
 
 .order-total-bar {
   display: flex;
@@ -8244,8 +8522,17 @@ const closeCategoryForm = () => {
   box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.16), 0 0 18px rgba(56, 189, 248, 0.18);
 }
 
-.card-actions { display:flex; gap:8px; align-items:center; }
-.empty { color: var(--brand-accent-alt); padding: 18px; text-align: center; }
+.card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.empty {
+  color: var(--brand-accent-alt);
+  padding: 18px;
+  text-align: center;
+}
 
 .price-badge {
   background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
@@ -8512,6 +8799,7 @@ const closeCategoryForm = () => {
 
 /* Media queries para responsividad */
 @media (max-width: 1200px) {
+
   .clients-grid,
   .vehicles-grid,
   .invoices-grid {
@@ -8528,6 +8816,7 @@ const closeCategoryForm = () => {
 }
 
 @media (max-width: 768px) {
+
   .clients-grid,
   .vehicles-grid,
   .invoices-grid,
@@ -8584,11 +8873,11 @@ const closeCategoryForm = () => {
 .simple-table {
   width: 100%;
   border-collapse: collapse;
-  background: linear-gradient(180deg, var(--brand-bg-end) 0%, rgba(255,255,255,0.01) 100%);
+  background: linear-gradient(180deg, var(--brand-bg-end) 0%, rgba(255, 255, 255, 0.01) 100%);
   border: 1px solid var(--brand-border);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(2,6,23,0.45);
+  box-shadow: 0 6px 20px rgba(2, 6, 23, 0.45);
 }
 
 .simple-table thead th {
@@ -8610,11 +8899,11 @@ const closeCategoryForm = () => {
 }
 
 .simple-table tbody tr:nth-child(even) {
-  background: rgba(255,255,255,0.01);
+  background: rgba(255, 255, 255, 0.01);
 }
 
 .simple-table tbody tr:hover {
-  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.03));
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.03));
 }
 
 .simple-table td .client-name {
@@ -8651,12 +8940,25 @@ const closeCategoryForm = () => {
   .simple-table thead th {
     display: none;
   }
-  .simple-table, .simple-table tbody, .simple-table tr, .simple-table td {
+
+  .simple-table,
+  .simple-table tbody,
+  .simple-table tr,
+  .simple-table td {
     display: block;
     width: 100%;
   }
-  .simple-table tr { margin-bottom: 12px; border-bottom: 1px solid var(--brand-border); }
-  .simple-table td { padding: 12px; text-align: center; }
+
+  .simple-table tr {
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--brand-border);
+  }
+
+  .simple-table td {
+    padding: 12px;
+    text-align: center;
+  }
+
   .simple-table td::before {
     content: attr(data-label);
     display: block;
@@ -8666,7 +8968,11 @@ const closeCategoryForm = () => {
     font-size: 0.8rem;
     text-align: center;
   }
-  .simple-table td .actions { justify-content: flex-start; margin-top: 8px; }
+
+  .simple-table td .actions {
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
 }
 
 /* Ajustes de ancho y recorte para columna Notas / Nombre / Fecha */
@@ -8688,7 +8994,9 @@ const closeCategoryForm = () => {
 }
 
 /* Asegurar que la columna acciones tenga espacio para botones */
-.simple-table td[data-label="Acciones"] .actions { gap:6px; }
+.simple-table td[data-label="Acciones"] .actions {
+  gap: 6px;
+}
 
 .simple-table td[data-label="Nombre"] {
   /* dar un poco más de espacio al nombre */
@@ -8705,10 +9013,12 @@ const closeCategoryForm = () => {
   display: grid;
   gap: 18px;
 }
+
 .kpi-row {
   display: flex;
   gap: 12px;
 }
+
 .kpi-card {
   flex: 1 1 0;
   background: var(--brand-bg-end);
@@ -8717,36 +9027,164 @@ const closeCategoryForm = () => {
   padding: 12px;
   text-align: center;
 }
-.kpi-label { color: var(--brand-accent-alt); font-size: 0.85rem; }
-.kpi-value { font-weight: 800; font-size: 1.25rem; color: var(--brand-success); margin-top: 6px; }
 
-.charts-row { display: flex; gap: 16px; align-items: stretch; }
-.chart-card { background: var(--brand-bg-end); border: 1px solid var(--brand-border); border-radius: 10px; padding: 12px; flex: 1; box-sizing: border-box; }
-.chart-card.small { max-width: 320px; }
-.chart-card.donut-card { flex: 1 1 70%; max-width: 59%; }
-.right-column { display:flex; flex-direction:column; gap:12px; flex: 0 0 40%; max-width: 50%; box-sizing: border-box; }
-.line-chart { width:100%; height:120px; display:block; }
-.donut { width:120px; height:120px; display:block; margin: 6px auto; }
-.donut-bg { stroke:#e6eef8; }
-.donut-complete { transform: rotate(-90deg); transform-origin: center; stroke-linecap: round; }
-.donut-text { font-size: 0.75rem; fill: var(--brand-primary-contrast); }
-.status-list, .upcoming-list { list-style:none; padding:0; margin:0; color:var(--brand-accent-alt); }
-.bars { padding-top:6px; }
-.bar-row { display:flex; align-items:center; gap:12px; margin:6px 0; }
-.bar-label { width:35%; color:var(--brand-accent-alt); font-size:0.95rem; }
-.bar { height:20px; background: linear-gradient(90deg,#60a5fa,#2563eb); border-radius:6px; color:#fff; padding:2px 8px; font-size:0.85rem; display:flex; align-items:center; justify-content:flex-end; }
-.card.wide { flex: 1 1 60%; }
-.card.small { flex: 1 1 30%; }
-.mini-chart .rev { background: linear-gradient(90deg, #10b981, #059669); }
-.mini-chart .cost { background: linear-gradient(90deg, #f97316, #f43f5e); }
-.table.small-table { width:100%; border-collapse: collapse; }
-.table.small-table th, .table.small-table td { padding:8px 10px; border-bottom:1px solid var(--brand-border); text-align:left; }
+.kpi-label {
+  color: var(--brand-accent-alt);
+  font-size: 0.85rem;
+}
+
+.kpi-value {
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--brand-success);
+  margin-top: 6px;
+}
+
+.charts-row {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.chart-card {
+  background: var(--brand-bg-end);
+  border: 1px solid var(--brand-border);
+  border-radius: 10px;
+  padding: 12px;
+  flex: 1;
+  box-sizing: border-box;
+}
+
+.chart-card.small {
+  max-width: 320px;
+}
+
+.chart-card.donut-card {
+  flex: 1 1 70%;
+  max-width: 59%;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 0 0 40%;
+  max-width: 50%;
+  box-sizing: border-box;
+}
+
+.line-chart {
+  width: 100%;
+  height: 120px;
+  display: block;
+}
+
+.donut {
+  width: 120px;
+  height: 120px;
+  display: block;
+  margin: 6px auto;
+}
+
+.donut-bg {
+  stroke: #e6eef8;
+}
+
+.donut-complete {
+  transform: rotate(-90deg);
+  transform-origin: center;
+  stroke-linecap: round;
+}
+
+.donut-text {
+  font-size: 0.75rem;
+  fill: var(--brand-primary-contrast);
+}
+
+.status-list,
+.upcoming-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: var(--brand-accent-alt);
+}
+
+.bars {
+  padding-top: 6px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0;
+}
+
+.bar-label {
+  width: 35%;
+  color: var(--brand-accent-alt);
+  font-size: 0.95rem;
+}
+
+.bar {
+  height: 20px;
+  background: linear-gradient(90deg, #60a5fa, #2563eb);
+  border-radius: 6px;
+  color: #fff;
+  padding: 2px 8px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.card.wide {
+  flex: 1 1 60%;
+}
+
+.card.small {
+  flex: 1 1 30%;
+}
+
+.mini-chart .rev {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.mini-chart .cost {
+  background: linear-gradient(90deg, #f97316, #f43f5e);
+}
+
+.table.small-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table.small-table th,
+.table.small-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--brand-border);
+  text-align: left;
+}
 
 @media (max-width: 900px) {
-  .charts-row { flex-direction: column; }
-  .right-column { flex: 1 1 100%; max-width: 100%; width: 100%; }
-  .chart-card.donut-card { flex: 1 1 100%; max-width: 100%; }
-  .kpi-row { flex-direction: column; }
+  .charts-row {
+    flex-direction: column;
+  }
+
+  .right-column {
+    flex: 1 1 100%;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .chart-card.donut-card {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+
+  .kpi-row {
+    flex-direction: column;
+  }
 }
 
 /* ApexCharts tweaks for dark theme and better contrast */
@@ -8755,20 +9193,42 @@ const closeCategoryForm = () => {
 .chart-card .apexcharts-canvas svg {
   background: transparent !important;
 }
+
 .apexcharts-tooltip {
-  background: rgba(10,10,10,0.92) !important;
+  background: rgba(10, 10, 10, 0.92) !important;
   color: #fff !important;
   border-radius: 8px !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.6) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
   padding: 8px 10px !important;
 }
-.apexcharts-tooltip .apexcharts-tooltip-title { color: #fff !important; font-weight: 700; }
-.apexcharts-legend-text, .apexcharts-legend-marker {
+
+.apexcharts-tooltip .apexcharts-tooltip-title {
+  color: #fff !important;
+  font-weight: 700;
+}
+
+.apexcharts-legend-text,
+.apexcharts-legend-marker {
   fill: var(--brand-accent-alt) !important;
   color: var(--brand-accent-alt) !important;
 }
-.chart-legend .legend-item { color: var(--brand-accent-alt); font-size: 0.85rem; padding: 4px 8px; border-radius: 6px; background: rgba(255,255,255,0.02); display:inline-block; margin-right:6px; }
-.donut-wrap { display:flex; justify-content:center; align-items:center; padding:8px 0; }
+
+.chart-legend .legend-item {
+  color: var(--brand-accent-alt);
+  font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.donut-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0;
+}
 
 /* Mini chart contrast and labels */
 .mini-chart .rev,
@@ -8781,7 +9241,9 @@ const closeCategoryForm = () => {
 }
 
 /* Force apexcharts legend text color in dark theme */
-.apexcharts-legend .apexcharts-legend-text { fill: var(--brand-accent-alt) !important; }
+.apexcharts-legend .apexcharts-legend-text {
+  fill: var(--brand-accent-alt) !important;
+}
 
 /* Chips para lista de servicios */
 .chip {
@@ -8795,6 +9257,7 @@ const closeCategoryForm = () => {
   font-size: 0.95rem;
   border: 1px solid rgba(15, 23, 42, 0.06);
 }
+
 .chip .btn,
 .chip .btn-sm {
   padding: 0 6px;
@@ -8809,52 +9272,220 @@ const closeCategoryForm = () => {
   cursor: pointer;
   color: #0f172a;
 }
+
 .chip .btn:hover,
-.chip .btn-sm:hover { background: rgba(0,0,0,0.06); }
-.chip small { color: var(--brand-accent-alt); margin-left: 6px; font-size: 0.85rem; }
+.chip .btn-sm:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.chip small {
+  color: var(--brand-accent-alt);
+  margin-left: 6px;
+  font-size: 0.85rem;
+}
 
 /* Ajustes para el input+botón de agregar servicio dentro del modal */
-.form-group .form-input { min-width: 0; }
-.form-group .form-input[placeholder] { color: inherit; }
-.form-group > div[style] { align-items: center; }
+.form-group .form-input {
+  min-width: 0;
+}
 
+.form-group .form-input[placeholder] {
+  color: inherit;
+}
+
+.form-group>div[style] {
+  align-items: center;
+}
 </style>
 
 <style>
 /* Estilos para impresión: mostrar sólo .print-area durante print */
-.print-area { display: none; }
+.print-area {
+  display: none;
+}
+
 @media print {
 
   /* Ocultar todo el contenido del documento para evitar que elementos invisibles sigan ocupando espacio */
-  body * { display: none !important; }
+  body * {
+    display: none !important;
+  }
 
   /* Mostrar únicamente la zona preparada para imprimir */
-  .print-area { display: block !important; position: relative !important; left: auto !important; top: auto !important; width: 100% !important; background: #fff !important; color: #000 !important; padding: 0 !important; margin: 0 auto !important; }
-  .print-area * { display: block !important; }
+  .print-area {
+    display: block !important;
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    background: #fff !important;
+    color: #000 !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+  }
+
+  .print-area * {
+    display: block !important;
+  }
 
   /* Estilos de la tarjeta dentro del área de impresión */
-  .service-order-card { max-width: 860px; margin: 0 auto; padding: 0; font-size: 12pt; background: #fff !important; border: 1px solid #d8deea; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 32px rgba(15, 23, 42, 0.12); }
-  .service-order-card { position: relative; }
-  .so-topbar { display:flex; justify-content:space-between; align-items:stretch; gap:16px; padding: 22px 24px; background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 48%, #38bdf8 100%); color:#fff; }
-  .so-brand { display:flex; align-items:center; gap:16px; min-width:0; }
-  .so-logo { width: 72px; height: auto; flex:0 0 auto; filter: drop-shadow(0 6px 18px rgba(0,0,0,0.22)); }
-  .so-brand-copy { min-width:0; }
-  .so-kicker { margin:0 0 4px 0; font-size: 9pt; letter-spacing: .18em; text-transform: uppercase; opacity:.82; }
-  .so-brand-copy h1 { margin:0; line-height:1.02; font-size: 22pt; }
-  .so-subtitle { margin:4px 0 0 0; font-size: 10pt; opacity:.84; }
-  .so-number { align-self:center; text-align:right; background: rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); padding: 12px 16px; border-radius: 14px; min-width:132px; }
-  .so-number span { display:block; font-size:9pt; text-transform:uppercase; letter-spacing:.14em; opacity:.78; }
-  .so-number strong { display:block; margin-top:4px; font-size:20pt; line-height:1; }
-  .so-meta-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; padding: 18px 24px 0 24px; }
-  .so-meta-card { border:1px solid rgba(15, 23, 42, 0.03); background:#ffffff; border-radius:14px; padding:12px 14px; }
-  .so-meta-card span { display:block; font-size:9pt; text-transform:uppercase; letter-spacing:.06em; color:#9ca3af; margin-bottom:6px; }
-  .so-meta-card strong { display:block; font-size:11pt; color:#111827; line-height:1.25; }
-  .so-section-grid { display:grid; grid-template-columns: 1.4fr 1fr; gap:12px; padding: 18px 24px 24px 24px; }
-  .so-panel { border:1px solid #e2e8f0; border-radius:16px; background:#fff; overflow:hidden; }
-  .so-panel-wide { grid-column: 1 / -1; }
-  .so-panel-title { padding: 11px 14px; background:#f1f5f9; color:#0f172a; font-size:9.5pt; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
-  .so-panel-body { padding: 14px; font-size: 12pt; line-height: 1.6; color:#1e293b; white-space: pre-wrap; }
+  .service-order-card {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0;
+    font-size: 12pt;
+    background: #fff !important;
+    border: 1px solid #d8deea;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 32px rgba(15, 23, 42, 0.12);
+  }
 
-  @page { margin: 12mm 10mm; }
+  .service-order-card {
+    position: relative;
+  }
+
+  .so-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 16px;
+    padding: 22px 24px;
+    background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 48%, #38bdf8 100%);
+    color: #fff;
+  }
+
+  .so-brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .so-logo {
+    width: 72px;
+    height: auto;
+    flex: 0 0 auto;
+    filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.22));
+  }
+
+  .so-brand-copy {
+    min-width: 0;
+  }
+
+  .so-kicker {
+    margin: 0 0 4px 0;
+    font-size: 9pt;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    opacity: .82;
+  }
+
+  .so-brand-copy h1 {
+    margin: 0;
+    line-height: 1.02;
+    font-size: 22pt;
+  }
+
+  .so-subtitle {
+    margin: 4px 0 0 0;
+    font-size: 10pt;
+    opacity: .84;
+  }
+
+  .so-number {
+    align-self: center;
+    text-align: right;
+    background: rgba(255, 255, 255, .14);
+    border: 1px solid rgba(255, 255, 255, .22);
+    padding: 12px 16px;
+    border-radius: 14px;
+    min-width: 132px;
+  }
+
+  .so-number span {
+    display: block;
+    font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    opacity: .78;
+  }
+
+  .so-number strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 20pt;
+    line-height: 1;
+  }
+
+  .so-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding: 18px 24px 0 24px;
+  }
+
+  .so-meta-card {
+    border: 1px solid rgba(15, 23, 42, 0.03);
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+
+  .so-meta-card span {
+    display: block;
+    font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #9ca3af;
+    margin-bottom: 6px;
+  }
+
+  .so-meta-card strong {
+    display: block;
+    font-size: 11pt;
+    color: #111827;
+    line-height: 1.25;
+  }
+
+  .so-section-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 12px;
+    padding: 18px 24px 24px 24px;
+  }
+
+  .so-panel {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .so-panel-wide {
+    grid-column: 1 / -1;
+  }
+
+  .so-panel-title {
+    padding: 11px 14px;
+    background: #f1f5f9;
+    color: #0f172a;
+    font-size: 9.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  .so-panel-body {
+    padding: 14px;
+    font-size: 12pt;
+    line-height: 1.6;
+    color: #1e293b;
+    white-space: pre-wrap;
+  }
+
+  @page {
+    margin: 12mm 10mm;
+  }
 }
 </style>
