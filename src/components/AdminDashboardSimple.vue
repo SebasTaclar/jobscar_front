@@ -230,7 +230,7 @@
               <td data-label="Km Actual">{{ typeof v.km === 'number' ? v.km.toLocaleString() + '' : (v.km || '-') }}
               </td>
               <td data-label="Último Servicio">{{ v.lastServiceDate ? formatShortDate(new Date(v.lastServiceDate)) : '-'
-                }}</td>
+              }}</td>
               <td data-label="Observaciones"><span class="client-notes">{{ v.observations || '-' }}</span></td>
               <td data-label="Acciones">
                 <div class="actions" style="display:flex;gap:6px;justify-content:center;">
@@ -410,7 +410,7 @@
                 </div>
                 <span class="order-info-label">Estado</span>
                 <span class="status-badge order-status-pill" :class="statusClass(order.status)">{{ order.status
-                  }}</span>
+                }}</span>
               </div>
             </div>
 
@@ -504,13 +504,13 @@
               <td data-label="Placa">{{ order.vehicle || '-' }}</td>
               <td data-label="Cliente">{{ order.client || '-' }}</td>
               <td data-label="Fecha creación">{{ order.createdDate ? formatShortDate(new Date(order.createdDate)) : '-'
-                }}
+              }}
               </td>
               <td data-label="Fecha entrega">{{ order.deliveryDate ? formatShortDate(new Date(order.deliveryDate)) : '-'
-                }}
+              }}
               </td>
               <td data-label="Estado"><span class="status-badge" :class="statusClass(order.status)">{{ order.status
-                  }}</span>
+              }}</span>
               </td>
               <td data-label="Tipo servicio">
                 <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
@@ -558,7 +558,7 @@
               <div class="form-group"><label>Placa</label><select v-model="newOrder.vehicle" class="form-input">
                   <option value="">Seleccionar placa</option>
                   <option v-for="v in getOrderPlateOptions(newOrder.vehicle)" :key="v.plate" :value="v.plate">{{ v.plate
-                    }}
+                  }}
                     · {{ v.client || 'Sin cliente' }} · {{ v.brand || 'Sin marca' }}</option>
                 </select></div>
             </div>
@@ -583,7 +583,7 @@
               <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;">
                 <span v-for="(s, idx) in newOrder.services" :key="idx" class="chip"
                   style="background:#eef2ff;padding:6px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;">{{
-                  s }} <button type="button" class="btn btn-sm" style="padding:0 6px;margin-left:6px;"
+                    s }} <button type="button" class="btn btn-sm" style="padding:0 6px;margin-left:6px;"
                     @click.prevent="removeNewService(idx)">✕</button></span>
                 <small v-if="!newOrder.services || !newOrder.services.length" style="color:var(--muted);">Usar 'General'
                   si
@@ -697,7 +697,7 @@
                   <option value="">Seleccionar placa</option>
                   <option v-for="v in getOrderPlateOptions(editingOrder.vehicle)" :key="v.plate" :value="v.plate">{{
                     v.plate
-                    }} · {{ v.client || 'Sin cliente' }} · {{ v.brand || 'Sin marca' }}</option>
+                  }} · {{ v.client || 'Sin cliente' }} · {{ v.brand || 'Sin marca' }}</option>
                 </select></div>
             </div>
             <div class="form-row">
@@ -722,7 +722,7 @@
               <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:8px;">
                 <span v-for="(s, idx) in (editingOrder.services || [])" :key="idx" class="chip"
                   style="background:#eef2ff;padding:6px 10px;border-radius:999px;display:inline-flex;align-items:center;gap:8px;">{{
-                  s }} <button type="button" class="btn btn-sm" style="padding:0 6px;margin-left:6px;"
+                    s }} <button type="button" class="btn btn-sm" style="padding:0 6px;margin-left:6px;"
                     @click.prevent="removeEditingService(idx)">✕</button></span>
                 <small v-if="!(editingOrder.services && editingOrder.services.length)" style="color:var(--muted);">Usar
                   'General' si no se agrega ninguno</small>
@@ -876,8 +876,9 @@
           <thead class="table-header">
             <tr>
               <th><input type="checkbox" :checked="selectAllChecked" @change="toggleSelectAllVisible" /></th>
-              <th @click="setSort('id')" style="cursor:pointer">ID <span v-if="sortKey === 'id'">{{ sortDir === -1 ? '▼' :
-                  '▲'
+              <th @click="setSort('id')" style="cursor:pointer">ID <span v-if="sortKey === 'id'">{{ sortDir === -1 ? '▼'
+                :
+                '▲'
                   }}</span></th>
               <th @click="setSort('createdAt')" style="cursor:pointer">Fecha <span v-if="sortKey === 'createdAt'">{{
                 sortDir === -1 ? '▼' : '▲' }}</span></th>
@@ -890,8 +891,9 @@
               <th @click="setSort('subtotal')" style="cursor:pointer">Subtotal <span v-if="sortKey === 'subtotal'">{{
                 sortDir === -1 ? '▼' : '▲' }}</span></th>
               <th>IVA</th>
-              <th @click="setSort('total')" style="cursor:pointer">Total <span v-if="sortKey === 'total'">{{ sortDir === -1
-                  ?
+              <th @click="setSort('total')" style="cursor:pointer">Total <span v-if="sortKey === 'total'">{{ sortDir ===
+                -1
+                ?
                   '▼' : '▲' }}</span></th>
               <th @click="setSort('status')" style="cursor:pointer">Estado <span v-if="sortKey === 'status'">{{
                 sortDir === -1 ?
@@ -913,7 +915,7 @@
               <td data-label="IVA">${{ invoiceTax(invoice).toLocaleString() }}</td>
               <td data-label="Total">${{ invoiceTotal(invoice).toLocaleString() }}</td>
               <td data-label="Estado"><span class="status-badge" :class="invoice.status.toLowerCase()">{{ invoice.status
-                  }}</span></td>
+              }}</span></td>
               <td data-label="Acciones">
                 <div class="actions-vertical" style="display:flex;flex-direction:column;gap:6px;align-items:center;">
                   <div class="actions-row" style="display:flex;gap:6px;justify-content:center;">
@@ -940,7 +942,8 @@
             <button class="btn btn-secondary" @click="exportSelectedCsv">Exportar Seleccionadas</button>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
-            <button class="btn" :disabled="currentPage <= 1" @click.prevent="goToPage(currentPage - 1)">Anterior</button>
+            <button class="btn" :disabled="currentPage <= 1"
+              @click.prevent="goToPage(currentPage - 1)">Anterior</button>
             <span>Página {{ currentPage }} / {{ totalPages }}</span>
             <button class="btn" :disabled="currentPage >= totalPages"
               @click.prevent="goToPage(currentPage + 1)">Siguiente</button>
@@ -996,7 +999,8 @@
               <div class="form-row" style="justify-content:space-between;align-items:center;margin-top:8px;">
                 <div><strong>Subtotal:</strong> ${{ invoiceSubtotal(formInvoice).toLocaleString() }}
                   <strong>IVA:</strong>
-                  ${{ invoiceTax(formInvoice).toLocaleString() }}</div>
+                  ${{ invoiceTax(formInvoice).toLocaleString() }}
+                </div>
                 <div><strong>Total:</strong> ${{ invoiceTotal(formInvoice).toLocaleString() }}</div>
               </div>
               <div class="form-actions" style="margin-top:12px;">
@@ -1036,7 +1040,7 @@
                   <td style="padding:6px 4px;text-align:right;">{{ it.qty ?? 1 }}</td>
                   <td style="padding:6px 4px;text-align:right;">${{ (it.price ?? 0).toLocaleString() }}</td>
                   <td style="padding:6px 4px;text-align:right;">${{ ((it.qty ?? 1) * (it.price ?? 0)).toLocaleString()
-                    }}
+                  }}
                   </td>
                 </tr>
               </tbody>
@@ -1291,7 +1295,7 @@
               <td data-label="Movimiento">
                 <span class="status-badge" :class="entry.movement === 'Ingreso' ? 'available' : 'danger'">{{
                   entry.movement
-                  }}</span>
+                }}</span>
               </td>
               <td data-label="Valor">${{ Number(entry.amount).toLocaleString('es-CO') }}</td>
               <td data-label="Cuenta">{{ entry.account }}</td>
@@ -1619,7 +1623,8 @@
                   <span v-if="ev.type === 'order'">🧾 {{ ev.client || ev.vehicle }}</span>
                   <span v-else>📅 {{ ev.service || ev.client || ev.vehicle }}</span>
                 </div>
-                <div v-if="(eventsByDate[cell.iso] || []).length > 3"><small>+{{ (eventsByDate[cell.iso] || []).length - 3
+                <div v-if="(eventsByDate[cell.iso] || []).length > 3"><small>+{{ (eventsByDate[cell.iso] || []).length -
+                  3
                     }}
                     más</small></div>
               </div>
@@ -1827,7 +1832,7 @@
         </div>
 
         <!-- Modal de edición de cliente -->
-        <div v-if="showEditClient" class="modal-overlay" @click="closeEditClient">
+        <div v-if="showEditClient && editingClient" class="modal-overlay" @click="closeEditClient">
           <div class="modal" @click.stop>
             <div class="modal-header">
               <h3>Editar Cliente</h3>
@@ -2447,7 +2452,7 @@
               <span class="discount-badge">
                 💰 Descuento: {{ Math.round(((productForm.originalPrice - productForm.price) /
                   productForm.originalPrice) *
-                100) }}%
+                  100) }}%
               </span>
             </div>
 
