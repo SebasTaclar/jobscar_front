@@ -1,14 +1,8 @@
-const rawBaseUrl = (import.meta as { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL?.trim()
-
-if (!rawBaseUrl) {
-  throw new Error('Missing required env var: VITE_API_BASE_URL')
-}
-
-const API_BASE_URL: string = rawBaseUrl
-
 // Configuración base para la API
 export const API_CONFIG = {
-  baseURL: API_BASE_URL,
+  baseURL: false // import.meta.env.DEV
+    ? 'http://localhost:7071/api/v1'
+    : 'https://jobscar-back-ccf0a8d7bqc5fjgk.centralus-01.azurewebsites.net/api/v1',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
