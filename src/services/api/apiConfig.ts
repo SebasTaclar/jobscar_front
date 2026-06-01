@@ -1,8 +1,14 @@
+const rawBaseUrl = (import.meta as { env?: { VITE_API_BASE_URL?: string } }).env?.VITE_API_BASE_URL?.trim()
+
+if (!rawBaseUrl) {
+  throw new Error('Missing required env var: VITE_API_BASE_URL')
+}
+
+const API_BASE_URL: string = rawBaseUrl
+
 // Configuración base para la API
 export const API_CONFIG = {
-  baseURL: false
-    ? 'http://localhost:7071/api/v1'
-    : 'https://red-wave-0e026e310.1.azurestaticapps.net/api/v1',
+  baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -45,7 +51,11 @@ export class ApiClient {
 
     // Obtener token del localStorage si existe
     const token = localStorage.getItem('authToken')
-    console.log('🔑 [apiClient] Token presente:', token ? '✅ Sí' : '❌ No', token ? `(${token.substring(0, 20)}...)` : '')
+    console.log(
+      '🔑 [apiClient] Token presente:',
+      token ? '✅ Sí' : '❌ No',
+      token ? `(${token.substring(0, 20)}...)` : '',
+    )
 
     // Preparar headers
     let headers = { ...this.defaultHeaders }

@@ -8,8 +8,8 @@
 
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="input-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" v-model="email" required @invalid="setCustomValidityMessage"
+          <label for="email">Usuario o Email</label>
+          <input type="text" id="email" v-model="email" autocomplete="username" required @invalid="setCustomValidityMessage"
             @input="clearCustomValidityMessage" class="form-input" />
         </div>
 
@@ -47,9 +47,17 @@ const router = useRouter();
 const handleLogin = async () => {
   loading.value = true;
   try {
+    const normalizedEmail = email.value.trim();
+    const normalizedPassword = password.value.trim();
+
+    if (!normalizedEmail || !normalizedPassword) {
+      alert('Debes ingresar usuario/email y contraseña.');
+      return;
+    }
+
     const credentials: LoginCredentials = {
-      email: email.value,
-      password: password.value,
+      email: normalizedEmail,
+      password: normalizedPassword,
     };
 
     const response = await authService.login(credentials);
@@ -57,12 +65,14 @@ const handleLogin = async () => {
     if (response.success) {
       // Redirigir según el rol del usuario
       const userInfo = authService.getCurrentUser();
+      const redirect = router.currentRoute.value.query.redirect;
+      const redirectPath = typeof redirect === 'string' && redirect.startsWith('/')
+        ? redirect
+        : userInfo?.role === 'admin'
+          ? '/admin/products'
+          : '/';
 
-      if (userInfo?.role === 'admin') {
-        router.push('/admin/products');
-      } else {
-        router.push('/');
-      }
+      router.push(redirectPath);
     } else {
       alert(response.message || 'Credenciales inválidas');
     }

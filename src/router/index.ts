@@ -67,6 +67,10 @@ const router = createRouter({
       path: '/admin/products',
       name: 'admin-products',
       component: () => import('../views/AdminDashboardNew.vue'),
+      meta: {
+        requiresAuth: true,
+        requiredRole: 'admin',
+      },
     },
 
     {
@@ -117,6 +121,31 @@ const router = createRouter({
       redirect: '/',
     },
   ],
+})
+
+router.beforeEach((to) => {
+  const isAuthenticated = authService.isAuthenticated()
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    return {
+      name: 'login',
+      query: { redirect: to.fullPath },
+    }
+  }
+
+  if (to.meta.requiresGuest && isAuthenticated) {
+    return authService.isAdmin() ? '/admin/products' : '/'
+  }
+
+  const requiredRoles = to.meta.requiredRoles || (to.meta.requiredRole ? [to.meta.requiredRole] : [])
+  if (requiredRoles.length > 0) {
+    const userRole = authService.getUserRole()
+    if (!userRole || !requiredRoles.includes(userRole)) {
+      return '/'
+    }
+  }
+
+  return true
 })
 
 
