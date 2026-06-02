@@ -1,49 +1,57 @@
-export type WorkOrderStatus = 'pending' | 'in-progress' | 'completed' | 'delivered'
+export type WorkOrderStatus = string
 
-export interface WorkOrderServiceItem {
-  description: string
-  quantity: number
-  unitPrice: number
-}
-
-export interface WorkOrderPartItem {
-  partId?: number
-  description: string
-  quantity: number
-  unitPrice: number
+export interface WorkOrderVehicleSummary {
+  plate: string
+  client: string
 }
 
 export interface WorkOrder {
   id: number
-  clientId: number
   vehicleId: number
   mechanicId?: number
-  createdAt: string
-  closedAt?: string
-  initialDiagnosis: string
-  services: WorkOrderServiceItem[]
-  parts: WorkOrderPartItem[]
   status: WorkOrderStatus
-  customerApproved: boolean
-  customerNameAtApproval?: string
+  services: string[]
+  gases: boolean
+  escaner: boolean
+  observations?: string
+  diagnosis?: string
+  deliveryDate?: string
+  garantia?: number
+  total?: number
+  vehicle?: WorkOrderVehicleSummary
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface WorkOrderListData {
+  count: number
+  workOrders: WorkOrder[]
 }
 
 export interface CreateWorkOrderRequest {
-  clientId: number
   vehicleId: number
-  mechanicId?: number
-  initialDiagnosis: string
-  services?: WorkOrderServiceItem[]
-  parts?: WorkOrderPartItem[]
+  mechanicId: number
+  status: string
+  services?: string[]
+  gases?: boolean
+  escaner?: boolean
+  observations?: string
+  diagnosis?: string
+  deliveryDate?: string
+  garantia?: number
+  total?: number
 }
 
 export interface UpdateWorkOrderRequest {
+  vehicleId?: number
   mechanicId?: number
-  initialDiagnosis?: string
-  services?: WorkOrderServiceItem[]
-  parts?: WorkOrderPartItem[]
-  status?: WorkOrderStatus
-  customerApproved?: boolean
-  customerNameAtApproval?: string
-  closedAt?: string
+  status?: string
+  services?: string[]
+  gases?: boolean
+  escaner?: boolean
+  observations?: string
+  diagnosis?: string
+  deliveryDate?: string
+  garantia?: number
+  total?: number
 }

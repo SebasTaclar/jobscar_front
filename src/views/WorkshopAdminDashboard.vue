@@ -270,13 +270,23 @@
               <ul v-else class="workorder-list">
                 <li v-for="order in vehicleWorkOrders" :key="order.id" class="workorder-item">
                   <div class="workorder-header">
-                    <span class="status" :class="order.status">{{ formatStatus(order.status) }}</span>
+                    <span class="status" :class="getStatusClass(order.status)">{{ formatStatus(order.status) }}</span>
                     <span class="date">{{ formatDate(order.createdAt) }}</span>
                   </div>
-                  <p class="diagnosis">{{ order.initialDiagnosis || 'Sin diagnóstico registrado' }}</p>
+                  <p class="workorder-vehicle">
+                    {{ order.vehicle ? `${order.vehicle.plate} · ${order.vehicle.client}` : `Vehículo #${order.vehicleId}` }}
+                  </p>
+                  <div v-if="order.services?.length" class="workorder-services">
+                    <span v-for="service in order.services" :key="service" class="service-pill">{{ service }}</span>
+                  </div>
+                  <p v-if="order.observations" class="workorder-notes">{{ order.observations }}</p>
+                  <p v-if="order.diagnosis" class="diagnosis">Diagnóstico: {{ order.diagnosis }}</p>
                   <div class="workorder-meta">
-                    <span v-if="order.customerApproved" class="chip approved">Aprobado por el cliente</span>
-                    <span v-if="order.closedAt" class="chip date">Cerrada: {{ formatDate(order.closedAt) }}</span>
+                    <span v-if="order.gases" class="chip approved">Gases</span>
+                    <span v-if="order.escaner" class="chip approved">Escáner</span>
+                    <span v-if="order.deliveryDate" class="chip date">Entrega: {{ formatDate(order.deliveryDate) }}</span>
+                    <span v-if="order.garantia" class="chip date">Garantía: {{ order.garantia }} días</span>
+                    <span v-if="order.total !== undefined && order.total !== null" class="chip date">Total: {{ formatCurrency(order.total) }}</span>
                   </div>
                 </li>
               </ul>
@@ -517,7 +527,7 @@ const loadWorkOrdersForVehicle = async (vehicleId: number) => {
   try {
     workOrdersLoading.value = true;
     const response = await workOrderService.getWorkOrders({ vehicleId });
-    vehicleWorkOrders.value = response.data || [];
+    vehicleWorkOrders.value = response.data?.workOrders || [];
   } catch (error) {
     console.error('Error cargando órdenes de trabajo', error);
   } finally {
@@ -525,19 +535,68 @@ const loadWorkOrdersForVehicle = async (vehicleId: number) => {
   }
 };
 
-const formatStatus = (status: WorkOrder['status']) => {
-  switch (status) {
+const normalizeStatus = (status: string) =>
+  status
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '-');
+
+const formatStatus = (status: string) => {
+  switch (normalizeStatus(status)) {
+    case 'recepcion':
+      return 'Recepción';
+    case 'diagnostico':
+      return 'Diagnóstico';
+    case 'en-proceso':
+      return 'En proceso';
+    case 'finalizado':
+    case 'completado':
+      return 'Finalizado';
+    case 'entregado':
+      return 'Entregado';
     case 'pending':
       return 'Pendiente';
     case 'in-progress':
       return 'En progreso';
     case 'completed':
       return 'Completado';
-    case 'delivered':
-      return 'Entregado';
     default:
       return status;
   }
+};
+
+const getStatusClass = (status: string) => {
+  switch (normalizeStatus(status)) {
+    case 'recepcion':
+      return 'recepcion';
+    case 'diagnostico':
+      return 'diagnostico';
+    case 'en-proceso':
+    case 'pending':
+      return 'pending';
+    case 'finalizado':
+    case 'completed':
+      return 'completed';
+    case 'entregado':
+    case 'in-progress':
+      return 'delivered';
+    default:
+      return normalizeStatus(status);
+  }
+};
+
+const formatCurrency = (value: number | string | null | undefined) => {
+  if (value === null || value === undefined || value === '') return '';
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) return String(value);
+  return numericValue.toLocaleString('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    maximumFractionDigits: 0,
+  });
 };
 
 const formatDate = (dateStr: string | null | undefined) => {
@@ -1015,8 +1074,50 @@ watch(selectedClient, () => {
   color: #fdba74;
 }
 
+.status.recepcion {
+  background: rgba(251, 191, 36, 0.15);
+  color: #facc15;
+}
+
+.status.diagnostico {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.status.finalizado {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
 .date {
   color: #9ca3af;
+}
+
+.workorder-vehicle {
+  font-size: 0.78rem;
+  color: #f8fafc;
+  margin-bottom: 4px;
+}
+
+.workorder-services {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.service-pill {
+  border-radius: 999px;
+  padding: 2px 6px;
+  font-size: 0.68rem;
+  background: rgba(59, 130, 246, 0.14);
+  color: #bfdbfe;
+}
+
+.workorder-notes {
+  font-size: 0.8rem;
+  color: #e2e8f0;
+  margin-bottom: 4px;
 }
 
 .diagnosis {
