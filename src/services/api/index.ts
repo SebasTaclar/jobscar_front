@@ -14,6 +14,7 @@ export * from './workshopClientService'
 export * from './vehicleService'
 export * from './workOrderService'
 export * from './employeeService'
+export * from './appointmentService'
 
 // Exportar tipos comunes
 export type { ApiResponse, ApiError } from './apiConfig'

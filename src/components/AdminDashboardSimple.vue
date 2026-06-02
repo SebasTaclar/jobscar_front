@@ -2597,7 +2597,7 @@ import { reactive, ref, computed, onMounted, onBeforeUnmount, watch, nextTick, t
 import { useProducts, type ShowcaseProduct } from '@/composables/useProducts'
 import type { Product } from '@/types/ProductType'
 import type { Category, CreateCategoryRequest } from '@/types/CategoryType'
-import { workshopClientService, vehicleService, employeeService, workOrderService } from '@/services/api'
+import { workshopClientService, vehicleService, employeeService, workOrderService, appointmentService } from '@/services/api'
 import { paymentService } from '@/services/api/paymentService'
 import type { Purchase, ProductPaymentItem } from '@/services/api/paymentService'
 import type {
@@ -3822,20 +3822,34 @@ const deleteEmployee = async (id: number) => {
 
 
 
-const AGENDA_STORAGE_KEY = 'jobscar_agenda'
-const _storedAgenda = (() => {
-  try {
-    const raw = localStorage.getItem(AGENDA_STORAGE_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch (e) {
-    return null
-  }
-})()
+const burnedAgenda = reactive<any[]>([])
 
-const burnedAgenda = reactive(_storedAgenda || [
-  { id: 1, date: '2026-04-10', time: '09:00', client: 'Juan Pérez', vehicle: 'ABC123', service: 'Cambio aceite', mechanic: 'Pedro' },
-  { id: 2, date: '2026-04-10', time: '11:00', client: 'María Gómez', vehicle: 'XYZ789', service: 'Revisión frenos', mechanic: 'Luis' }
-])
+const mapApiAppointmentToDashboardAgenda = (appointment: any) => {
+  return {
+    id: appointment?.id,
+    date: appointment?.date ? String(appointment.date).slice(0, 10) : '',
+    time: appointment?.date ? String(appointment.date).slice(11, 19) : '09:00',
+    vehicle: appointment?.plate || '',
+    client: appointment?.client || '',
+    service: appointment?.subject || '',
+    plate: appointment?.plate || '',
+    subject: appointment?.subject || '',
+    createdAt: appointment?.createdAt,
+    updatedAt: appointment?.updatedAt,
+    backendId: appointment?.id,
+  }
+}
+
+const refreshAppointments = async () => {
+  try {
+    const response = await appointmentService.getAppointments()
+    const apiAppointments = response.data?.appointments || []
+    burnedAgenda.splice(0, burnedAgenda.length, ...apiAppointments.map(mapApiAppointmentToDashboardAgenda))
+  } catch (error) {
+    console.error('No se pudieron cargar las citas', error)
+    burnedAgenda.splice(0, burnedAgenda.length)
+  }
+}
 
 // Persistir agenda en localStorage
 watch(burnedAgenda, (newVal) => {
@@ -3969,27 +3983,51 @@ function confirmSchedule() {
   showScheduleModal.value = false
 }
 
-function nextAgendaId(): number {
-  const ids = Array.isArray(burnedAgenda) ? burnedAgenda.map((a: any) => Number(a.id)).filter(n => Number.isFinite(n)) : []
-  return ids.length ? Math.max(...ids) + 1 : 1
+async function createAgendaEvent(dateIso: string, time: string, payload: any) {
+  try {
+    const isoDateTime = `${dateIso}T${time || '09:00'}:00.000Z`
+    const request = {
+      date: isoDateTime,
+      plate: String(payload.vehicle || ''),
+      client: String(payload.client || ''),
+      subject: String(payload.serviceType || payload.service || '')
+    }
+    await appointmentService.createAppointment(request)
+    await refreshAppointments()
+    Object.assign(newCalendarOrder, { vehicle: '', client: '', serviceType: '', mechanic: '', total: 0, diagnosis: '' })
+    alert('Cita creada: ' + dateIso + ' ' + time)
+  } catch (error) {
+    console.error('No se pudo crear la cita', error)
+    alert(error instanceof Error ? error.message : 'No se pudo crear la cita')
+  }
 }
 
-function createAgendaEvent(dateIso: string, time: string, payload: any) {
-  // payload: vehicle, client, serviceType, mechanic
-  const id = nextAgendaId()
-  const ev = {
-    id,
-    date: dateIso,
-    time: time || '09:00',
-    client: String(payload.client || ''),
-    vehicle: String(payload.vehicle || ''),
-    service: String(payload.serviceType || payload.service || ''),
-    mechanic: String(payload.mechanic || '')
+async function updateAgendaEvent(appointmentId: number, dateIso: string, subject: string) {
+  try {
+    const isoDateTime = `${dateIso}T09:00:00.000Z`
+    const request = {
+      date: isoDateTime,
+      subject: String(subject || '')
+    }
+    await appointmentService.updateAppointment(appointmentId, request)
+    await refreshAppointments()
+    alert('Cita actualizada')
+  } catch (error) {
+    console.error('No se pudo actualizar la cita', error)
+    alert(error instanceof Error ? error.message : 'No se pudo actualizar la cita')
   }
-  burnedAgenda.push(ev)
-  // limpiar form
-  Object.assign(newCalendarOrder, { vehicle: '', client: '', serviceType: '', mechanic: '', total: 0, diagnosis: '' })
-  alert('Cita creada: ' + dateIso + ' ' + time)
+}
+
+async function deleteAgendaEvent(appointmentId: number) {
+  if (!confirm('¿Eliminar esta cita?')) return
+  try {
+    await appointmentService.deleteAppointment(appointmentId)
+    await refreshAppointments()
+    alert('Cita eliminada')
+  } catch (error) {
+    console.error('No se pudo eliminar la cita', error)
+    alert(error instanceof Error ? error.message : 'No se pudo eliminar la cita')
+  }
 }
 
 async function scheduleOrder(orderId: number | string, dateIso: string, time: string) {
@@ -4528,6 +4566,7 @@ function clearPrintOrder() {
 onMounted(() => {
   window.addEventListener('afterprint', clearPrintOrder)
   refreshWorkOrders()
+  refreshAppointments()
 })
 
 onBeforeUnmount(() => {
