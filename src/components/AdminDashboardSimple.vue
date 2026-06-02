@@ -3851,13 +3851,6 @@ const refreshAppointments = async () => {
   }
 }
 
-// Persistir agenda en localStorage
-watch(burnedAgenda, (newVal) => {
-  try {
-    localStorage.setItem(AGENDA_STORAGE_KEY, JSON.stringify(newVal))
-  } catch (e) { }
-}, { deep: true })
-
 // ---------- Calendar / Agenda helpers ----------
 const calendarDate = ref(new Date())
 const showScheduleModal = ref(false)
