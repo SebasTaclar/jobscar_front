@@ -27,9 +27,9 @@
             <form @submit.prevent="saveEditedVehicle">
               <div class="form-group">
                 <label>Nombre Cliente</label>
-                <select v-model="editingVehicle.client" class="form-input">
-                  <option value="">Seleccionar cliente</option>
-                  <option v-for="c in burnedClients" :key="c.id" :value="c.name">{{ c.name }}</option>
+                <select v-model.number="editingVehicle.clientId" class="form-input">
+                  <option :value="0">Seleccionar cliente</option>
+                  <option v-for="c in burnedClients" :key="c.id" :value="c.id">{{ c.name }}</option>
                 </select>
               </div>
               <div class="form-row">
@@ -261,9 +261,9 @@
             <form @submit.prevent="addBurnedVehicle">
               <div class="form-group">
                 <label>Nombre Cliente</label>
-                <select v-model="newVehicle.client" class="form-input">
-                  <option value="">Seleccionar cliente</option>
-                  <option v-for="c in burnedClients" :key="c.id" :value="c.name">{{ c.name }}</option>
+                <select v-model.number="newVehicle.clientId" class="form-input">
+                  <option :value="0">Seleccionar cliente</option>
+                  <option v-for="c in burnedClients" :key="c.id" :value="c.id">{{ c.name }}</option>
                 </select>
               </div>
               <div class="form-row">
@@ -289,8 +289,8 @@
                   <label>Tipo Vehículo</label>
                   <select v-model="newVehicle.vehicleType" class="form-input">
                     <option value="">Seleccionar tipo</option>
-                    <option value="Carro">Automóvil</option>
-                    <option value="Camion">Camioneta</option>
+                    <option value="Automovil">Automóvil</option>
+                    <option value="Camioneta">Camioneta</option>
 
                   </select>
                 </div>
@@ -894,7 +894,7 @@
               <th @click="setSort('total')" style="cursor:pointer">Total <span v-if="sortKey === 'total'">{{ sortDir ===
                 -1
                 ?
-                  '▼' : '▲' }}</span></th>
+                '▼' : '▲' }}</span></th>
               <th @click="setSort('status')" style="cursor:pointer">Estado <span v-if="sortKey === 'status'">{{
                 sortDir === -1 ?
                   '▼' : '▲' }}</span></th>
@@ -1492,15 +1492,21 @@
                   <input v-model="newEmployee.specialty" type="text" class="form-input" />
                 </div>
                 <div class="form-group">
-                  <label>Teléfono</label>
-                  <input v-model="newEmployee.phone" type="text" class="form-input" />
+                  <label>Email</label>
+                  <input v-model="newEmployee.email" type="email" class="form-input" />
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
+                  <label>Teléfono</label>
+                  <input v-model="newEmployee.phone" type="text" class="form-input" />
+                </div>
+                <div class="form-group">
                   <label>Órdenes asignadas</label>
                   <input :value="0" type="number" class="form-input" min="0" disabled />
                 </div>
+              </div>
+              <div class="form-row">
                 <div class="form-group">
                   <label>Estado</label>
                   <input :value="'Activo'" type="text" class="form-input" disabled />
@@ -1551,16 +1557,22 @@
                   <input v-model="editingEmployee.specialty" type="text" class="form-input" />
                 </div>
                 <div class="form-group">
-                  <label>Teléfono</label>
-                  <input v-model="editingEmployee.phone" type="text" class="form-input" />
+                  <label>Email</label>
+                  <input v-model="editingEmployee.email" type="email" class="form-input" />
                 </div>
               </div>
               <div class="form-row">
+                <div class="form-group">
+                  <label>Teléfono</label>
+                  <input v-model="editingEmployee.phone" type="text" class="form-input" />
+                </div>
                 <div class="form-group">
                   <label>Órdenes asignadas</label>
                   <input :value="editingEmployee ? getEmployeeActiveOrders(editingEmployee) : 0" type="number"
                     class="form-input" min="0" disabled />
                 </div>
+              </div>
+              <div class="form-row">
                 <div class="form-group">
                   <label>Estado</label>
                   <input :value="'Activo'" type="text" class="form-input" disabled />
@@ -2585,7 +2597,7 @@ import { reactive, ref, computed, onMounted, onBeforeUnmount, watch, nextTick, t
 import { useProducts, type ShowcaseProduct } from '@/composables/useProducts'
 import type { Product } from '@/types/ProductType'
 import type { Category, CreateCategoryRequest } from '@/types/CategoryType'
-import { workshopClientService } from '@/services/api'
+import { workshopClientService, vehicleService, employeeService } from '@/services/api'
 import { paymentService } from '@/services/api/paymentService'
 import type { Purchase, ProductPaymentItem } from '@/services/api/paymentService'
 import type {
@@ -2593,6 +2605,16 @@ import type {
   CreateWorkshopClientRequest,
   UpdateWorkshopClientRequest,
 } from '@/types/WorkshopClientType'
+import type {
+  Vehicle,
+  CreateVehicleRequest,
+  UpdateVehicleRequest,
+} from '@/types/VehicleType'
+import type {
+  Employee,
+  CreateEmployeeRequest,
+  UpdateEmployeeRequest,
+} from '@/types/EmployeeType'
 
 // Estado para modal y formulario de cliente quemado
 const showCreateClient = ref(false)
@@ -2632,6 +2654,35 @@ const mapClientToRow = (client: WorkshopClient): WorkshopClientRow => ({
   totalOrders: 0,
   totalSpent: 0,
 })
+
+interface VehicleRow extends Vehicle {
+  clientId: number
+  client?: string
+}
+
+const burnedVehicles = reactive<VehicleRow[]>([])
+
+const mapVehicleToRow = (vehicle: Vehicle): VehicleRow => ({
+  ...vehicle,
+  clientId: vehicle.clientId,
+  client: vehicle.client ?? '',
+  km: vehicle.km,
+  mileage: vehicle.mileage ?? vehicle.km,
+  registrationDate: vehicle.registrationDate || vehicle.createdAt || '',
+  lastServiceDate: vehicle.lastServiceDate || '',
+  nextServiceKm: vehicle.nextServiceKm ?? 0,
+  observations: vehicle.observations || '',
+})
+
+const loadBurnedVehicles = async () => {
+  try {
+    const response = await vehicleService.getVehicles({})
+    const vehicles = response.data?.vehicles?.map(mapVehicleToRow) || []
+    burnedVehicles.splice(0, burnedVehicles.length, ...vehicles)
+  } catch (error) {
+    console.error('Error cargando vehículos desde el backend', error)
+  }
+}
 
 const loadBurnedClients = async () => {
   try {
@@ -2785,23 +2836,8 @@ interface Sale {
   items?: ProductPaymentItem[] // Items detallados de la compra
 }
 
-// Employee type used in the employees table
-interface Employee {
-  id: number
-  name: string
-  role: string
-  specialty?: string
-  phone?: string
-  status?: string
-  entryDate?: string
-  activeOrders?: number
-  notes?: string
-}
-
 // Estado reactivo (persistente)
 const ACTIVE_TAB_KEY = 'admin_active_tab'
-// Local storage keys para datos temporales
-const VEHICLES_STORAGE_KEY = 'jobscar_admin_vehicles'
 const activeTab = ref<string>(localStorage.getItem(ACTIVE_TAB_KEY) || 'clients')
 const showProductForm = ref(false)
 const showCategoryForm = ref(false)
@@ -2832,10 +2868,11 @@ const searchVehicles = ref('')
 // Vehículos: modal y formulario rápido
 const showCreateVehicle = ref(false)
 const newVehicle = reactive({
-  client: '',
+  clientId: 0,
   plate: '',
   brand: '',
   model: '',
+  year: new Date().getFullYear(),
   km: '',
   vehicleType: '',
   status: '',
@@ -2845,42 +2882,53 @@ const newVehicle = reactive({
   observations: ''
 })
 
-function addBurnedVehicle() {
-  if (!newVehicle.plate && !newVehicle.client) return
+async function addBurnedVehicle() {
+  if (!newVehicle.plate.trim() || !newVehicle.clientId) return
 
-  // Calcular siguiente ID consecutivo si existen ids previos
-  const ids = Array.isArray(burnedVehicles) ? burnedVehicles.map((v: any) => Number(v.id)).filter((n: number) => Number.isFinite(n) && n > 0) : []
-  let nextId = 1
-  if (ids.length > 0) nextId = Math.max(...ids) + 1
+  const payload: CreateVehicleRequest = {
+    clientId: newVehicle.clientId,
+    plate: newVehicle.plate.trim(),
+    brand: newVehicle.brand.trim(),
+    model: newVehicle.model.trim(),
+    year: Number(newVehicle.year) || new Date().getFullYear(),
+    km: Number(newVehicle.km) || 0,
+    vehicleType: newVehicle.vehicleType.trim() || undefined,
+    status: newVehicle.status.trim() || undefined,
+    registrationDate: newVehicle.registrationDate
+      ? new Date(newVehicle.registrationDate).toISOString()
+      : undefined,
+    lastServiceDate: newVehicle.lastServiceDate
+      ? new Date(newVehicle.lastServiceDate).toISOString()
+      : undefined,
+    nextServiceKm: newVehicle.nextServiceKm ? Number(newVehicle.nextServiceKm) : undefined,
+    observations: newVehicle.observations.trim() || undefined,
+  }
 
-  const regISO = newVehicle.registrationDate ? new Date(newVehicle.registrationDate).toISOString() : new Date().toISOString()
-  const lastServiceISO = newVehicle.lastServiceDate ? new Date(newVehicle.lastServiceDate).toISOString() : ''
-
-  burnedVehicles.push({
-    id: nextId,
-    plate: newVehicle.plate || '',
-    brand: newVehicle.brand || '',
-    model: newVehicle.model || '',
-    km: newVehicle.km ? Number(newVehicle.km) : 0,
-    client: newVehicle.client || '',
-    vehicleType: newVehicle.vehicleType || '',
-    status: newVehicle.status || '',
-    registrationDate: regISO,
-    lastServiceDate: lastServiceISO,
-    nextServiceKm: newVehicle.nextServiceKm ? Number(newVehicle.nextServiceKm) : 0,
-    observations: newVehicle.observations || ''
-  })
-
-  // Resetear formulario
-  Object.keys(newVehicle).forEach((k) => { ; (newVehicle as any)[k] = '' })
-  showCreateVehicle.value = false
+  try {
+    const response = await vehicleService.createVehicle(payload)
+    if (response.data) {
+      burnedVehicles.unshift(mapVehicleToRow(response.data))
+      newVehicle.model = ''
+      newVehicle.year = new Date().getFullYear()
+      newVehicle.km = ''
+      newVehicle.vehicleType = ''
+      newVehicle.status = ''
+      newVehicle.registrationDate = ''
+      newVehicle.lastServiceDate = ''
+      newVehicle.nextServiceKm = ''
+      newVehicle.observations = ''
+      showCreateVehicle.value = false
+    }
+  } catch (error) {
+    console.error('Error creando vehículo en el backend', error)
+  }
 }
 
 // Edición y eliminación de vehículos
-const editingVehicle: Ref<any | null> = ref(null)
+const editingVehicle: Ref<VehicleRow | null> = ref(null)
 const showEditVehicle = ref(false)
 
-const editVehicle = (vehicle: any) => {
+const editVehicle = (vehicle: VehicleRow) => {
   const clone: any = { ...vehicle }
   if (clone.registrationDate) {
     try {
@@ -2905,34 +2953,64 @@ const editVehicle = (vehicle: any) => {
   showEditVehicle.value = true
 }
 
-const saveEditedVehicle = () => {
+const saveEditedVehicle = async () => {
   if (!editingVehicle.value) return
-  const ev: any = { ...editingVehicle.value }
+  const ev = { ...editingVehicle.value }
 
-  // Normalizar fechas a ISO
-  if (ev.registrationDate) {
-    ev.registrationDate = ev.registrationDate.includes('T') ? ev.registrationDate : new Date(ev.registrationDate).toISOString()
-  } else {
-    ev.registrationDate = new Date().toISOString()
-  }
-  if (ev.lastServiceDate) {
-    ev.lastServiceDate = ev.lastServiceDate.includes('T') ? ev.lastServiceDate : new Date(ev.lastServiceDate).toISOString()
-  } else {
-    ev.lastServiceDate = ''
+  const payload: UpdateVehicleRequest = {
+    clientId: ev.clientId,
+    plate: ev.plate?.trim(),
+    brand: ev.brand?.trim(),
+    model: ev.model?.trim(),
+    year: ev.year,
+    km: Number(ev.km) || 0,
+    vehicleType: ev.vehicleType?.trim(),
+    status: ev.status?.trim(),
+    registrationDate: ev.registrationDate
+      ? ev.registrationDate.includes('T')
+        ? ev.registrationDate
+        : new Date(ev.registrationDate).toISOString()
+      : undefined,
+    lastServiceDate: ev.lastServiceDate
+      ? ev.lastServiceDate.includes('T')
+        ? ev.lastServiceDate
+        : new Date(ev.lastServiceDate).toISOString()
+      : undefined,
+    nextServiceKm: ev.nextServiceKm ? Number(ev.nextServiceKm) : undefined,
+    observations: ev.observations?.trim() || undefined,
   }
 
-  const idx = burnedVehicles.findIndex((b: any) => (b.id && ev.id && b.id === ev.id) || (b.plate && ev.plate && b.plate === ev.plate))
-  if (idx > -1) {
-    burnedVehicles.splice(idx, 1, ev)
+  try {
+    const response = await vehicleService.updateVehicle(ev.id, payload)
+    if (response.data) {
+      const updated = mapVehicleToRow(response.data)
+      const idx = burnedVehicles.findIndex((b) => b.id === ev.id)
+      if (idx > -1) {
+        burnedVehicles.splice(idx, 1, updated)
+      }
+      showEditVehicle.value = false
+      editingVehicle.value = null
+    }
+  } catch (error) {
+    console.error('Error actualizando vehículo en el backend', error)
   }
-  showEditVehicle.value = false
-  editingVehicle.value = null
 }
 
-const deleteVehicle = (idOrPlate: string | number) => {
+const deleteVehicle = async (idOrPlate: string | number) => {
   if (!confirm('¿Estás seguro de eliminar este vehículo?')) return
-  const idx = burnedVehicles.findIndex((b: any) => (b.id && b.id === idOrPlate) || (b.plate && b.plate === idOrPlate))
-  if (idx > -1) burnedVehicles.splice(idx, 1)
+
+  const vehicleToDelete = burnedVehicles.find(
+    (b) => b.id === idOrPlate || String(b.plate) === String(idOrPlate),
+  )
+  if (!vehicleToDelete) return
+
+  try {
+    await vehicleService.deleteVehicle(vehicleToDelete.id)
+    const remaining = burnedVehicles.filter((b) => b.id !== vehicleToDelete.id)
+    burnedVehicles.splice(0, burnedVehicles.length, ...remaining)
+  } catch (error) {
+    console.error('Error eliminando vehículo en el backend', error)
+  }
 }
 
 // Usar el composable de productos
@@ -2961,29 +3039,9 @@ const products = regularProducts
 
 // Cargar categorías y productos desde el backend al montar el componente
 onMounted(async () => {
-  // Restaurar vehículos desde localStorage si existen (fusionar con defaults)
-  try {
-    const storedV = localStorage.getItem(VEHICLES_STORAGE_KEY)
-    if (storedV) {
-      const parsedV = JSON.parse(storedV)
-      if (Array.isArray(parsedV)) {
-        // fusionar: conservar lo guardado por el usuario y añadir defaults faltantes
-        const defaults = Array.isArray(burnedVehicles) ? [...(burnedVehicles as any)] : []
-        const existingPlates = new Set(parsedV.map((v: any) => (v.plate || '').toString().toUpperCase()))
-        defaults.forEach((d: any) => {
-          const p = (d.plate || '').toString().toUpperCase()
-          if (p && !existingPlates.has(p)) parsedV.push(d)
-        })
-        // Reemplazar el contenido reactivo con la lista fusionada
-        burnedVehicles.splice(0, burnedVehicles.length, ...parsedV)
-        console.log('✅ Vehículos cargados y fusionados desde localStorage:', burnedVehicles.length)
-      }
-    }
-  } catch (e) {
-    console.warn('No se pudo restaurar/ fusionar vehículos desde localStorage', e)
-  }
-
   await loadBurnedClients()
+  await loadBurnedVehicles()
+  await loadBurnedEmployees()
 
   console.log('🔄 Cargando categorías y productos al montar el componente...')
   await loadCategories()
@@ -3144,26 +3202,6 @@ const tabs = [
   { id: 'agenda', name: 'Agenda', icon: '📅' },
   { id: 'reports', name: 'Dashboard', icon: '📊' }
 ]
-// Datos quemados para cada módulo
-const burnedVehicles = reactive([
-  { id: 1, plate: 'ABC123', brand: 'Chevrolet', model: '1900', km: 45000, client: 'Juan Pérez', vehicleType: 'Carro', status: 'Disponible', registrationDate: '2024-06-12T10:00:00Z', lastServiceDate: '2025-12-01T09:00:00Z', nextServiceKm: 50000, observations: 'Historial regular, último servicio cambio aceite.' },
-  { id: 2, plate: 'XYZ789', brand: 'Renault', model: '2025', km: 32000, client: 'María Gómez', vehicleType: 'Carro', status: 'En servicio', registrationDate: '2025-01-23T12:30:00Z', lastServiceDate: '2026-02-20T11:00:00Z', nextServiceKm: 35000, observations: 'Pendiente revisión frenos.' },
-  { id: 3, plate: 'JKL456', brand: 'Mazda', model: '2022', km: 60000, client: 'Carlos Ramírez', vehicleType: 'Carro', status: 'Disponible', registrationDate: '2026-02-10T09:15:00Z', lastServiceDate: '2026-03-15T09:00:00Z', nextServiceKm: 65000, observations: 'Solicita repuestos originales.' },
-  { id: 4, plate: 'YIB14F', brand: 'Dominar 400', model: '1994', km: 25000, client: 'Felipe Acosta', vehicleType: 'Moto', status: 'Disponible', registrationDate: '2024-03-15T10:00:00Z', lastServiceDate: '2025-11-10T08:30:00Z', nextServiceKm: 30000, observations: 'Prefiere repuestos originales.' },
-  { id: 5, plate: 'GHT56F', brand: 'Honda ug', model: '2026', km: 24000, client: 'Miguel Angel Bustos', vehicleType: 'Moto', status: 'Disponible', registrationDate: '2024-05-10T14:20:00Z', lastServiceDate: '2025-11-10T10:00:00Z', nextServiceKm: 25000, observations: 'Motor.' },
-  { id: 6, plate: 'QRS901', brand: 'Honda', model: '2024', km: 14000, client: 'Miguel Angel Bustos', vehicleType: 'Carro', status: 'Disponible', registrationDate: '2023-05-10T14:20:00Z', lastServiceDate: '2024-11-10T10:00:00Z', nextServiceKm: 15000, observations: 'Cadena y frenos revisados.' },
-])
-
-// Persistir vehículos en localStorage cuando cambien
-watch(burnedVehicles, (newVal) => {
-  try {
-    localStorage.setItem(VEHICLES_STORAGE_KEY, JSON.stringify(newVal))
-    console.log('✅ Vehículos guardados en localStorage:', newVal.length)
-  } catch (e) {
-    console.warn('No se pudo persistir vehículos en localStorage', e)
-  }
-}, { deep: true })
-
 const ORDERS_STORAGE_KEY = 'jobscar_orders'
 const ORDERS_STORAGE_VERSION_KEY = 'jobscar_orders_seed_version'
 const ORDERS_SEED_VERSION = 'v1'
@@ -3666,90 +3704,120 @@ function deleteInventoryItem(id: number) {
   if (idx > -1) burnedInventory.splice(idx, 1)
 }
 
-const burnedEmployees = reactive<Employee[]>([
-  { id: 1, name: 'Daniel Olivos', role: 'Mecánico', specialty: 'Motor', phone: '3001112222', status: 'Activo', activeOrders: 12, entryDate: '2024-01-10', notes: '' },
-  { id: 2, name: 'Jorge Suazo', role: 'Mecánico', specialty: 'Frenos', phone: '3002223333', status: 'Activo', activeOrders: 8, entryDate: '2024-02-10', notes: '' },
-  { id: 3, name: 'Fredy Cardozo', role: 'Mecánico', specialty: 'Atención', phone: '3003334444', status: 'Activo', activeOrders: 0, entryDate: '2025-05-01', notes: '' },
-])
+const burnedEmployees = reactive<Employee[]>([])
 
-burnedEmployees.forEach((employee) => {
-  employee.status = 'Activo'
+const mapEmployeeToRow = (employee: Employee): Employee => ({
+  ...employee,
+  status: employee.status || 'Activo',
+  activeOrders: employee.activeOrders ?? 0,
 })
 
-// Employees UI state
-const EMPLOYEES_STORAGE_KEY = 'jobscar_admin_employees'
-const showCreateEmployee = ref(false)
-const showEditEmployee = ref(false)
-const newEmployee = reactive<Employee>({ id: 0, name: '', role: '', specialty: '', phone: '', status: 'Activo', entryDate: '', activeOrders: 0, notes: '' })
-const editingEmployee: Ref<Employee | null> = ref(null)
-
-const nextEmployeeId = (): number => {
-  const ids = Array.isArray(burnedEmployees) ? burnedEmployees.map(e => Number(e.id)).filter(n => Number.isFinite(n)) : []
-  return ids.length ? Math.max(...ids) + 1 : 1
+const loadBurnedEmployees = async (name?: string) => {
+  try {
+    const response = await employeeService.getEmployees(name ? { name } : undefined)
+    const employees = response.data?.employees?.map(mapEmployeeToRow) || []
+    burnedEmployees.splice(0, burnedEmployees.length, ...employees)
+  } catch (error) {
+    console.error('Error cargando empleados desde el backend', error)
+    burnedEmployees.splice(0, burnedEmployees.length)
+  }
 }
 
-function addBurnedEmployee() {
-  if (!newEmployee.name || !newEmployee.role) return
-  const id = nextEmployeeId()
-  const emp: Employee = {
-    id,
-    name: String(newEmployee.name),
-    role: String(newEmployee.role),
-    specialty: newEmployee.specialty || '',
-    phone: newEmployee.phone || '',
-    status: 'Activo',
-    entryDate: newEmployee.entryDate || '',
-    activeOrders: 0,
-    notes: newEmployee.notes || ''
+const showCreateEmployee = ref(false)
+const showEditEmployee = ref(false)
+const newEmployee = reactive<Employee>({
+  id: 0,
+  name: '',
+  role: '',
+  specialty: '',
+  email: '',
+  phone: '',
+  status: 'Activo',
+  entryDate: '',
+  activeOrders: 0,
+  notes: '',
+})
+const editingEmployee: Ref<Employee | null> = ref(null)
+
+const addBurnedEmployee = async () => {
+  if (!newEmployee.name.trim() || !newEmployee.role.trim()) return
+
+  const payload: CreateEmployeeRequest = {
+    name: newEmployee.name.trim(),
+    role: newEmployee.role.trim(),
+    specialty: newEmployee.specialty?.trim() || undefined,
+    email: newEmployee.email?.trim() || undefined,
+    phone: newEmployee.phone?.trim() || undefined,
+    status: newEmployee.status?.trim() || 'Activo',
+    entryDate: newEmployee.entryDate ? new Date(newEmployee.entryDate).toISOString() : undefined,
+    notes: newEmployee.notes?.trim() || undefined,
   }
-  burnedEmployees.push(emp)
-  // reset form
-  newEmployee.name = ''
-  newEmployee.role = ''
-  newEmployee.specialty = ''
-  newEmployee.phone = ''
-  newEmployee.status = 'Activo'
-  newEmployee.entryDate = ''
-  newEmployee.activeOrders = 0
-  newEmployee.notes = ''
-  showCreateEmployee.value = false
+
+  try {
+    const response = await employeeService.createEmployee(payload)
+    if (response.data) {
+      burnedEmployees.unshift(mapEmployeeToRow(response.data))
+      newEmployee.name = ''
+      newEmployee.role = ''
+      newEmployee.specialty = ''
+      newEmployee.email = ''
+      newEmployee.phone = ''
+      newEmployee.status = 'Activo'
+      newEmployee.entryDate = ''
+      newEmployee.activeOrders = 0
+      newEmployee.notes = ''
+      showCreateEmployee.value = false
+    }
+  } catch (error) {
+    console.error('Error creando empleado en el backend', error)
+  }
 }
 
 function editEmployee(emp: Employee) {
-  editingEmployee.value = { ...emp, status: 'Activo', activeOrders: getEmployeeActiveOrders(emp) }
+  editingEmployee.value = mapEmployeeToRow({ ...emp })
   showEditEmployee.value = true
 }
 
-function saveEditedEmployee() {
+const saveEditedEmployee = async () => {
   if (!editingEmployee.value) return
-  const idx = burnedEmployees.findIndex(e => e.id === editingEmployee.value!.id)
-  if (idx > -1) {
-    // replace in place to keep reactivity
-    burnedEmployees.splice(idx, 1, {
-      ...editingEmployee.value,
-      status: 'Activo',
-      activeOrders: getEmployeeActiveOrders(editingEmployee.value)
-    })
+  const employee = { ...editingEmployee.value }
+
+  const payload: UpdateEmployeeRequest = {
+    name: employee.name.trim(),
+    role: employee.role.trim(),
+    specialty: employee.specialty?.trim() || undefined,
+    email: employee.email?.trim() || undefined,
+    phone: employee.phone?.trim() || undefined,
+    status: employee.status?.trim() || 'Activo',
+    entryDate: employee.entryDate ? new Date(employee.entryDate).toISOString() : undefined,
+    notes: employee.notes?.trim() || undefined,
   }
-  editingEmployee.value = null
-  showEditEmployee.value = false
-}
 
-function deleteEmployee(id: number) {
-  if (!confirm('¿Estás seguro de eliminar este empleado?')) return
-  const idx = burnedEmployees.findIndex(e => e.id === id)
-  if (idx > -1) burnedEmployees.splice(idx, 1)
-}
-
-// Persistir empleados en localStorage cuando cambien
-watch(burnedEmployees, (newVal) => {
   try {
-    localStorage.setItem(EMPLOYEES_STORAGE_KEY, JSON.stringify(newVal))
-    console.log('✅ Empleados guardados en localStorage:', newVal.length)
-  } catch (e) {
-    console.warn('No se pudo persistir empleados en localStorage', e)
+    const response = await employeeService.updateEmployee(employee.id, payload)
+    if (response.data) {
+      const updatedEmployee = mapEmployeeToRow(response.data)
+      const idx = burnedEmployees.findIndex((e) => e.id === employee.id)
+      if (idx > -1) burnedEmployees.splice(idx, 1, updatedEmployee)
+      editingEmployee.value = null
+      showEditEmployee.value = false
+    }
+  } catch (error) {
+    console.error('Error actualizando empleado en el backend', error)
   }
-}, { deep: true })
+}
+
+const deleteEmployee = async (id: number) => {
+  if (!confirm('¿Estás seguro de eliminar este empleado?')) return
+
+  try {
+    await employeeService.deleteEmployee(id)
+    const idx = burnedEmployees.findIndex((e) => e.id === id)
+    if (idx > -1) burnedEmployees.splice(idx, 1)
+  } catch (error) {
+    console.error('Error eliminando empleado en el backend', error)
+  }
+}
 
 
 

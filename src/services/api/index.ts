@@ -13,6 +13,7 @@ export * from './wallpaperService'
 export * from './workshopClientService'
 export * from './vehicleService'
 export * from './workOrderService'
+export * from './employeeService'
 
 // Exportar tipos comunes
 export type { ApiResponse, ApiError } from './apiConfig'
@@ -23,3 +24,9 @@ export type {
   CreateCategoryResponse,
   GetCategoriesResponse,
 } from '@/types/CategoryType'
+export type {
+  Employee,
+  EmployeeListData,
+  CreateEmployeeRequest,
+  UpdateEmployeeRequest,
+} from '@/types/EmployeeType'

@@ -46,46 +46,26 @@
             <div class="form-row">
               <div class="form-field">
                 <label for="name">Nombre del cliente</label>
-                <input
-                  id="name"
-                  v-model="clientForm.name"
-                  type="text"
-                  placeholder="Ej: Juan Pérez"
-                  required
-                />
+                <input id="name" v-model="clientForm.name" type="text" placeholder="Ej: Juan Pérez" required />
               </div>
               <div class="form-field">
                 <label for="phone">Teléfono</label>
-                <input
-                  id="phone"
-                  v-model="clientForm.phone"
-                  type="tel"
-                  placeholder="Ej: 300 123 4567"
-                />
+                <input id="phone" v-model="clientForm.phone" type="tel" placeholder="Ej: 300 123 4567" />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-field">
                 <label for="email">Correo electrónico</label>
-                <input
-                  id="email"
-                  v-model="clientForm.email"
-                  type="email"
-                  placeholder="Opcional"
-                />
+                <input id="email" v-model="clientForm.email" type="email" placeholder="Opcional" />
               </div>
             </div>
 
             <div class="form-row">
               <div class="form-field full-width">
                 <label for="notes">Notas internas del cliente</label>
-                <textarea
-                  id="notes"
-                  v-model="clientForm.notes"
-                  rows="2"
-                  placeholder="Ej: Cliente exigente, prefiere que lo llamen antes de cambiar repuestos."
-                ></textarea>
+                <textarea id="notes" v-model="clientForm.notes" rows="2"
+                  placeholder="Ej: Cliente exigente, prefiere que lo llamen antes de cambiar repuestos."></textarea>
               </div>
             </div>
 
@@ -93,23 +73,14 @@
               <button type="submit" class="btn primary">
                 {{ clientForm.id ? 'Guardar cambios' : 'Registrar cliente' }}
               </button>
-              <button
-                v-if="clientForm.id"
-                type="button"
-                class="btn ghost"
-                @click="resetClientForm"
-              >
+              <button v-if="clientForm.id" type="button" class="btn ghost" @click="resetClientForm">
                 Cancelar edición
               </button>
             </div>
           </form>
 
           <div class="client-search">
-            <input
-              v-model="searchTerm"
-              type="text"
-              placeholder="Buscar por nombre, teléfono o correo"
-            />
+            <input v-model="searchTerm" type="text" placeholder="Buscar por nombre, teléfono o correo" />
           </div>
 
           <div class="client-list-wrapper">
@@ -124,12 +95,9 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="client in filteredClients"
-                  :key="client.id"
+                <tr v-for="client in filteredClients" :key="client.id"
                   :class="{ selected: selectedClient && selectedClient.id === client.id }"
-                  @click="selectClient(client)"
-                >
+                  @click="selectClient(client)">
                   <td>
                     <div class="client-main">
                       <span class="client-name">{{ client.name }}</span>
@@ -174,7 +142,8 @@
           <div class="panel-body">
             <section class="detail-section">
               <p class="hint">
-                Usa este catálogo como referencia al crear órdenes de trabajo o al explicar al cliente los paquetes disponibles.
+                Usa este catálogo como referencia al crear órdenes de trabajo o al explicar al cliente los paquetes
+                disponibles.
               </p>
               <div class="services-grid">
                 <article class="service-card premium">
@@ -269,97 +238,80 @@
 
           <div class="panel-body">
             <!-- Secciones que dependen del cliente seleccionado -->
-            <section
-              v-if="selectedClient"
-              class="detail-section"
-              id="admin-vehicles"
-            >
-            <h3>Vehículos del cliente</h3>
-            <div v-if="vehiclesLoading" class="loading-text">Cargando vehículos...</div>
-            <div v-else-if="clientVehicles.length === 0" class="empty-state small">
-              <p>Este cliente aún no tiene vehículos registrados.</p>
-            </div>
-            <ul v-else class="vehicle-list">
-              <li
-                v-for="vehicle in clientVehicles"
-                :key="vehicle.id"
-                :class="{ selected: selectedVehicle && selectedVehicle.id === vehicle.id }"
-                @click="selectVehicle(vehicle)"
-              >
-                <div class="vehicle-main">
-                  <span class="vehicle-plate">{{ vehicle.plate }}</span>
-                  <span class="vehicle-model">{{ vehicle.brand }} {{ vehicle.model }} • {{ vehicle.year }}</span>
-                </div>
-                <div class="vehicle-meta">
-                  <span v-if="vehicle.mileage" class="vehicle-mileage">{{ vehicle.mileage }} km</span>
-                  <span v-if="vehicle.notes" class="vehicle-notes">{{ vehicle.notes }}</span>
-                </div>
-              </li>
-            </ul>
+            <section v-if="selectedClient" class="detail-section" id="admin-vehicles">
+              <h3>Vehículos del cliente</h3>
+              <div v-if="vehiclesLoading" class="loading-text">Cargando vehículos...</div>
+              <div v-else-if="clientVehicles.length === 0" class="empty-state small">
+                <p>Este cliente aún no tiene vehículos registrados.</p>
+              </div>
+              <ul v-else class="vehicle-list">
+                <li v-for="vehicle in clientVehicles" :key="vehicle.id"
+                  :class="{ selected: selectedVehicle && selectedVehicle.id === vehicle.id }"
+                  @click="selectVehicle(vehicle)">
+                  <div class="vehicle-main">
+                    <span class="vehicle-plate">{{ vehicle.plate }}</span>
+                    <span class="vehicle-model">{{ vehicle.brand }} {{ vehicle.model }} • {{ vehicle.year }}</span>
+                  </div>
+                  <div class="vehicle-meta">
+                    <span v-if="vehicle.mileage" class="vehicle-mileage">{{ vehicle.mileage }} km</span>
+                    <span v-if="vehicle.notes" class="vehicle-notes">{{ vehicle.notes }}</span>
+                  </div>
+                </li>
+              </ul>
 
-            <h3 class="services-subtitle">Historial de servicios del vehículo</h3>
-            <div v-if="!selectedVehicle" class="empty-state small">
-              <p>Selecciona un vehículo para ver sus servicios realizados.</p>
-            </div>
-            <div v-else-if="workOrdersLoading" class="loading-text">Cargando historial...</div>
-            <div
-              v-else-if="vehicleWorkOrders.length === 0"
-              class="empty-state small"
-            >
-              <p>Este vehículo aún no tiene servicios registrados.</p>
-            </div>
-            <ul v-else class="workorder-list">
-              <li v-for="order in vehicleWorkOrders" :key="order.id" class="workorder-item">
-                <div class="workorder-header">
-                  <span class="status" :class="order.status">{{ formatStatus(order.status) }}</span>
-                  <span class="date">{{ formatDate(order.createdAt) }}</span>
-                </div>
-                <p class="diagnosis">{{ order.initialDiagnosis || 'Sin diagnóstico registrado' }}</p>
-                <div class="workorder-meta">
-                  <span v-if="order.customerApproved" class="chip approved">Aprobado por el cliente</span>
-                  <span v-if="order.closedAt" class="chip date">Cerrada: {{ formatDate(order.closedAt) }}</span>
-                </div>
-              </li>
-            </ul>
-          </section>
+              <h3 class="services-subtitle">Historial de servicios del vehículo</h3>
+              <div v-if="!selectedVehicle" class="empty-state small">
+                <p>Selecciona un vehículo para ver sus servicios realizados.</p>
+              </div>
+              <div v-else-if="workOrdersLoading" class="loading-text">Cargando historial...</div>
+              <div v-else-if="vehicleWorkOrders.length === 0" class="empty-state small">
+                <p>Este vehículo aún no tiene servicios registrados.</p>
+              </div>
+              <ul v-else class="workorder-list">
+                <li v-for="order in vehicleWorkOrders" :key="order.id" class="workorder-item">
+                  <div class="workorder-header">
+                    <span class="status" :class="order.status">{{ formatStatus(order.status) }}</span>
+                    <span class="date">{{ formatDate(order.createdAt) }}</span>
+                  </div>
+                  <p class="diagnosis">{{ order.initialDiagnosis || 'Sin diagnóstico registrado' }}</p>
+                  <div class="workorder-meta">
+                    <span v-if="order.customerApproved" class="chip approved">Aprobado por el cliente</span>
+                    <span v-if="order.closedAt" class="chip date">Cerrada: {{ formatDate(order.closedAt) }}</span>
+                  </div>
+                </li>
+              </ul>
+            </section>
 
-          <section v-if="selectedClient" class="detail-section">
-            <h3>Recordatorios del vehículo</h3>
-            <p class="hint">
-              Usa estas notas rápidas para no olvidar mantenimientos, revisiones o SOAT.
-            </p>
-            <ul class="reminder-list">
-              <li>Próximo cambio de aceite</li>
-              <li>Revisión técnica / mecánica</li>
-              <li>Vencimiento del SOAT</li>
-            </ul>
-            <textarea
-              v-model="reminderNotes"
-              rows="3"
-              class="reminder-notes"
-              placeholder="Ej: Revisar suspensión delantera en la próxima visita."
-            ></textarea>
-          </section>
+            <section v-if="selectedClient" class="detail-section">
+              <h3>Recordatorios del vehículo</h3>
+              <p class="hint">
+                Usa estas notas rápidas para no olvidar mantenimientos, revisiones o SOAT.
+              </p>
+              <ul class="reminder-list">
+                <li>Próximo cambio de aceite</li>
+                <li>Revisión técnica / mecánica</li>
+                <li>Vencimiento del SOAT</li>
+              </ul>
+              <textarea v-model="reminderNotes" rows="3" class="reminder-notes"
+                placeholder="Ej: Revisar suspensión delantera en la próxima visita."></textarea>
+            </section>
 
-          <section
-            v-if="selectedClient"
-            class="detail-section"
-            id="admin-reports"
-          >
-            <h3>Reportes del taller</h3>
-            <p class="hint">
-              Aquí verás un resumen de servicios realizados, tickets abiertos y facturación del taller.
-            </p>
-            <div class="empty-state small">
+            <section v-if="selectedClient" class="detail-section" id="admin-reports">
+              <h3>Reportes del taller</h3>
+              <p class="hint">
+                Aquí verás un resumen de servicios realizados, tickets abiertos y facturación del taller.
+              </p>
+              <div class="empty-state small">
                 <p>La sección de reportes está en construcción para esta vista.</p>
-            </div>
-          </section>
+              </div>
+            </section>
 
-          <div v-if="!selectedClient" class="empty-state">
-            <p>Selecciona un cliente en la tabla de la izquierda para ver sus vehículos y su historial de servicios.</p>
-            <p class="empty-hint">El catálogo de servicios ya está disponible en el panel superior de servicios.</p>
+            <div v-if="!selectedClient" class="empty-state">
+              <p>Selecciona un cliente en la tabla de la izquierda para ver sus vehículos y su historial de servicios.
+              </p>
+              <p class="empty-hint">El catálogo de servicios ya está disponible en el panel superior de servicios.</p>
+            </div>
           </div>
-        </div>
         </section>
       </section>
     </main>
@@ -546,7 +498,8 @@ const loadVehiclesForClient = async (clientId: number) => {
   try {
     vehiclesLoading.value = true;
     const response = await vehicleService.getVehicles({ clientId });
-    clientVehicles.value = response.data || [];
+    const allVehicles = response.data?.vehicles || [];
+    clientVehicles.value = allVehicles.filter((vehicle) => vehicle.clientId === clientId);
   } catch (error) {
     console.error('Error cargando vehículos', error);
   } finally {
