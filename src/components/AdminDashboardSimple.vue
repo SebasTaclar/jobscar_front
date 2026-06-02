@@ -2597,7 +2597,7 @@ import { reactive, ref, computed, onMounted, onBeforeUnmount, watch, nextTick, t
 import { useProducts, type ShowcaseProduct } from '@/composables/useProducts'
 import type { Product } from '@/types/ProductType'
 import type { Category, CreateCategoryRequest } from '@/types/CategoryType'
-import { workshopClientService, vehicleService, employeeService } from '@/services/api'
+import { workshopClientService, vehicleService, employeeService, workOrderService } from '@/services/api'
 import { paymentService } from '@/services/api/paymentService'
 import type { Purchase, ProductPaymentItem } from '@/services/api/paymentService'
 import type {
@@ -3202,45 +3202,46 @@ const tabs = [
   { id: 'agenda', name: 'Agenda', icon: '📅' },
   { id: 'reports', name: 'Dashboard', icon: '📊' }
 ]
-const ORDERS_STORAGE_KEY = 'jobscar_orders'
-const ORDERS_STORAGE_VERSION_KEY = 'jobscar_orders_seed_version'
-const ORDERS_SEED_VERSION = 'v1'
+const burnedOrders = reactive<any[]>([])
 
-const _storedOrders = (() => {
-  try {
-    const savedVer = localStorage.getItem(ORDERS_STORAGE_VERSION_KEY)
-    if (savedVer !== ORDERS_SEED_VERSION) {
-      localStorage.removeItem(ORDERS_STORAGE_KEY)
-      localStorage.setItem(ORDERS_STORAGE_VERSION_KEY, ORDERS_SEED_VERSION)
-    }
-    const raw = localStorage.getItem(ORDERS_STORAGE_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch (e) {
-    console.warn('No se pudo leer órdenes desde localStorage', e)
-    return null
+const mapApiWorkOrderToDashboardOrder = (order: any) => {
+  const services = Array.isArray(order?.services) ? order.services.filter(Boolean).map((service: any) => String(service).trim()) : []
+  const createdDate = order?.createdAt ? String(order.createdAt).slice(0, 10) : ''
+  return {
+    id: order?.id,
+    vehicle: order?.vehicle?.plate || String(order?.vehicleId || ''),
+    client: order?.vehicle?.client || '',
+    diagnosis: order?.diagnosis || '',
+    services,
+    parts: [],
+    mechanic: order?.mechanicId ? String(order.mechanicId) : '',
+    mechanicId: order?.mechanicId || null,
+    vehicleId: order?.vehicleId || null,
+    status: order?.status || 'Recepción',
+    serviceType: services[0] || 'General',
+    mileage: 0,
+    total: Number(order?.total) || 0,
+    observations: order?.observations || '',
+    garantia: Number(order?.garantia) || 0,
+    createdDate,
+    deliveryDate: order?.deliveryDate ? String(order.deliveryDate).slice(0, 10) : null,
+    deliveryTime: '',
+    gases: Boolean(order?.gases),
+    escaner: Boolean(order?.escaner),
+    backendId: order?.id,
   }
-})()
+}
 
-const burnedOrders = reactive(_storedOrders || [
-  { id: 1, vehicle: 'ABC123', client: 'Juan Pérez', diagnosis: 'Cambio de aceite y revisión general', services: ['Cambio aceite', 'Revisión'], parts: ['Filtro aceite'], mechanic: 'Pedro', status: 'Terminado', serviceType: 'Mantenimiento', mileage: 45200, total: 150000, createdDate: '2026-04-01', deliveryDate: '2026-04-10', deliveryTime: '09:00' },
-  { id: 2, vehicle: 'XYZ789', client: 'María Gómez', diagnosis: 'Frenos hacen ruido', services: ['Revisión frenos'], parts: ['Pastillas de freno'], mechanic: 'Luis', status: 'En proceso', serviceType: 'Reparación de frenos', mileage: 32000, total: 220000, createdDate: '2026-04-03', deliveryDate: '2026-04-10', deliveryTime: '11:00' },
-  { id: 3, vehicle: 'JKL456', client: 'Carlos Ramírez', diagnosis: 'Ingreso para revisión inicial', services: [], parts: [], mechanic: '', status: 'Recepción', serviceType: 'Diagnóstico', mileage: 60000, total: 0, createdDate: '2026-04-15', deliveryDate: null },
-  { id: 4, vehicle: 'YIB14F', client: 'Felipe Acosta', diagnosis: 'Revisión sistema eléctrico', services: ['Inspección eléctrica'], parts: ['Conector'], mechanic: 'Ana', status: 'Diagnóstico', serviceType: 'Inspección', mileage: 25000, total: 80000, createdDate: '2026-04-18', deliveryDate: '2026-04-20', deliveryTime: '10:30' },
-  { id: 5, vehicle: 'GHT56F', client: 'Miguel Angel Bustos', diagnosis: 'Ajuste de suspensión y alineación', services: ['Ajuste suspensión', 'Alineación'], parts: ['Amortiguadores'], mechanic: 'Carlos', status: 'Entregado', serviceType: 'Reparación', mileage: 24000, total: 320000, createdDate: '2026-04-05', deliveryDate: '2026-04-15', deliveryTime: '15:00' },
-  { id: 6, vehicle: 'GHT56F', client: 'Miguel Angel Bustos', diagnosis: 'Ajuste de suspensión y alineación', services: ['Ajuste suspensión', 'Alineación'], parts: ['Amortiguadores'], mechanic: 'Carlos', status: 'Entregado', serviceType: 'Reparación', mileage: 24000, total: 320000, createdDate: '2026-04-07', deliveryDate: '2026-04-17', deliveryTime: '09:00' },
-  { id: 7, vehicle: 'GHT56F', client: 'Miguel Angel Bustos', diagnosis: 'Ajuste de suspensión y alineación', services: ['Ajuste suspensión', 'Alineación'], parts: ['Amortiguadores'], mechanic: 'Carlos', status: 'En proceso', serviceType: 'Reparación', mileage: 24000, total: 320000, createdDate: '2026-04-19', deliveryDate: null }
-])
-
-// Persistir órdenes en localStorage cuando cambien
-watch(burnedOrders, (newVal) => {
+const refreshWorkOrders = async () => {
   try {
-    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(newVal))
-    try { localStorage.setItem(ORDERS_STORAGE_VERSION_KEY, ORDERS_SEED_VERSION) } catch (e) { }
-    console.log('✅ Órdenes guardadas en localStorage:', newVal.length)
-  } catch (e) {
-    console.warn('No se pudo persistir órdenes en localStorage', e)
+    const response = await workOrderService.getWorkOrders()
+    const apiOrders = response.data?.workOrders || []
+    burnedOrders.splice(0, burnedOrders.length, ...apiOrders.map(mapApiWorkOrderToDashboardOrder))
+  } catch (error) {
+    console.error('No se pudieron cargar las órdenes reales', error)
+    burnedOrders.splice(0, burnedOrders.length)
   }
-}, { deep: true })
+}
 
 const INVOICES_STORAGE_KEY = 'jobscar_invoices'
 const INVOICES_STORAGE_VERSION_KEY = 'jobscar_invoices_seed_version'
@@ -3991,12 +3992,15 @@ function createAgendaEvent(dateIso: string, time: string, payload: any) {
   alert('Cita creada: ' + dateIso + ' ' + time)
 }
 
-function scheduleOrder(orderId: number | string, dateIso: string, time: string) {
-  const idx = burnedOrders.findIndex((o: any) => o.id === orderId)
-  if (idx === -1) return
-  const updated = { ...burnedOrders[idx], deliveryDate: dateIso, deliveryTime: time }
-  burnedOrders.splice(idx, 1, updated)
-  alert('Orden agendada: ' + dateIso + ' ' + time)
+async function scheduleOrder(orderId: number | string, dateIso: string, time: string) {
+  try {
+    await workOrderService.updateWorkOrder(Number(orderId), { deliveryDate: dateIso })
+    await refreshWorkOrders()
+    alert('Orden agendada: ' + dateIso + ' ' + time)
+  } catch (error) {
+    console.error('No se pudo agendar la orden', error)
+    alert('No se pudo agendar la orden')
+  }
 }
 
 function autoScheduleOrder(orderId: number | string) {
@@ -4014,30 +4018,18 @@ function autoScheduleOrder(orderId: number | string) {
   alert('No se encontró hueco en los próximos 30 días')
 }
 
-function createOrderFromCalendar(dateIso: string, time: string, payload: any) {
+async function createOrderFromCalendar(dateIso: string, time: string, payload: any) {
   // payload: vehicle, client, serviceType, mechanic, total, diagnosis
-  const id = nextOrderId()
-  const todayIso = (new Date()).toISOString().slice(0, 10)
-  const orderObj = {
-    id,
-    vehicle: String(payload.vehicle || ''),
-    client: String(payload.client || ''),
-    status: String(payload.status || 'Recepción'),
-    serviceType: String(payload.serviceType || ''),
-    services: Array.isArray(payload.services) ? payload.services.slice() : [],
-    parts: Array.isArray(payload.parts) ? payload.parts.slice() : [],
-    mechanic: String(payload.mechanic || ''),
-    mileage: payload.mileage || 0,
-    total: Number(payload.total) || 0,
-    diagnosis: String(payload.diagnosis || ''),
-    createdDate: todayIso,
-    deliveryDate: dateIso,
-    deliveryTime: time
+  try {
+    const request = buildWorkOrderPayload({ ...payload, deliveryDate: dateIso })
+    const response = await workOrderService.createWorkOrder(request)
+    await refreshWorkOrders()
+    Object.assign(newCalendarOrder, { vehicle: '', client: '', serviceType: '', mechanic: '', total: 0, diagnosis: '' })
+    alert('Orden creada y agendada: #' + (response.data?.id || 'N/A'))
+  } catch (error) {
+    console.error('No se pudo crear la orden desde el calendario', error)
+    alert(error instanceof Error ? error.message : 'No se pudo crear la orden')
   }
-  burnedOrders.push(orderObj)
-  // limpiar form
-  Object.assign(newCalendarOrder, { vehicle: '', client: '', serviceType: '', mechanic: '', total: 0, diagnosis: '' })
-  alert('Orden creada y agendada: #' + id)
 }
 
 
@@ -4535,6 +4527,7 @@ function clearPrintOrder() {
 
 onMounted(() => {
   window.addEventListener('afterprint', clearPrintOrder)
+  refreshWorkOrders()
 })
 
 onBeforeUnmount(() => {
@@ -4546,6 +4539,47 @@ const nextOrderId = (): number => {
   return ids.length ? Math.max(...ids) + 1 : 1
 }
 
+function resolveVehicleIdByPlate(plate: string): number | null {
+  const normalizedPlate = String(plate || '').trim().toUpperCase()
+  if (!normalizedPlate || !Array.isArray(burnedVehicles)) return null
+  const vehicle = burnedVehicles.find((entry: any) => String(entry.plate || '').trim().toUpperCase() === normalizedPlate)
+  return vehicle?.id ? Number(vehicle.id) : null
+}
+
+function resolveMechanicIdByName(name: string): number | null {
+  const normalizedName = String(name || '').trim().toLowerCase()
+  if (!normalizedName || !Array.isArray(burnedEmployees)) return null
+  const employee = burnedEmployees.find((entry: any) => String(entry.name || '').trim().toLowerCase() === normalizedName)
+  return employee?.id ? Number(employee.id) : null
+}
+
+function buildWorkOrderPayload(source: any) {
+  const vehicleId = Number(source?.vehicleId || resolveVehicleIdByPlate(source?.vehicle || ''))
+  const mechanicId = Number(source?.mechanicId || resolveMechanicIdByName(source?.mechanic || ''))
+
+  if (!vehicleId) {
+    throw new Error('No se pudo resolver el vehículo para la orden')
+  }
+
+  if (!mechanicId) {
+    throw new Error('Selecciona un técnico válido para la orden')
+  }
+
+  return {
+    vehicleId,
+    mechanicId,
+    status: String(source?.status || 'Recepción'),
+    services: getOrderServiceChips(source),
+    gases: Boolean(source?.gases),
+    escaner: Boolean(source?.escaner),
+    observations: String(source?.observations || ''),
+    diagnosis: String(source?.diagnosis || ''),
+    deliveryDate: source?.deliveryDate || undefined,
+    garantia: Number(source?.garantia) || 0,
+    total: Number(source?.total) || 0
+  }
+}
+
 function openCreateOrder() {
   Object.assign(newOrder, { vehicle: '', client: '', status: 'Recepción', serviceType: '', services: [], parts: [], mechanic: '', mileage: null, total: 0, diagnosis: '', observations: '', garantia: 0, gases: false, escaner: false })
   orderPlateSearch.value = ''
@@ -4553,15 +4587,17 @@ function openCreateOrder() {
   showCreateOrder.value = true
 }
 
-function createOrder() {
-  if (!newOrder.vehicle || !newOrder.client) { alert('Placa y cliente son requeridos'); return }
-  const id = nextOrderId()
-  const todayIso = (new Date()).toISOString().slice(0, 10)
-  const created = newOrder.createdDate ? String(newOrder.createdDate) : todayIso
-  burnedOrders.push({ id, vehicle: String(newOrder.vehicle), client: String(newOrder.client), status: String(newOrder.status), serviceType: String(newOrder.serviceType), services: Array.isArray(newOrder.services) ? newOrder.services.slice() : [], parts: Array.isArray(newOrder.parts) ? newOrder.parts.slice() : [], mechanic: String(newOrder.mechanic), mileage: newOrder.mileage || 0, total: Number(newOrder.total) || 0, diagnosis: String(newOrder.diagnosis), observations: String(newOrder.observations || ''), garantia: Number(newOrder.garantia) || 0, gases: Boolean(newOrder.gases), escaner: Boolean(newOrder.escaner), createdDate: created, deliveryDate: newOrder.deliveryDate || null })
-  // limpiar formulario
-  Object.assign(newOrder, { vehicle: '', client: '', status: 'Recepción', serviceType: '', services: [], parts: [], mechanic: '', mileage: null, total: 0, diagnosis: '', observations: '', garantia: 0, createdDate: '', deliveryDate: '', gases: false, escaner: false })
-  showCreateOrder.value = false
+async function createOrder() {
+  try {
+    const payload = buildWorkOrderPayload(newOrder)
+    await workOrderService.createWorkOrder(payload)
+    await refreshWorkOrders()
+    Object.assign(newOrder, { vehicle: '', client: '', status: 'Recepción', serviceType: '', services: [], parts: [], mechanic: '', mileage: null, total: 0, diagnosis: '', observations: '', garantia: 0, createdDate: '', deliveryDate: '', gases: false, escaner: false })
+    showCreateOrder.value = false
+  } catch (error) {
+    console.error('No se pudo crear la orden', error)
+    alert(error instanceof Error ? error.message : 'No se pudo crear la orden')
+  }
 }
 
 function editOrder(order: any) {
@@ -4578,18 +4614,29 @@ function editOrder(order: any) {
   showEditOrder.value = true
 }
 
-function saveEditedOrder() {
+async function saveEditedOrder() {
   if (!editingOrder.value) return
-  const idx = burnedOrders.findIndex((o: any) => o.id === editingOrder.value.id)
-  if (idx > -1) burnedOrders.splice(idx, 1, { ...editingOrder.value })
-  showEditOrder.value = false
-  editingOrder.value = null
+  try {
+    const payload = buildWorkOrderPayload(editingOrder.value)
+    await workOrderService.updateWorkOrder(editingOrder.value.id, payload)
+    await refreshWorkOrders()
+    showEditOrder.value = false
+    editingOrder.value = null
+  } catch (error) {
+    console.error('No se pudo actualizar la orden', error)
+    alert(error instanceof Error ? error.message : 'No se pudo actualizar la orden')
+  }
 }
 
-function deleteOrder(id: number) {
+async function deleteOrder(id: number) {
   if (!confirm('¿Estás seguro de eliminar esta orden?')) return
-  const idx = burnedOrders.findIndex((o: any) => o.id === id)
-  if (idx > -1) burnedOrders.splice(idx, 1)
+  try {
+    await workOrderService.deleteWorkOrder(id)
+    await refreshWorkOrders()
+  } catch (error) {
+    console.error('No se pudo eliminar la orden', error)
+    alert('No se pudo eliminar la orden')
+  }
 }
 
 function statusClass(status: string) {
