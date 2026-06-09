@@ -1,6 +1,6 @@
 // Configuración base para la API
 export const API_CONFIG = {
-  baseURL: false //import.meta.env.DEV // false
+  baseURL: import.meta.env.DEV
     ? 'http://localhost:7071/api/v1'
     : 'https://jobscar-back-ccf0a8d7bqc5fjgk.centralus-01.azurewebsites.net/api/v1',
   timeout: 10000,

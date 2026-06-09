@@ -7,6 +7,13 @@
       </h1>
       <p class="dashboard-subtitle">Gestiona clientes, servicios, vehículos y reportes del taller</p>
     </div>
+
+
+
+    <!-- ==========================================================
+         NAVEGACIÓN POR PESTAÑAS
+          Permite cambiar entre secciones de clientes, vehículos y órdenes
+    ========================================================== -->
     <!-- Navegación por pestañas -->
     <div class="tabs-container">
       <div class="tabs">
@@ -35,20 +42,30 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Placa</label>
-                  <input v-model="editingVehicle.plate" type="text" class="form-input" />
+                  <input v-model="editingVehicle.plate" type="text" class="form-input" style="text-transform: uppercase;" placeholder="Ej: ABC123" />
                 </div>
                 <div class="form-group">
                   <label>Marca</label>
-                  <input v-model="editingVehicle.brand" type="text" class="form-input" />
+                  <input v-model="editingVehicle.brand" type="text" class="form-input" style="text-transform: uppercase;" placeholder="Ej: TOYOTA" />
                 </div>
               </div>
               <div class="form-group">
                 <label>Modelo</label>
-                <input v-model="editingVehicle.model" type="text" class="form-input" />
+                <input v-model="editingVehicle.model" type="text" class="form-input" style="text-transform: uppercase;" placeholder="Ej: COROLLA 2022" />
               </div>
-              <div class="form-group">
-                <label>Km Actual</label>
-                <input v-model="editingVehicle.km" type="number" class="form-input" />
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Km Actual</label>
+                  <input v-model="editingVehicle.km" type="number" class="form-input" placeholder="Ej: 45000" />
+                </div>
+                <div class="form-group">
+                  <label>Tipo Vehículo</label>
+                  <select v-model="editingVehicle.vehicleType" class="form-input">
+                    <option value="">Seleccionar tipo</option>
+                    <option value="Automovil">Automóvil</option>
+                    <option value="Camioneta">Camioneta</option>
+                  </select>
+                </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -62,7 +79,7 @@
               </div>
               <div class="form-group">
                 <label>Observaciones</label>
-                <textarea v-model="editingVehicle.observations" class="form-input" rows="3"></textarea>
+                <textarea v-model="editingVehicle.observations" class="form-input" rows="3" placeholder="Ej: Revisión general al ingresar, detalles de daños visibles..."></textarea>
               </div>
               <div class="form-actions">
                 <button type="button" class="btn btn-secondary" @click="showEditVehicle = false">Cancelar</button>
@@ -74,6 +91,13 @@
       </div>
     </div>
 
+
+
+    <!-- ==========================================================
+         ESTADÍSTICAS RÁPIDAS DEL TALLER
+          Muestra datos clave como número de clientes, órdenes activas
+          y vehículos atendidos para una visión general rápida.
+    ========================================================== -->
     <!-- Estadísticas rápidas del taller -->
     <div class="stats-grid">
       <div class="stat-card">
@@ -97,74 +121,180 @@
           <div class="stat-label">Vehículos atendidos</div>
         </div>
       </div>
-
     </div>
 
 
 
-    <!-- Pestaña: Clientes
+    <!-- ==========================================================
+         PESTAÑA: CLIENTES
+         Muestra el listado de clientes registrados con opciones
+         para crear, editar, eliminar y buscar clientes.
+         ========================================================== -->
+    <!-- Pestaña: Clientes (versión tarjetas - comentada) -->
+
     <div v-if="activeTab === 'clients'" class="content-section">
-      <div class="section-title-bar">
-        <h2 class="section-title">👥 Clientes</h2>
-      </div>
-      <div class="clients-grid">
-        <div v-for="client in burnedClients" :key="client.id" class="pro-card client-card">
-          <div class="card-header">
-            <div class="avatar-large">{{ client.name.charAt(0).toUpperCase() }}</div>
-            <div class="type-badge" :class="client.type">{{ client.type }}</div>
-          </div>
-          <h3 class="card-title">{{ client.name }}</h3>
-          <div class="card-body">
-            <p class="info-row"><span class="label">📞</span> {{ client.phone }}</p>
-            <p class="info-row"><span class="label">✉️</span> {{ client.email }}</p>
-            <p class="info-row highlight"><span class="label">🔔</span> {{ getReminderTypeDisplay(client) }}</p>
-            <p class="info-row note"><span class="label">📝</span> {{ client.notes }}</p>
-          </div>
-          <div class="card-footer">
-            <div class="stat"><strong>{{ client.totalOrders }}</strong> órdenes</div>
-            <div class="stat"><strong>${{ (client.totalSpent / 1000).toFixed(0) }}k</strong> gastado</div>
+      <div class="section-header" style="display:grid;grid-template-columns:1fr minmax(260px,420px) auto;align-items:center;gap:12px;">
+        <h2>Clientes</h2>
+        <div style="justify-self:center;">
+          <div class="search-input-wrapper" style="max-width:420px;">
+            <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path fill="currentColor"
+                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
+            </svg>
+            <input type="search" v-model="searchClients" placeholder="Buscar clientes..." aria-label="Buscar clientes"
+              class="search-input" />
+            <button v-if="searchClients" class="search-clear" @click.prevent="searchClients = ''"
+              aria-label="Limpiar búsqueda">X</button>
           </div>
         </div>
+        <div style="justify-self:end;">
+          <button class="btn btn-primary" @click="showCreateClient = true">➕ Crear Cliente</button>
+        </div>
       </div>
-    </div> -->
 
-    <!-- Pestaña: Servicios -->
-    <div v-if="activeTab === 'services'" class="content-section">
-      <div class="section-title-bar">
-        <h2 class="section-title">🛠️ Servicios</h2>
-      </div>
-      <div class="services-grid">
-        <div v-for="service in burnedServices" :key="service.id" class="pro-card service-card">
-          <h3 class="card-title">{{ service.name }}</h3>
-          <p class="card-description">{{ service.description }}</p>
-          <div class="card-footer">
-            <span class="price-badge">${{ service.price.toLocaleString() }}</span>
-            <span class="status-badge available">{{ service.status }}</span>
+      <!-- Modal para crear cliente (mantener) -->
+      <div v-if="showCreateClient" class="modal-overlay" @click="showCreateClient = false">
+        <div class="modal" @click.stop>
+          <div class="modal-header">
+            <h3>Registrar Cliente</h3>
+            <button class="modal-close" @click="showCreateClient = false">✕</button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="addBurnedClient">
+              <div class="form-group">
+                <label>Nombre *</label>
+                <input v-model="newClient.name" type="text" class="form-input" required
+                  placeholder="Ej: Juan Pérez" />
+              </div>
+              <div class="form-group">
+                <label>Teléfono</label>
+                <input v-model="newClient.phone" type="text" class="form-input" placeholder="Ej: 3001234567" />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input v-model="newClient.email" type="email" class="form-input" placeholder="Ej: juan@email.com" />
+              </div>
+              <div class="form-group">
+                <label>Notas internas</label>
+                <textarea v-model="newClient.notes" class="form-input" rows="2"
+                  placeholder="Ej: Cliente exigente, siempre paga tarde"></textarea>
+              </div>
+              <!-- Campos de aviso removidos según requerimiento -->
+              <div class="form-group">
+                <label>Fecha de Registro</label>
+                <input v-model="newClient.registrationDate" type="date" class="form-input" />
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" @click="showCreateClient = false">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Registrar</button>
+              </div>
+            </form>
           </div>
         </div>
+      </div>
+
+      <!-- Modal de edición de cliente -->
+      <div v-if="showEditClient && editingClient" class="modal-overlay" @click="closeEditClient">
+        <div class="modal" @click.stop>
+          <div class="modal-header">
+            <h3>Editar Cliente</h3>
+            <button class="modal-close" @click="closeEditClient">✕</button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="saveEditedClient">
+              <div class="form-group">
+                <label>Nombre *</label>
+                <input v-model="editingClient.name" type="text" class="form-input" required />
+              </div>
+              <div class="form-group">
+                <label>Teléfono</label>
+                <input v-model="editingClient.phone" type="text" class="form-input" />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input v-model="editingClient.email" type="email" class="form-input" />
+              </div>
+              <!-- Campos de aviso removidos en edición -->
+              <div class="form-group">
+                <label>Fecha de Registro</label>
+                <input v-model="editingClient.registrationDate" type="date" class="form-input" />
+              </div>
+              <div class="form-group">
+                <label>Notas</label>
+                <textarea v-model="editingClient.notes" class="form-input" rows="2"></textarea>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" @click="closeEditClient">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de clientes -->
+      <div class="table-responsive" style="margin-top:16px;">
+        <table class="simple-table">
+          <colgroup>
+            <col style="width:20%" /> <!-- Nombre -->
+            <col style="width:14%" /> <!-- Teléfono -->
+            <col style="width:20%" /> <!-- Correo -->
+            <col style="width:14%" /> <!-- Fecha registro -->
+            <col style="width:24%" /> <!-- Notas -->
+            <col style="width:13%" /> <!-- Acciones (fijo) -->
+          </colgroup>
+          <thead class="table-header">
+            <tr>
+              <th>Nombre</th>
+              <th>Teléfono</th>
+              <th>Correo</th>
+              <th>Fecha Registro</th>
+              <th>Notas</th>
+              <th style="text-align:center;">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="client in burnedClients.filter(c => {
+              if (!searchClients) return true
+              const q = searchClients.toLowerCase()
+              return (c.name && c.name.toLowerCase().includes(q)) || (c.email && c.email.toLowerCase().includes(q)) || (c.phone && c.phone.toLowerCase().includes(q))
+            })" :key="client.id">
+              <td data-label="Nombre"><span class="client-name">{{ client.name }}</span></td>
+              <td data-label="Teléfono">{{ client.phone }}</td>
+              <td data-label="Correo"><span class="client-email">{{ client.email }}</span></td>
+              <td data-label="Fecha de Registro">{{ client.registrationDate ? formatShortDate(new
+                Date(client.registrationDate)) : '-' }}</td>
+              <td data-label="Notas"><span class="client-notes">{{ client.notes }}</span></td>
+              <td data-label="Acciones">
+                <div class="actions">
+                  <button class="btn btn-sm btn-secondary" @click="editClient(client)">✏️</button>
+                  <button class="btn btn-sm btn-danger" @click="deleteClient(client.id)">🗑️</button>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="burnedClients.length === 0">
+              <td colspan="6">No hay clientes registrados.</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <!-- Pestaña: Categorías -->
-    <div v-if="activeTab === 'categories'" class="content-section">
-      <div class="section-title-bar">
-        <h2 class="section-title">📂 Categorías</h2>
-      </div>
-      <div class="categories-grid">
-        <div v-for="cat in burnedCategories" :key="cat.id" class="pro-card category-card">
-          <h3 class="card-title">{{ cat.name }}</h3>
-          <p class="card-description">{{ cat.description }}</p>
-        </div>
-      </div>
-    </div>
 
+
+
+    <!-- ==========================================================
+         PESTAÑA: VEHÍCULOS
+         Registro y gestión de vehículos: búsqueda, creación,
+         edición, eliminación y relación con clientes.
+         ========================================================== -->
     <!-- Pestaña: Vehículos -->
     <div v-if="activeTab === 'vehicles'" class="content-section">
       <div class="section-title-bar"
-        style="display:grid;grid-template-columns:1fr minmax(320px,420px) auto;align-items:center;gap:12px;">
+        style="display:grid;grid-template-columns:1fr minmax(360px,560px) auto;align-items:center;gap:12px;">
         <h2 class="section-title">Vehículos</h2>
         <div style="justify-self:center;">
-          <div class="search-input-wrapper" style="max-width:420px;">
+          <div class="search-input-wrapper" style="max-width:560px;">
             <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
               <path fill="currentColor"
                 d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
@@ -183,21 +313,19 @@
       <div class="table-responsive" style="margin-top:16px;">
         <table class="simple-table vehicles-table compact">
           <colgroup>
-            <col style="width:9%" /> <!-- ID Vehículo -->
-            <col style="width:13%" /> <!-- Nombre Cliente -->
+            <col style="width:14%" /> <!-- Nombre Cliente -->
             <col style="width:10%" /> <!-- Placa -->
             <col style="width:10%" /> <!-- Marca -->
-            <col style="width:9%" /> <!-- Modelo -->
-            <col style="width:10%" /> <!-- Tipo Vehículo -->
-            <col style="width:11%" /> <!-- Fecha Registro -->
-            <col style="width:8%" /> <!-- Km Actual -->
-            <col style="width:11%" /> <!-- Último Servicio -->
-            <col style="width:15%" /> <!-- Observaciones -->
-            <col style="width:9%" /> <!-- Acciones -->
+            <col style="width:13%" /> <!-- Modelo -->
+            <col style="width:11%" /> <!-- Tipo Vehículo -->
+            <col style="width:12%" /> <!-- Fecha Registro -->
+            <col style="width:9%" /> <!-- Km Actual -->
+            <col style="width:12%" /> <!-- Último Servicio -->
+            <col style="width:16%" /> <!-- Observaciones -->
+            <col style="width:10%" /> <!-- Acciones -->
           </colgroup>
           <thead class="table-header">
             <tr>
-              <th>ID Vehículo</th>
               <th>Nombre Cliente</th>
               <th>Placa</th>
               <th>Marca</th>
@@ -219,11 +347,10 @@
                 (vehicle.brand && vehicle.brand.toLowerCase().includes(q)) ||
                 (vehicle.model && vehicle.model.toLowerCase().includes(q))
             })" :key="v.plate || idx">
-              <td data-label="ID">{{ v.id || (idx + 1) }}</td>
               <td data-label="Nombre Cliente">{{ v.client || '-' }}</td>
-              <td data-label="Placa">{{ v.plate || '-' }}</td>
-              <td data-label="Marca">{{ v.brand || '-' }}</td>
-              <td data-label="Modelo">{{ v.model || '-' }}</td>
+              <td data-label="Placa" style="text-transform: uppercase;">{{ v.plate || '-' }}</td>
+              <td data-label="Marca" style="text-transform: uppercase;">{{ v.brand || '-' }}</td>
+              <td data-label="Modelo" style="text-transform: uppercase;">{{ v.model || '-' }}</td>
               <td data-label="Tipo Vehículo">{{ v.vehicleType || '-' }}</td>
               <td data-label="Fecha Registro">{{ v.registrationDate ? formatShortDate(new Date(v.registrationDate)) :
                 '-' }}</td>
@@ -240,7 +367,7 @@
               </td>
             </tr>
             <tr v-if="burnedVehicles.length === 0">
-              <td colspan="11">No hay vehículos registrados.</td>
+              <td colspan="10">No hay vehículos registrados.</td>
             </tr>
           </tbody>
         </table>
@@ -269,29 +396,28 @@
               <div class="form-row">
                 <div class="form-group">
                   <label>Placa</label>
-                  <input v-model="newVehicle.plate" type="text" class="form-input" placeholder="ABC123" />
+                  <input v-model="newVehicle.plate" type="text" class="form-input" style="text-transform: uppercase;" placeholder="Ej: ABC123" />
                 </div>
                 <div class="form-group">
                   <label>Marca</label>
-                  <input v-model="newVehicle.brand" type="text" class="form-input" />
+                  <input v-model="newVehicle.brand" type="text" class="form-input" style="text-transform: uppercase;" placeholder="Ej: TOYOTA" />
                 </div>
               </div>
               <div class="form-group">
                 <label>Modelo</label>
-                <input v-model="newVehicle.model" type="text" class="form-input" />
-              </div>
-              <div class="form-group">
-                <label>Km Actual</label>
-                <input v-model="newVehicle.km" type="number" class="form-input" />
+                <input v-model="newVehicle.model" type="text" class="form-input" style="text-transform: uppercase;" placeholder="Ej: COROLLA 2022" />
               </div>
               <div class="form-row">
+                <div class="form-group">
+                  <label>Km Actual</label>
+                  <input v-model="newVehicle.km" type="number" class="form-input" placeholder="Ej: 45000" />
+                </div>
                 <div class="form-group">
                   <label>Tipo Vehículo</label>
                   <select v-model="newVehicle.vehicleType" class="form-input">
                     <option value="">Seleccionar tipo</option>
                     <option value="Automovil">Automóvil</option>
                     <option value="Camioneta">Camioneta</option>
-
                   </select>
                 </div>
               </div>
@@ -307,7 +433,7 @@
               </div>
               <div class="form-group">
                 <label>Observaciones</label>
-                <textarea v-model="newVehicle.observations" class="form-input" rows="3"></textarea>
+                <textarea v-model="newVehicle.observations" class="form-input" rows="3" placeholder="Ej: Revisión general al ingresar, detalles de daños visibles..."></textarea>
               </div>
               <div class="form-actions">
                 <button type="button" class="btn btn-secondary" @click="showCreateVehicle = false">Cancelar</button>
@@ -319,19 +445,39 @@
       </div>
     </div>
 
+
+
+
+    <!-- ==========================================================
+         PESTAÑA: ÓRDENES DE TRABAJO
+         Visualización de órdenes activas e históricas con
+         opciones para crear, editar, eliminar y exportar a PDF.
+         ========================================================== -->
     <!-- Pestaña: Órdenes de trabajo -->
     <div v-if="activeTab === 'orders'" class="content-section">
-      <div class="section-title-bar" style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+      <div class="section-title-bar" style="display:grid;grid-template-columns:1fr minmax(260px,420px) auto;align-items:center;gap:12px;">
         <h2 class="section-title">📝 Órdenes de Trabajo (Activos)</h2>
-        <div>
+        <div style="justify-self:center;">
+          <div class="search-input-wrapper" style="max-width:420px;">
+            <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor"
+                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
+            </svg>
+            <input type="search" v-model="searchOrders" placeholder="Buscar por cliente, placa, estado..."
+              aria-label="Buscar órdenes" class="search-input" />
+            <button v-if="searchOrders" class="search-clear" @click.prevent="searchOrders = ''"
+              aria-label="Limpiar búsqueda">X</button>
+          </div>
+        </div>
+        <div style="justify-self:end;">
           <button class="btn btn-primary" @click="openCreateOrder">➕ Nueva Orden</button>
         </div>
       </div>
 
       <div class="orders-grid orders-row">
-        <div v-if="activeWorkOrders.length === 0" class="empty">No hay órdenes de trabajo activas.</div>
+        <div v-if="filteredActiveWorkOrders.length === 0" class="empty">No hay órdenes de trabajo activas.</div>
         <template v-else>
-          <div v-for="order in activeWorkOrders" :key="order.id"
+          <div v-for="order in filteredActiveWorkOrders" :key="order.id"
             :class="['pro-card', 'order-card', statusClass(order.status)]">
             <div class="order-top-row">
               <span class="order-id-badge">#{{ order.id }}</span>
@@ -343,6 +489,13 @@
                       fill="currentColor" />
                   </svg>
                   Editar
+                </button>
+                <button v-if="isOrderBillable(order.status)" type="button" class="order-action-btn success" @click="openInvoiceForOrder(order)" aria-label="Facturar orden">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M12 2.75a9.25 9.25 0 1 0 9.25 9.25A9.26 9.26 0 0 0 12 2.75Zm0 1.5A7.75 7.75 0 1 1 4.25 12 7.76 7.76 0 0 1 12 4.25Zm-1.1 3.75h2.7a2.35 2.35 0 0 1 0 4.7h-1.1a.85.85 0 0 0 0 1.7h1.8a.75.75 0 0 1 0 1.5h-1.1v1a.75.75 0 0 1-1.5 0v-1h-1.8a.75.75 0 0 1 0-1.5h2.7a.85.85 0 0 0 0-1.7h-1.8a2.35 2.35 0 1 1 0-4.7Z"
+                      fill="currentColor" />
+                  </svg>
+                  {{ findInvoiceByOrderId(order.id) ? 'Actualizar Factura' : 'Facturar' }}
                 </button>
                 <button class="order-action-btn pdf" @click="exportOrderPdf(order)" aria-label="Exportar a PDF">
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -447,22 +600,11 @@
             </div>
 
             <div class="order-bottom-divider"></div>
-
-            <div class="order-total-bar">
-              <span class="order-total-label">Total</span>
-              <span class="order-total-value">${{ Number(order.total || 0).toLocaleString('en-US') }}</span>
-              <span class="order-total-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M12 2.75A9.25 9.25 0 1 0 21.25 12 9.26 9.26 0 0 0 12 2.75Zm0 1.5A7.75 7.75 0 1 1 4.25 12 7.76 7.76 0 0 1 12 4.25Zm-1.1 3.75h2.7a2.35 2.35 0 0 1 0 4.7h-1.1a.85.85 0 0 0 0 1.7h1.8a.75.75 0 0 1 0 1.5h-1.1v1a.75.75 0 0 1-1.5 0v-1h-1.8a.75.75 0 0 1 0-1.5h2.7a.85.85 0 0 0 0-1.7h-1.8a2.35 2.35 0 1 1 0-4.7Z"
-                    fill="currentColor" />
-                </svg>
-              </span>
-            </div>
           </div>
         </template>
       </div>
 
+      <!-- Pestaña: Órdenes de trabajo - Históricas -->
       <div class="section-title-bar" style="margin-top:24px;">
         <h2 class="section-title">📚 Histórico de Órdenes de Trabajo</h2>
       </div>
@@ -471,16 +613,15 @@
           <colgroup>
             <col style="width:8%" /> <!-- ID -->
             <col style="width:10%" /> <!-- Placa -->
-            <col style="width:12%" /> <!-- Fecha creación -->
-            <col style="width:12%" /> <!-- Fecha entrega -->
             <col style="width:12%" /> <!-- Cliente -->
-            <col style="width:16%" /> <!-- Estado -->
-            <col style="width:11%" /> <!-- Tipo servicio -->
+            <col style="width:10%" /> <!-- Fecha creación -->
+            <col style="width:10%" /> <!-- Fecha entrega -->
+            <col style="width:14%" /> <!-- Estado -->
+            <col style="width:10%" /> <!-- Tipo servicio -->
             <col style="width:10%" /> <!-- Técnico -->
             <!-- Kilometraje column removed -->
-            <col style="width:12%" /> <!-- Total -->
-            <col style="width:15%" /> <!-- Diagnóstico / Servicios -->
-            <col style="width:12%" /> <!-- Acciones -->
+            <col style="width:12%" /> <!-- Diagnóstico / Servicios -->
+            <col style="width:18%" /> <!-- Acciones -->
           </colgroup>
           <thead class="table-header">
             <tr>
@@ -493,7 +634,6 @@
               <th>Tipo servicio</th>
               <th>Técnico</th>
               <!-- Kilometraje removed -->
-              <th>Total</th>
               <th>Diagnóstico</th>
               <th>Acciones</th>
             </tr>
@@ -520,7 +660,6 @@
               </td>
               <td data-label="Técnico">{{ order.mechanic || '-' }}</td>
               <!-- Kilometraje removed -->
-              <td data-label="Total">${{ (order.total || 0).toLocaleString() }}</td>
               <td data-label="Diagnóstico / Servicios">
                 <div style="display:flex;align-items:center;gap:8px;justify-content:center;">
                   <button class="btn btn-sm btn-secondary" type="button"
@@ -528,15 +667,16 @@
                 </div>
               </td>
               <td data-label="Acciones">
-                <div class="actions" style="display:flex;gap:6px;justify-content:center;">
-                  <button class="btn btn-sm btn-secondary" @click="editOrder(order)">✏️</button>
-                  <button class="btn btn-sm btn-primary" @click="exportOrderPdf(order)">PDF</button>
-                  <button class="btn btn-sm btn-danger" @click="deleteOrder(order.id)">🗑️</button>
+                <div class="actions" style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;">
+                  <button class="btn btn-sm btn-secondary" type="button" @click="editOrder(order)">✏️</button>
+                  <button v-if="normalizeText(order.status || '') === 'entregado'" class="btn btn-sm btn-success" type="button" @click="openInvoiceForOrder(order)">{{ findInvoiceByOrderId(order.id) ? '✏️ Actualizar' : '💵 Fact.' }}</button>
+                  <button class="btn btn-sm btn-primary" type="button" @click="exportOrderPdf(order)">PDF</button>
+                  <button class="btn btn-sm btn-danger" type="button" @click="deleteOrder(order.id)">🗑️</button>
                 </div>
               </td>
             </tr>
             <tr v-if="historicalWorkOrders.length === 0">
-              <td colspan="11">No hay historial de órdenes.</td>
+              <td colspan="10">No hay historial de órdenes.</td>
             </tr>
           </tbody>
         </table>
@@ -553,18 +693,34 @@
         <div class="modal-body">
           <form @submit.prevent="createOrder">
             <div class="form-row">
-              <div class="form-group"><label>Buscar placa</label><input v-model="orderPlateSearch" type="search"
-                  class="form-input" placeholder="Escribe placa, cliente o marca" /></div>
-              <div class="form-group"><label>Placa</label><select v-model="newOrder.vehicle" class="form-input">
-                  <option value="">Seleccionar placa</option>
-                  <option v-for="v in getOrderPlateOptions(newOrder.vehicle)" :key="v.plate" :value="v.plate">{{ v.plate
-                  }}
-                    · {{ v.client || 'Sin cliente' }} · {{ v.brand || 'Sin marca' }}</option>
-                </select></div>
+              <div class="form-group" style="position:relative;">
+                <label>Placa</label>
+                <input v-model="orderPlateSearch" type="search" class="form-input"
+                  placeholder="Buscar placa, cliente o marca..."
+                  @focus="showPlateDropdownCreate = true"
+                  @blur="blurPlateDropdown(false)" />
+                <div v-if="showPlateDropdownCreate && getOrderPlateOptions(newOrder.vehicle).length"
+                  style="position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:200;background:var(--brand-surface);border:1px solid var(--brand-border);border-radius:8px;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.35);color:var(--brand-primary-contrast);">
+                  <div v-for="v in getOrderPlateOptions(newOrder.vehicle)" :key="v.plate"
+                    @mousedown.prevent="selectPlateForOrder(v, false)"
+                    style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--brand-border);font-size:0.95rem;transition:background 0.15s;"
+                    onmouseenter="this.style.background='var(--brand-bg-end)'"
+                    onmouseleave="this.style.background='transparent'">
+                    <strong>{{ v.plate }}</strong> · {{ v.client || 'Sin cliente' }} · {{ v.brand || 'Sin marca' }}
+                  </div>
+                </div>
+              </div>
+              <div class="form-group"><label>Cliente</label><input :value="newOrder.client || 'No registrado'" class="form-input form-input-readonly" readonly /></div>
             </div>
             <div class="form-row">
-              <div class="form-group"><label>Cliente</label><input v-model="newOrder.client" class="form-input"
-                  placeholder="Se completará si existe placa" /></div>
+              <div class="form-group">
+                <label>Tipo Vehículo</label>
+                <input :value="newOrder.vehicleType || 'No registrado'" class="form-input form-input-readonly" readonly />
+              </div>
+              <div class="form-group">
+                <label>Modelo</label>
+                <input :value="newOrder.vehicleModel || 'No registrado'" class="form-input form-input-readonly" readonly />
+              </div>
               <div class="form-group"><label>Estado</label>
                 <select v-model="newOrder.status" class="form-input">
                   <option>Recepción</option>
@@ -609,6 +765,10 @@
                   <option value="">Seleccionar técnico</option>
                   <option v-for="emp in burnedEmployees" :key="emp.id" :value="emp.name">{{ emp.name }}</option>
                 </select>
+                <label style="display:inline-flex;align-items:center;gap:8px;font-weight:600;margin-top:10px;">
+                  <input type="checkbox" v-model="newOrder.showTechnicianInPdf" />
+                  Mostrar técnico en PDF
+                </label>
               </div>
               <div class="form-group"><label>Fecha entrega (opcional)</label><input v-model="newOrder.deliveryDate"
                   type="date" class="form-input" /></div>
@@ -620,8 +780,6 @@
             <div class="form-row">
               <div class="form-group"><label>Garantía (# veces)</label><input v-model.number="newOrder.garantia"
                   type="number" min="0" class="form-input" /></div>
-              <div class="form-group"><label>Total</label><input v-model.number="newOrder.total" type="number"
-                  class="form-input" /></div>
             </div>
             <div class="form-actions">
               <button type="button" class="btn btn-secondary" @click="showCreateOrder = false">Cancelar</button>
@@ -691,18 +849,35 @@
         <div class="modal-body">
           <form @submit.prevent="saveEditedOrder">
             <div class="form-row">
-              <div class="form-group"><label>Buscar placa</label><input v-model="orderPlateSearch" type="search"
-                  class="form-input" placeholder="Escribe placa, cliente o marca" /></div>
-              <div class="form-group"><label>Placa</label><select v-model="editingOrder.vehicle" class="form-input">
-                  <option value="">Seleccionar placa</option>
-                  <option v-for="v in getOrderPlateOptions(editingOrder.vehicle)" :key="v.plate" :value="v.plate">{{
-                    v.plate
-                  }} · {{ v.client || 'Sin cliente' }} · {{ v.brand || 'Sin marca' }}</option>
-                </select></div>
+              <div class="form-group" style="position:relative;">
+                <label>Placa</label>
+                <input v-model="orderPlateSearch" type="search" class="form-input"
+                  placeholder="Buscar placa, cliente o marca..."
+                  @focus="showPlateDropdownEdit = true"
+                  @blur="blurPlateDropdown(true)" />
+                <div v-if="showPlateDropdownEdit && getOrderPlateOptions(editingOrder.vehicle).length"
+                  style="position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:200;background:var(--brand-surface);border:1px solid var(--brand-border);border-radius:8px;max-height:180px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.35);color:var(--brand-primary-contrast);">
+                  <div v-for="v in getOrderPlateOptions(editingOrder.vehicle)" :key="v.plate"
+                    @mousedown.prevent="selectPlateForOrder(v, true)"
+                    style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--brand-border);font-size:0.95rem;transition:background 0.15s;"
+                    onmouseenter="this.style.background='var(--brand-bg-end)'"
+                    onmouseleave="this.style.background='transparent'">
+                    <strong>{{ v.plate }}</strong> · {{ v.client || 'Sin cliente' }} · {{ v.brand || 'Sin marca' }}
+                  </div>
+                </div>
+              </div>
+              <div class="form-group"><label>Cliente</label><input :value="editingOrder.client || 'No registrado'" class="form-input form-input-readonly" readonly /></div>
             </div>
             <div class="form-row">
-              <div class="form-group"><label>Cliente</label><input v-model="editingOrder.client" class="form-input"
-                  placeholder="Se completará si existe placa" /></div>
+
+              <div class="form-group">
+                <label>Tipo Vehículo</label>
+                <input :value="editingOrder.vehicleType || 'No registrado'" class="form-input form-input-readonly" readonly />
+              </div>
+              <div class="form-group">
+                <label>Modelo</label>
+                <input :value="editingOrder.vehicleModel || 'No registrado'" class="form-input form-input-readonly" readonly />
+              </div>
               <div class="form-group"><label>Estado</label>
                 <select v-model="editingOrder.status" class="form-input">
                   <option>Recepción</option>
@@ -746,6 +921,10 @@
                   <option value="">Seleccionar técnico</option>
                   <option v-for="emp in burnedEmployees" :key="emp.id" :value="emp.name">{{ emp.name }}</option>
                 </select>
+                <label style="display:inline-flex;align-items:center;gap:8px;font-weight:600;margin-top:10px;">
+                  <input type="checkbox" v-model="editingOrder.showTechnicianInPdf" />
+                  Mostrar técnico en PDF
+                </label>
               </div>
               <div class="form-group"><label>Fecha entrega (opcional)</label><input v-model="editingOrder.deliveryDate"
                   type="date" class="form-input" /></div>
@@ -757,8 +936,6 @@
             <div class="form-row">
               <div class="form-group"><label>Garantía (# veces)</label><input v-model.number="editingOrder.garantia"
                   type="number" min="0" class="form-input" /></div>
-              <div class="form-group"><label>Total</label><input v-model.number="editingOrder.total" type="number"
-                  class="form-input" /></div>
             </div>
             <div class="form-actions">
               <button type="button" class="btn btn-secondary" @click="showEditOrder = false">Cancelar</button>
@@ -805,7 +982,7 @@
             <span>Vehículo</span>
             <strong>{{ printOrder.vehicle || '-' }}</strong>
           </div>
-          <div class="so-meta-card">
+          <div v-if="printOrder.showTechnicianInPdf !== false" class="so-meta-card">
             <span>Técnico</span>
             <strong>{{ printOrder.mechanic || '-' }}</strong>
           </div>
@@ -831,6 +1008,15 @@
       </div>
     </div>
 
+
+
+
+
+    <!-- ==========================================================
+         PESTAÑA: FACTURACIÓN
+         Administración de facturas: listado, filtros, creación,
+         edición, cambio de estado y exportación a CSV/PDF.
+         ========================================================== -->
     <!-- Pestaña: Facturación -->
     <div v-if="activeTab === 'invoices'" class="content-section">
       <div class="section-title-bar">
@@ -849,6 +1035,7 @@
             <select v-model="invoiceFilterStatus" class="form-input">
               <option value="">Todos</option>
               <option value="Pendiente">Pendiente</option>
+              <option value="Abonado">Abonado</option>
               <option value="Pagado">Pagado</option>
               <option value="Anulado">Anulado</option>
             </select>
@@ -861,85 +1048,64 @@
       <div class="table-responsive invoices-fullwidth" style="margin-top:12px;">
         <table class="simple-table invoices-table compact">
           <colgroup>
-            <col style="width:40px" />
-            <col style="width:6%" />
-            <col style="width:8%" />
-            <col style="width:17%" />
-            <col style="width:12%" />
-            <col style="width:5%" />
-            <col style="width:10%" />
-            <col style="width:4%" />
             <col style="width:7%" />
+            <col style="width:9%" />
+            <col style="width:14%" />
+            <col style="width:10%" />
             <col style="width:8%" />
-            <col style="width:13%" />
+            <col style="width:10%" />
+            <col style="width:9%" />
+            <col style="width:9%" />
+            <col style="width:9%" />
+            <col style="width:15%" />
           </colgroup>
           <thead class="table-header">
             <tr>
-              <th><input type="checkbox" :checked="selectAllChecked" @change="toggleSelectAllVisible" /></th>
-              <th @click="setSort('id')" style="cursor:pointer">ID <span v-if="sortKey === 'id'">{{ sortDir === -1 ? '▼'
-                :
-                '▲'
-                  }}</span></th>
-              <th @click="setSort('createdAt')" style="cursor:pointer">Fecha <span v-if="sortKey === 'createdAt'">{{
-                sortDir === -1 ? '▼' : '▲' }}</span></th>
-              <th @click="setSort('client')" style="cursor:pointer">Cliente <span v-if="sortKey === 'client'">{{
-                sortDir === -1
-                  ? '▼' : '▲' }}</span></th>
-              <th @click="setSort('vehicle')" style="cursor:pointer">Vehículo <span v-if="sortKey === 'vehicle'">{{
-                sortDir === -1 ? '▼' : '▲' }}</span></th>
-              <th>Items</th>
-              <th @click="setSort('subtotal')" style="cursor:pointer">Subtotal <span v-if="sortKey === 'subtotal'">{{
-                sortDir === -1 ? '▼' : '▲' }}</span></th>
-              <th>IVA</th>
-              <th @click="setSort('total')" style="cursor:pointer">Total <span v-if="sortKey === 'total'">{{ sortDir ===
-                -1
-                ?
-                '▼' : '▲' }}</span></th>
-              <th @click="setSort('status')" style="cursor:pointer">Estado <span v-if="sortKey === 'status'">{{
-                sortDir === -1 ?
-                  '▼' : '▲' }}</span></th>
+              <th @click="setSort('id')" style="cursor:pointer"># Factura <span v-if="sortKey === 'id'">{{ sortDir === -1 ? '▼' : '▲' }}</span></th>
+              <th @click="setSort('createdAt')" style="cursor:pointer">Fecha <span v-if="sortKey === 'createdAt'">{{ sortDir === -1 ? '▼' : '▲' }}</span></th>
+              <th @click="setSort('client')" style="cursor:pointer">Cliente <span v-if="sortKey === 'client'">{{ sortDir === -1 ? '▼' : '▲' }}</span></th>
+              <th @click="setSort('vehicle')" style="cursor:pointer">Vehículo <span v-if="sortKey === 'vehicle'">{{ sortDir === -1 ? '▼' : '▲' }}</span></th>
+              <th>Placa</th>
+              <th @click="setSort('total')" style="cursor:pointer">Total <span v-if="sortKey === 'total'">{{ sortDir === -1 ? '▼' : '▲' }}</span></th>
+              <th @click="setSort('deposit')" style="cursor:pointer">Abono <span v-if="sortKey === 'deposit'">{{ sortDir === -1 ? '▼' : '▲' }}</span></th>
+              <th @click="setSort('balance')" style="cursor:pointer">Saldo <span v-if="sortKey === 'balance'">{{ sortDir === -1 ? '▼' : '▲' }}</span></th>
+              <th @click="setSort('status')" style="cursor:pointer">Estado <span v-if="sortKey === 'status'">{{ sortDir === -1 ? '▼' : '▲' }}</span></th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="invoice in paginatedInvoices" :key="invoice.id">
-              <td data-label="Sel"><input type="checkbox" :checked="selectedInvoices.includes(invoice.id)"
-                  @change="toggleSelectInvoice(invoice.id)" /></td>
-              <td data-label="ID">#{{ invoice.id }}</td>
+              <td data-label="# Factura">#{{ invoice.id }}</td>
               <td data-label="Fecha">{{ invoice.createdAt ? formatShortDate(new Date(invoice.createdAt)) : '-' }}</td>
-              <td data-label="Cliente">{{ invoice.client }}</td>
-              <td data-label="Vehículo">{{ invoice.vehicle || '-' }}</td>
-              <td data-label="Items">{{ Array.isArray(invoice.items) ? invoice.items.length : (invoice.items ||
-                '').toString().split(',').length }}</td>
-              <td data-label="Subtotal">${{ invoiceSubtotal(invoice).toLocaleString() }}</td>
-              <td data-label="IVA">${{ invoiceTax(invoice).toLocaleString() }}</td>
-              <td data-label="Total">${{ invoiceTotal(invoice).toLocaleString() }}</td>
-              <td data-label="Estado"><span class="status-badge" :class="invoice.status.toLowerCase()">{{ invoice.status
-              }}</span></td>
+              <td data-label="Cliente">
+                <strong>{{ invoice.client }}</strong>
+                <div style="color:var(--muted);font-size:0.85rem;">{{ invoice.vehicleBrand || '' }} {{ invoice.vehicleModel || '' }}</div>
+              </td>
+              <td data-label="Vehículo">{{ invoice.vehicleBrand || '-' }} {{ invoice.vehicleModel || '' }}</td>
+              <td data-label="Placa"><span style="text-transform:uppercase;font-weight:700;">{{ invoice.vehicle || '-' }}</span></td>
+              <td data-label="Total"><strong>${{ invoiceTotal(invoice).toLocaleString() }}</strong></td>
+              <td data-label="Abono" :style="{ color: invoiceDepositTotal(invoice) > 0 ? '#22c55e' : 'var(--muted)', fontWeight: invoiceDepositTotal(invoice) > 0 ? '600' : '400' }">${{ invoiceDepositTotal(invoice).toLocaleString() }}</td>
+              <td data-label="Saldo" :style="{ color: (invoiceTotal(invoice) - invoiceDepositTotal(invoice)) > 0 ? '#f59e0b' : '#22c55e', fontWeight: '600' }">${{ (invoiceTotal(invoice) - invoiceDepositTotal(invoice)).toLocaleString() }}</td>
+              <td data-label="Estado"><span class="status-badge" :class="invoice.status.toLowerCase()">{{ invoice.status }}</span></td>
               <td data-label="Acciones">
-                <div class="actions-vertical" style="display:flex;flex-direction:column;gap:6px;align-items:center;">
-                  <div class="actions-row" style="display:flex;gap:6px;justify-content:center;">
-                    <button class="btn btn-sm btn-secondary" @click="previewInvoiceFn(invoice)">👁️</button>
-                    <button class="btn btn-sm btn-secondary" @click="editInvoice(invoice)">✏️</button>
-                    <button class="btn btn-sm btn-primary" @click="viewInvoice(invoice)">📄</button>
-                  </div>
-                  <div class="actions-row" style="display:flex;gap:6px;justify-content:center;">
-                    <button class="btn btn-sm btn-success" @click="toggleInvoicePaid(invoice)">{{ invoice.status ===
-                      'Pagado' ? 'Marcar Pendiente' : 'Marcar Pagado' }}</button>
-                    <button class="btn btn-sm btn-danger" @click="deleteInvoice(invoice.id)">🗑️</button>
-                  </div>
+                <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">
+                  <button class="btn btn-sm btn-secondary" @click="previewInvoiceFn(invoice)" title="Vista previa">👁️</button>
+                  <button class="btn btn-sm btn-secondary" @click="editInvoice(invoice)" title="Editar">✏️</button>
+                  <button class="btn btn-sm btn-primary" @click="viewInvoice(invoice)" title="PDF">📄</button>
+                  <button class="btn btn-sm btn-success" @click="toggleInvoicePaid(invoice)">{{ invoice.status === 'Pagado' ? 'Marcar Pendiente' : (invoice.status === 'Abonado' ? 'Marcar Pagado' : 'Marcar Abonado') }}</button>
+                  <button class="btn btn-sm btn-danger" @click="deleteInvoice(invoice.id)" title="Eliminar">🗑️</button>
                 </div>
               </td>
             </tr>
             <tr v-if="sortedInvoices.length === 0">
-              <td colspan="11">No hay facturas para mostrar.</td>
+              <td colspan="10">No hay facturas. Vaya a la pestaña <strong>Órdenes</strong> y pulse <strong>Facturar</strong> en una orden terminada para generarla aquí.</td>
             </tr>
           </tbody>
         </table>
         <div class="table-footer"
           style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:12px;flex-wrap:wrap;">
           <div style="display:flex;gap:8px;align-items:center;">
-            <button class="btn btn-secondary" @click="exportSelectedCsv">Exportar Seleccionadas</button>
+            <button class="btn btn-secondary" @click="exportInvoicesCsv">Exportar CSV</button>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
             <button class="btn" :disabled="currentPage <= 1"
@@ -957,202 +1123,110 @@
         </div>
       </div>
 
-      <!-- Modal crear/editar factura -->
-      <div v-if="showInvoiceModal" class="modal-overlay" @click="showInvoiceModal = false">
-        <div class="modal" @click.stop>
-          <div class="modal-header">
-            <h3>{{ editingInvoice ? 'Editar Factura #' + editingInvoice.id : 'Nueva Factura' }}</h3>
-            <button class="modal-close" @click="showInvoiceModal = false">✕</button>
-          </div>
-          <div class="modal-body">
-            <form @submit.prevent="saveInvoice">
-              <div class="form-group">
-                <label>Cliente *</label>
-                <input v-model="formInvoice.client" type="text" class="form-input" required />
-              </div>
-              <div class="form-group">
-                <label>Vehículo</label>
-                <input v-model="formInvoice.vehicle" type="text" class="form-input" />
-              </div>
-              <div class="form-group">
-                <label>Items</label>
-                <div v-for="(it, idx) in formInvoice.items" :key="idx" class="form-row"
-                  style="gap:8px;align-items:center;">
-                  <input v-model="it.description" placeholder="Descripción" class="form-input" />
-                  <input v-model.number="it.qty" type="number" min="1" class="form-input" style="width:80px" />
-                  <input v-model.number="it.price" type="number" min="0" class="form-input" style="width:120px" />
-                  <button type="button" class="btn btn-sm btn-danger" @click="removeInvoiceItem(idx)">−</button>
-                </div>
-                <button type="button" class="btn btn-secondary" @click="addInvoiceItem">➕ Agregar item</button>
-              </div>
-              <div class="form-row" style="gap:12px;">
-                <div class="form-group"><label>% IVA</label><input v-model.number="formInvoice.taxPct" type="number"
-                    min="0" class="form-input" /></div>
-                <div class="form-group"><label>Pagos</label><input v-model="formInvoice.payments"
-                    placeholder="Ej: Efectivo, Transferencia" class="form-input" /></div>
-                <div class="form-group"><label>Estado</label><select v-model="formInvoice.status" class="form-input">
-                    <option>Pendiente</option>
-                    <option>Pagado</option>
-                    <option>Anulado</option>
-                  </select></div>
-              </div>
-              <div class="form-row" style="justify-content:space-between;align-items:center;margin-top:8px;">
-                <div><strong>Subtotal:</strong> ${{ invoiceSubtotal(formInvoice).toLocaleString() }}
-                  <strong>IVA:</strong>
-                  ${{ invoiceTax(formInvoice).toLocaleString() }}
-                </div>
-                <div><strong>Total:</strong> ${{ invoiceTotal(formInvoice).toLocaleString() }}</div>
-              </div>
-              <div class="form-actions" style="margin-top:12px;">
-                <button type="button" class="btn btn-secondary" @click="showInvoiceModal = false">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Guardar</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
-
-      <!-- Modal vista previa factura (solo lectura) -->
-      <div v-if="showInvoicePreview" class="modal-overlay" @click="showInvoicePreview = false">
-        <div class="modal" @click.stop>
-          <div class="modal-header">
-            <h3>Vista previa Factura #{{ previewInvoice?.id }}</h3>
-            <button class="modal-close" @click="showInvoicePreview = false">✕</button>
-          </div>
-          <div class="modal-body">
-            <p><strong>Cliente:</strong> {{ previewInvoice?.client }}</p>
-            <p><strong>Vehículo:</strong> {{ previewInvoice?.vehicle || '-' }}</p>
-            <p><strong>Fecha:</strong> {{ previewInvoice?.createdAt ? formatShortDate(new
-              Date(previewInvoice.createdAt)) :
-              '-' }}</p>
-            <table style="width:100%;border-collapse:collapse;margin-top:8px;">
-              <thead>
-                <tr>
-                  <th style="text-align:left;border-bottom:1px solid #ccc;padding:6px;">Descripción</th>
-                  <th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Cantidad</th>
-                  <th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Precio</th>
-                  <th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in (previewInvoice?.items || [])" :key="idx">
-                  <td style="padding:6px 4px;">{{ it.description || it }}</td>
-                  <td style="padding:6px 4px;text-align:right;">{{ it.qty ?? 1 }}</td>
-                  <td style="padding:6px 4px;text-align:right;">${{ (it.price ?? 0).toLocaleString() }}</td>
-                  <td style="padding:6px 4px;text-align:right;">${{ ((it.qty ?? 1) * (it.price ?? 0)).toLocaleString()
-                  }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <div style="margin-top:12px;text-align:right;">
-              <div><strong>Subtotal:</strong> ${{ invoiceSubtotal(previewInvoice).toLocaleString() }}</div>
-              <div><strong>IVA:</strong> ${{ invoiceTax(previewInvoice).toLocaleString() }}</div>
-              <div><strong>Total:</strong> ${{ invoiceTotal(previewInvoice).toLocaleString() }}</div>
-            </div>
-            <div style="margin-top:8px;"><strong>Pagos:</strong> {{ Array.isArray(previewInvoice?.payments) ?
-              previewInvoice.payments.join(', ') : (previewInvoice?.payments || '') }}</div>
-            <div style="margin-top:8px;"><strong>Notas:</strong> {{ previewInvoice?.notes || '-' }}</div>
-          </div>
-          <div class="modal-footer form-actions" style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px;">
-            <button type="button" class="btn btn-secondary" @click="showInvoicePreview = false">Cerrar</button>
-            <button type="button" class="btn btn-secondary" @click="editPreviewInvoice">Editar</button>
-            <button type="button" class="btn btn-primary" @click="printPreviewInvoice">Imprimir</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Impresión factura -->
-      <div v-if="printInvoice" class="print-area" aria-hidden="true">
-        <div class="invoice-print-card">
-          <div class="ip-header">
-            <img class="ip-logo" src="/images/logo.png" alt="Jobs Car logo" />
-            <div class="ip-title">
-              <h1>FACTURA - JOB'S CAR</h1>
-              <div class="ip-meta">Factura #{{ printInvoice.id }} — Fecha: {{ new Date(printInvoice.createdAt ||
-                Date.now()).toLocaleDateString() }}</div>
-            </div>
-          </div>
-          <div class="ip-section">
-            <p><strong>Cliente:</strong> {{ printInvoice.client }}</p>
-            <p><strong>Vehículo:</strong> {{ printInvoice.vehicle || '-' }}</p>
-            <table style="width:100%;border-collapse:collapse;margin-top:8px;">
-              <thead>
-                <tr>
-                  <th style="text-align:left;border-bottom:1px solid #ccc;padding:6px;">Descripción</th>
-                  <th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Cantidad</th>
-                  <th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Precio</th>
-                  <th style="text-align:right;border-bottom:1px solid #ccc;padding:6px;">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(it, idx) in (printInvoice.items || [])" :key="idx">
-                  <td style="padding:6px 4px;">{{ it.description || '' }}</td>
-                  <td style="padding:6px 4px;text-align:right;">{{ it.qty ?? 1 }}</td>
-                  <td style="padding:6px 4px;text-align:right;">${{ (Number(it.price) || 0).toLocaleString() }}</td>
-                  <td style="padding:6px 4px;text-align:right;">${{ ((Number(it.qty) || 1) * (Number(it.price) ||
-                    0)).toLocaleString() }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div style="margin-top:12px;text-align:right;">
-              <div><strong>Subtotal:</strong> ${{ invoiceSubtotal(printInvoice).toLocaleString() }}</div>
-              <div><strong>IVA:</strong> ${{ invoiceTax(printInvoice).toLocaleString() }}</div>
-              <div><strong>Total:</strong> ${{ invoiceTotal(printInvoice).toLocaleString() }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
 
-    <!-- Pestaña: Inventario -->
+
+
+
+    <!-- ==========================================================
+         PESTAÑA: REPUESTOS
+         Control de repuestos y materiales: registro de entradas,
+         costos, valor en factura y ganancia neta.
+         ========================================================== -->
+    <!-- Pestaña: Repuestos -->
     <div v-if="activeTab === 'inventory'" class="content-section">
-      <div class="section-title-bar" style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-        <h2 class="section-title">🧰 Inventario</h2>
-        <button class="btn btn-primary" @click="showCreateInventory = true">➕ Agregar inventario</button>
+      <div class="section-title-bar" style="display:grid;grid-template-columns:1fr minmax(260px,420px) auto;align-items:center;gap:12px;">
+        <h2 class="section-title">🧰 Repuestos</h2>
+        <div style="justify-self:center;">
+          <div class="search-input-wrapper" style="max-width:420px;">
+            <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor"
+                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
+            </svg>
+            <input type="search" v-model="searchInventory" placeholder="Buscar respuesto, cliente, etc..."
+              aria-label="Buscar inventario" class="search-input" />
+            <button v-if="searchInventory" class="search-clear" @click.prevent="searchInventory = ''"
+              aria-label="Limpiar búsqueda">X</button>
+          </div>
+        </div>
+        <div style="justify-self:end;">
+          <button class="btn btn-primary" @click="showCreateInventory = true">➕ Agregar Repuesto</button>
+        </div>
       </div>
       <div class="table-responsive" style="margin-top:16px;">
         <table class="simple-table compact">
           <colgroup>
-            <col style="width:14%" />
-            <col style="width:18%" />
-            <col style="width:10%" />
-            <col style="width:18%" />
-            <col style="width:20%" />
+            <col style="width:8%" />
+            <col style="width:12%" />
             <col style="width:20%" />
             <col style="width:12%" />
+            <col style="width:15%" />
+            <col style="width:15%" />
+            <col style="width:15%" />
+            <col style="width:13%" />
           </colgroup>
           <thead class="table-header">
             <tr>
-              <th>Fecha</th>
-              <th>Actividad</th>
-              <th>Cantidad</th>
-              <th>Costo Repuestos</th>
-              <th>Valor Repuestos en Factura</th>
-              <th>Ganancia Neta Repuestos</th>
+              <th></th>
+              <th>Orden #</th>
+              <th>Cliente / Vehículo</th>
+              <th>Cantidad Items</th>
+              <th>Costo Total</th>
+              <th>Valor Factura</th>
+              <th>Ganancia Neta</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in burnedInventory" :key="item.id">
-              <td data-label="Fecha">{{ item.date }}</td>
-              <td data-label="Actividad">{{ item.activity }}</td>
-              <td data-label="Cantidad">{{ item.quantity }}</td>
-              <td data-label="Costo Repuestos">${{ item.cost.toLocaleString('es-CO') }}</td>
-              <td data-label="Valor Repuestos en Factura">${{ item.invoiceValue.toLocaleString('es-CO') }}</td>
-              <td data-label="Ganancia Neta Repuestos">${{ item.netProfit.toLocaleString('es-CO') }}</td>
-              <td data-label="Acciones">
-                <div style="display:flex;gap:6px;justify-content:center;">
-                  <button class="btn btn-sm btn-secondary" type="button" @click="editInventoryItem(item)"
-                    aria-label="Editar inventario">✏️</button>
-                  <button class="btn btn-sm btn-danger" type="button" @click="deleteInventoryItem(item.id)"
-                    aria-label="Eliminar inventario">🗑️</button>
-                </div>
-              </td>
-            </tr>
+            <template v-for="(items, orderId) in getInventoryGroups()" :key="orderId">
+              <!-- Fila principal de la orden -->
+              <tr class="inventory-group-row" @click="toggleInventoryOrder(Number(orderId))">
+                <td style="text-align:center;">
+                  <span style="font-size:1.2rem;color:var(--brand-primary-contrast);">{{ expandedInventoryOrders.has(Number(orderId)) ? '▼' : '▶' }}</span>
+                </td>
+                <td data-label="Orden #"><strong style="color:var(--brand-primary-contrast);">#{{ orderId }}</strong></td>
+                <td data-label="Cliente / Vehículo">
+                  <div v-if="getOrderForInventory(Number(orderId))">
+                    <div style="color:var(--brand-primary-contrast);font-weight:600;">{{ getOrderForInventory(Number(orderId))?.client || 'Sin cliente' }}</div>
+                    <div style="font-size:0.85rem;color:var(--muted);">{{ getOrderForInventory(Number(orderId))?.vehicle || '' }}</div>
+                  </div>
+                  <div v-else>
+                    <div style="color:var(--brand-primary-contrast);font-weight:600;">Orden #{{ orderId }}</div>
+                    <div style="font-size:0.85rem;color:var(--muted);">Sin información de cliente</div>
+                  </div>
+                </td>
+                <td data-label="Cantidad Items" style="color:var(--brand-primary-contrast);">{{ items.length }}</td>
+                <td data-label="Costo Total" style="color:var(--brand-primary-contrast);">${{ items.reduce((sum: number, i: any) => sum + (Number(i.cost) || 0), 0).toLocaleString('es-CO') }}</td>
+                <td data-label="Valor Factura" style="color:var(--brand-primary-contrast);">${{ items.reduce((sum: number, i: any) => sum + (Number(i.invoiceValue) || 0), 0).toLocaleString('es-CO') }}</td>
+                <td data-label="Ganancia Neta" style="color:var(--brand-primary-contrast);">${{ items.reduce((sum: number, i: any) => sum + (Number(i.netProfit) || 0), 0).toLocaleString('es-CO') }}</td>
+                <td data-label="Acciones">
+                  <div style="display:flex;gap:6px;justify-content:center;">
+                    <button class="btn btn-sm btn-secondary" type="button" @click.stop="showCreateInventory = true; newInventoryItem.orderId = Number(orderId)"
+                      aria-label="Agregar repuesto">➕</button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Filas desplegadas de actividades -->
+              <tr v-if="expandedInventoryOrders.has(Number(orderId))" v-for="item in items" :key="item.id" class="inventory-item-row">
+                <td></td>
+                <td data-label="Fecha" style="color:var(--muted);">{{ item.date }}</td>
+                <td data-label="Actividad" style="color:var(--brand-primary-contrast);">{{ item.activity }}</td>
+                <td data-label="Cantidad" style="color:var(--muted);">{{ item.quantity }}</td>
+                <td data-label="Costo" style="color:var(--brand-primary-contrast);">${{ (Number(item.cost) || 0).toLocaleString('es-CO') }}</td>
+                <td data-label="Valor Factura" style="color:var(--brand-primary-contrast);">${{ (Number(item.invoiceValue) || 0).toLocaleString('es-CO') }}</td>
+                <td data-label="Ganancia" style="color:var(--brand-primary-contrast);">${{ (Number(item.netProfit) || 0).toLocaleString('es-CO') }}</td>
+                <td data-label="Acciones">
+                  <div style="display:flex;gap:6px;justify-content:center;">
+                    <button class="btn btn-sm btn-secondary" type="button" @click="editInventoryItem(item)"
+                      aria-label="Editar">✏️</button>
+                    <button class="btn btn-sm btn-danger" type="button" @click="deleteInventoryItem(item.id)"
+                      aria-label="Eliminar">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+            </template>
             <tr v-if="burnedInventory.length === 0">
-              <td colspan="7">No hay registros de inventario.</td>
+              <td colspan="8">No hay registros de inventario.</td>
             </tr>
           </tbody>
         </table>
@@ -1163,40 +1237,78 @@
     <div v-if="showCreateInventory" class="modal-overlay" @click="showCreateInventory = false">
       <div class="modal" @click.stop>
         <div class="modal-header">
-          <h3>Agregar Inventario</h3>
+          <h3>Agregar Repuesto al Inventario</h3>
           <button class="modal-close" @click="showCreateInventory = false">✕</button>
         </div>
         <div class="modal-body">
           <form @submit.prevent="addInventoryItem">
             <div class="form-row">
               <div class="form-group">
+                <label>Orden de Servicio *</label>
+                <select v-model.number="newInventoryItem.orderId" class="form-input" required>
+                  <option :value="0">Seleccionar orden</option>
+                  <option v-for="order in burnedOrders" :key="order.id" :value="order.id">#{{ order.id }} - {{ order.client }} ({{ order.vehicle }})</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Factura (opcional)</label>
+                <select v-model.number="newInventoryItem.invoiceId" class="form-input" @change="newInventoryItem.invoiceItemIndex = null">
+                  <option :value="null">Sin factura</option>
+                  <option v-for="inv in burnedInvoices.filter((i: any) => i.orderId === newInventoryItem.orderId)" :key="inv.id" :value="inv.id">#{{ inv.id }} - {{ inv.client }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" v-if="newInventoryItem.invoiceId">
+              <div class="form-group">
+                <label>Item de Factura</label>
+                <select v-model.number="newInventoryItem.invoiceItemIndex" class="form-input" @change="populateFromInvoiceItem(false)">
+                  <option :value="null">Seleccionar item</option>
+                  <option v-for="(it, idx) in (burnedInvoices.find((i: any) => i.id === newInventoryItem.invoiceId)?.items || [])" :key="idx" :value="idx">{{ it.description }} - ${{ (Number(it.price) || 0).toLocaleString('es-CO') }}</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label></label>
+                <div style="padding-top:8px;color:var(--muted);font-size:0.85rem;">Selecciona un item para autocompletar</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
                 <label>Fecha</label>
                 <input v-model="newInventoryItem.date" type="date" class="form-input" required />
               </div>
               <div class="form-group">
-                <label>Actividad</label>
-                <input v-model="newInventoryItem.activity" type="text" class="form-input" required />
+                <label>Actividad / Repuesto</label>
+                <input v-model="newInventoryItem.activity" type="text" class="form-input" placeholder="Ej: Filtro de aceite" required />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label>Cantidad</label>
-                <input v-model.number="newInventoryItem.quantity" type="number" min="1" class="form-input" required />
+                <input v-model.number="newInventoryItem.quantity" type="number" min="1" class="form-input" required @input="onQuantityChange(false)" />
               </div>
               <div class="form-group">
-                <label>Costo Repuestos</label>
-                <input v-model.number="newInventoryItem.cost" type="number" min="0" class="form-input" required />
+                <label>Costo Unitario</label>
+                <input :value="formatNumber(newInventoryItem.unitCost)" type="text" class="form-input" required @input="onNumberInput($event, false, 'unitCost')" />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label>Valor Repuestos en Factura</label>
-                <input v-model.number="newInventoryItem.invoiceValue" type="number" min="0" class="form-input"
-                  required />
+                <label>Valor Unitario en Factura</label>
+                <input :value="formatNumber(newInventoryItem.unitValue)" type="text" class="form-input" required @input="onNumberInput($event, false, 'unitValue')" />
               </div>
               <div class="form-group">
-                <label>Ganancia Neta Repuestos</label>
-                <input v-model.number="newInventoryItem.netProfit" type="number" min="0" class="form-input" required />
+                <label>Costo Total</label>
+                <input :value="formatNumber(newInventoryItem.cost)" type="text" class="form-input" required @input="onNumberInput($event, false, 'cost')" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Valor Total en Factura</label>
+                <input :value="formatNumber(newInventoryItem.invoiceValue)" type="text" class="form-input" required @input="onNumberInput($event, false, 'invoiceValue')" />
+              </div>
+              <div class="form-group">
+                <label>Ganancia Neta</label>
+                <input :value="formatNumber(newInventoryItem.netProfit)" type="text" class="form-input" readonly style="background-color:var(--brand-surface);" />
               </div>
             </div>
             <div class="form-actions">
@@ -1212,40 +1324,78 @@
     <div v-if="showEditInventory && editingInventory" class="modal-overlay" @click="showEditInventory = false">
       <div class="modal" @click.stop>
         <div class="modal-header">
-          <h3>Editar Inventario</h3>
+          <h3>Editar Repuesto del Inventario</h3>
           <button class="modal-close" @click="showEditInventory = false">✕</button>
         </div>
         <div class="modal-body">
           <form @submit.prevent="saveEditedInventory">
             <div class="form-row">
               <div class="form-group">
+                <label>Orden de Servicio *</label>
+                <select v-model.number="editingInventory.orderId" class="form-input" required>
+                  <option :value="0">Seleccionar orden</option>
+                  <option v-for="order in burnedOrders" :key="order.id" :value="order.id">#{{ order.id }} - {{ order.client }} ({{ order.vehicle }})</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Factura (opcional)</label>
+                <select v-model.number="editingInventory.invoiceId" class="form-input" @change="editingInventory.invoiceItemIndex = null">
+                  <option :value="null">Sin factura</option>
+                  <option v-for="inv in burnedInvoices.filter((i: any) => i.orderId === editingInventory.orderId)" :key="inv.id" :value="inv.id">#{{ inv.id }} - {{ inv.client }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" v-if="editingInventory.invoiceId">
+              <div class="form-group">
+                <label>Item de Factura</label>
+                <select v-model.number="editingInventory.invoiceItemIndex" class="form-input" @change="populateFromInvoiceItem(true)">
+                  <option :value="null">Seleccionar item</option>
+                  <option v-for="(it, idx) in (burnedInvoices.find((i: any) => i.id === editingInventory.invoiceId)?.items || [])" :key="idx" :value="idx">{{ it.description }} - ${{ (Number(it.price) || 0).toLocaleString('es-CO') }}</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label></label>
+                <div style="padding-top:8px;color:var(--muted);font-size:0.85rem;">Selecciona un item para autocompletar</div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
                 <label>Fecha</label>
                 <input v-model="editingInventory.date" type="date" class="form-input" required />
               </div>
               <div class="form-group">
-                <label>Actividad</label>
+                <label>Actividad / Repuesto</label>
                 <input v-model="editingInventory.activity" type="text" class="form-input" required />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label>Cantidad</label>
-                <input v-model.number="editingInventory.quantity" type="number" min="1" class="form-input" required />
+                <input v-model.number="editingInventory.quantity" type="number" min="1" class="form-input" required @input="onQuantityChange(true)" />
               </div>
               <div class="form-group">
-                <label>Costo Repuestos</label>
-                <input v-model.number="editingInventory.cost" type="number" min="0" class="form-input" required />
+                <label>Costo Unitario</label>
+                <input :value="formatNumber(editingInventory.unitCost)" type="text" class="form-input" required @input="onNumberInput($event, true, 'unitCost')" />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label>Valor Repuestos en Factura</label>
-                <input v-model.number="editingInventory.invoiceValue" type="number" min="0" class="form-input"
-                  required />
+                <label>Valor Unitario en Factura</label>
+                <input :value="formatNumber(editingInventory.unitValue)" type="text" class="form-input" required @input="onNumberInput($event, true, 'unitValue')" />
               </div>
               <div class="form-group">
-                <label>Ganancia Neta Repuestos</label>
-                <input v-model.number="editingInventory.netProfit" type="number" min="0" class="form-input" required />
+                <label>Costo Total</label>
+                <input :value="formatNumber(editingInventory.cost)" type="text" class="form-input" required @input="onNumberInput($event, true, 'cost')" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Valor Total en Factura</label>
+                <input :value="formatNumber(editingInventory.invoiceValue)" type="text" class="form-input" required @input="onNumberInput($event, true, 'invoiceValue')" />
+              </div>
+              <div class="form-group">
+                <label>Ganancia Neta</label>
+                <input :value="formatNumber(editingInventory.netProfit)" type="text" class="form-input" readonly style="background-color:var(--brand-surface);" />
               </div>
             </div>
             <div class="form-actions">
@@ -1257,20 +1407,45 @@
       </div>
     </div>
 
+
+
+
+
+    <!-- ==========================================================
+         PESTAÑA: CAJA
+         Movimientos de caja del taller: ingresos, egresos,
+         referencias, conceptos y observaciones.
+         ========================================================== -->
     <!-- Pestaña: Caja -->
     <div v-if="activeTab === 'cash'" class="content-section">
-      <div class="section-title-bar">
+      <div class="section-title-bar" style="display:grid;grid-template-columns:1fr minmax(260px,420px) auto;align-items:center;gap:12px;">
         <h2 class="section-title">💰 Caja</h2>
+        <div style="justify-self:center;">
+          <div class="search-input-wrapper" style="max-width:420px;">
+            <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor"
+                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
+            </svg>
+            <input type="search" v-model="searchCash" placeholder="Buscar movimientos..."
+              aria-label="Buscar movimientos de caja" class="search-input" />
+            <button v-if="searchCash" class="search-clear" @click.prevent="searchCash = ''"
+              aria-label="Limpiar búsqueda">X</button>
+          </div>
+        </div>
+        <div style="justify-self:end;">
+          <button class="btn btn-primary" @click="showCreateCash = true">➕ Crear Movimiento</button>
+        </div>
       </div>
       <div class="table-responsive" style="margin-top:16px;">
         <table class="simple-table compact">
           <colgroup>
+            <col style="width:11%" />
+            <col style="width:9%" />
             <col style="width:12%" />
+            <col style="width:17%" />
+            <col style="width:11%" />
+            <col style="width:11%" />
             <col style="width:10%" />
-            <col style="width:14%" />
-            <col style="width:20%" />
-            <col style="width:12%" />
-            <col style="width:12%" />
             <col style="width:10%" />
             <col style="width:10%" />
           </colgroup>
@@ -1284,10 +1459,19 @@
               <th>Valor</th>
               <th>Cuenta</th>
               <th>Observación</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="entry in burnedCashMovements" :key="entry.id">
+            <tr v-for="entry in burnedCashMovements.filter(e => {
+              if (!searchCash) return true
+              const q = searchCash.toLowerCase()
+              return (e.name && e.name.toLowerCase().includes(q)) ||
+                (e.concept && e.concept.toLowerCase().includes(q)) ||
+                (e.reference && e.reference.toLowerCase().includes(q)) ||
+                (e.account && e.account.toLowerCase().includes(q)) ||
+                (e.observation && e.observation.toLowerCase().includes(q))
+            })" :key="entry.id">
               <td data-label="Fecha">{{ entry.date }}</td>
               <td data-label="Referencia">{{ entry.reference || '-' }}</td>
               <td data-label="Nombre">{{ entry.name }}</td>
@@ -1300,15 +1484,158 @@
               <td data-label="Valor">${{ Number(entry.amount).toLocaleString('es-CO') }}</td>
               <td data-label="Cuenta">{{ entry.account }}</td>
               <td data-label="Observación">{{ entry.observation || '-' }}</td>
+              <td data-label="Acciones">
+                <div style="display:flex;gap:6px;justify-content:center;">
+                  <button class="btn btn-sm btn-secondary" type="button" @click="editCashItem(entry)"
+                    aria-label="Editar movimiento">✏️</button>
+                  <button class="btn btn-sm btn-danger" type="button" @click="deleteCashItem(entry.id)"
+                    aria-label="Eliminar movimiento">🗑️</button>
+                </div>
+              </td>
             </tr>
             <tr v-if="burnedCashMovements.length === 0">
-              <td colspan="8">No hay movimientos de caja registrados.</td>
+              <td colspan="9">No hay movimientos de caja registrados.</td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <!-- Modal crear movimiento de caja -->
+      <div v-if="showCreateCash" class="modal-overlay" @click="showCreateCash = false">
+        <div class="modal" @click.stop>
+          <div class="modal-header">
+            <h3>Crear Movimiento de Caja</h3>
+            <button class="modal-close" @click="showCreateCash = false">✕</button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="addCashItem">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Fecha</label>
+                  <input v-model="newCashItem.date" type="date" class="form-input" required />
+                </div>
+                <div class="form-group">
+                  <label>Referencia</label>
+                  <input v-model="newCashItem.reference" type="text" class="form-input" placeholder="Ej: 2X" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Nombre *</label>
+                  <input v-model="newCashItem.name" type="text" class="form-input" required placeholder="Ej: NISSAN" />
+                </div>
+                <div class="form-group">
+                  <label>Concepto *</label>
+                  <input v-model="newCashItem.concept" type="text" class="form-input" required placeholder="Ej: TRABAJO REALIZADO" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Movimiento</label>
+                  <select v-model="newCashItem.movement" class="form-input">
+                    <option>Ingreso</option>
+                    <option>Egreso</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Valor</label>
+                  <input :value="formatNumber(newCashItem.amount)" type="text" class="form-input" required @input="newCashItem.amount = parseNumber(($event.target as HTMLInputElement).value)" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Cuenta</label>
+                  <select v-model="newCashItem.account" class="form-input">
+                    <option>Banco</option>
+                    <option>Caja Menor</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Observación</label>
+                  <input v-model="newCashItem.observation" type="text" class="form-input" placeholder="Notas opcionales" />
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" @click="showCreateCash = false">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal editar movimiento de caja -->
+      <div v-if="showEditCash && editingCash" class="modal-overlay" @click="showEditCash = false">
+        <div class="modal" @click.stop>
+          <div class="modal-header">
+            <h3>Editar Movimiento de Caja</h3>
+            <button class="modal-close" @click="showEditCash = false">✕</button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="saveEditedCash">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Fecha</label>
+                  <input v-model="editingCash.date" type="date" class="form-input" required />
+                </div>
+                <div class="form-group">
+                  <label>Referencia</label>
+                  <input v-model="editingCash.reference" type="text" class="form-input" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Nombre *</label>
+                  <input v-model="editingCash.name" type="text" class="form-input" required />
+                </div>
+                <div class="form-group">
+                  <label>Concepto *</label>
+                  <input v-model="editingCash.concept" type="text" class="form-input" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Movimiento</label>
+                  <select v-model="editingCash.movement" class="form-input">
+                    <option>Ingreso</option>
+                    <option>Egreso</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Valor</label>
+                  <input :value="formatNumber(editingCash.amount)" type="text" class="form-input" required @input="editingCash.amount = parseNumber(($event.target as HTMLInputElement).value)" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Cuenta</label>
+                  <select v-model="editingCash.account" class="form-input">
+                    <option>Banco</option>
+                    <option>Caja Menor</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Observación</label>
+                  <input v-model="editingCash.observation" type="text" class="form-input" />
+                </div>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" @click="showEditCash = false">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
 
+
+
+    <!-- ==========================================================
+         PESTAÑA: EMPLEADOS
+         Gestión del personal del taller: creación, edición,
+         búsqueda, nómina y resumen de desempeño.
+         ========================================================== -->
     <!-- Pestaña: Empleados -->
     <div v-if="activeTab === 'employees'" class="content-section">
       <div class="section-title-bar"
@@ -1395,8 +1722,17 @@
       <div class="section-title-bar"
         style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
         <h2 class="section-title">💼 Nómina</h2>
-        <div style="font-weight:600;">
-          50% taller / 50% técnico
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn" :class="payrollViewMode === 'employee' ? 'btn-primary' : 'btn-secondary'" @click="payrollViewMode = 'employee'">Por Empleado</button>
+          <button class="btn" :class="payrollViewMode === 'biweekly' ? 'btn-primary' : 'btn-secondary'" @click="payrollViewMode = 'biweekly'">Por Quincena</button>
+          <select v-model="payrollEmployeeFilter" class="form-input" style="min-width:180px;">
+            <option value="">Todos los empleados</option>
+            <option v-for="emp in burnedEmployees" :key="emp.id" :value="emp.name">{{ emp.name }}</option>
+          </select>
+          <select v-model="payrollBiweeklyFilter" class="form-input" style="min-width:180px;">
+            <option value="">Todas las quincenas</option>
+            <option v-for="period in payrollBiweeklyPeriods" :key="period" :value="period">{{ period }}</option>
+          </select>
         </div>
       </div>
 
@@ -1411,57 +1747,127 @@
         <div class="stat-card">
           <div class="stat-icon">💵</div>
           <div class="stat-content">
-            <div class="stat-number">${{ payrollTotals.grossTotal.toLocaleString('es-CO') }}</div>
-            <div class="stat-label">Total facturado</div>
+            <div class="stat-number">${{ formatNumber(payrollTotals.grossTotal) }}</div>
+            <div class="stat-label">Total M.O.</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">➖</div>
+          <div class="stat-content">
+            <div class="stat-number">${{ formatNumber(payrollTotals.totalDiscount) }}</div>
+            <div class="stat-label">Descuentos</div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">👨‍🔧</div>
           <div class="stat-content">
-            <div class="stat-number">${{ payrollTotals.technicianShare.toLocaleString('es-CO') }}</div>
-            <div class="stat-label">50% técnicos</div>
+            <div class="stat-number">${{ formatNumber(payrollTotals.technicianShare) }}</div>
+            <div class="stat-label">Total a pagar técnicos</div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon">🏪</div>
           <div class="stat-content">
-            <div class="stat-number">${{ payrollTotals.workshopShare.toLocaleString('es-CO') }}</div>
+            <div class="stat-number">${{ formatNumber(payrollTotals.workshopShare) }}</div>
             <div class="stat-label">50% taller</div>
           </div>
         </div>
       </div>
 
-      <div class="table-responsive" style="margin-top:16px;">
+      <!-- Vista por Empleado -->
+      <div v-if="payrollViewMode === 'employee'" class="table-responsive" style="margin-top:16px;">
         <table class="simple-table compact">
           <colgroup>
-            <col style="width:24%" />
-            <col style="width:16%" />
-            <col style="width:16%" />
-            <col style="width:20%" />
-            <col style="width:24%" />
+            <col style="width:6%" />
+            <col style="width:18%" />
+            <col style="width:10%" />
+            <col style="width:14%" />
+            <col style="width:14%" />
+            <col style="width:14%" />
+            <col style="width:14%" />
+            <col style="width:10%" />
           </colgroup>
           <thead class="table-header">
             <tr>
+              <th></th>
               <th>Técnico</th>
               <th>Servicios</th>
-              <th>Total</th>
+              <th>Total M.O.</th>
+              <th>Descuento</th>
+              <th>50% Técnico</th>
+              <th>50% Taller</th>
+              <th>A Pagar</th>
+            </tr>
+          </thead>
+          <tbody>
+            <template v-for="row in payrollRows" :key="row.id">
+              <!-- Fila principal del empleado -->
+              <tr class="payroll-group-row" @click="togglePayrollEmployee(row.id)">
+                <td style="text-align:center;">
+                  <span style="font-size:1.2rem;color:var(--brand-primary-contrast);">{{ expandedPayrollEmployees.has(row.id) ? '▼' : '▶' }}</span>
+                </td>
+                <td data-label="Técnico">
+                  <strong style="color:var(--brand-primary-contrast);">{{ row.name }}</strong>
+                  <div style="color:var(--muted);font-size:0.85rem;">{{ row.role }}</div>
+                </td>
+                <td data-label="Servicios" style="color:var(--brand-primary-contrast);">{{ row.ordersCount }}</td>
+                <td data-label="Total M.O." style="color:var(--brand-primary-contrast);">${{ formatNumber(row.grossTotal) }}</td>
+                <td data-label="Descuento" style="color:var(--brand-primary-contrast);">${{ formatNumber(row.totalDiscount) }}</td>
+                <td data-label="50% Técnico" style="color:var(--brand-primary-contrast);">${{ formatNumber(row.technicianShare) }}</td>
+                <td data-label="50% Taller" style="color:var(--brand-primary-contrast);">${{ formatNumber(row.workshopShare) }}</td>
+                <td data-label="A Pagar" style="color:var(--brand-primary-contrast);">${{ formatNumber(row.technicianShare) }}</td>
+              </tr>
+              <!-- Filas desplegadas de facturas/órdenes -->
+              <tr v-if="expandedPayrollEmployees.has(row.id)" v-for="order in row.orders" :key="order.id" class="payroll-item-row">
+                <td></td>
+                <td data-label="Orden">#{{ order.id }} - {{ order.vehicle }}</td>
+                <td data-label="Fecha">{{ order.createdDate }}</td>
+                <td data-label="Mano de Obra">${{ formatNumber(order.laborTotal) }}</td>
+                <td data-label="Descuento">${{ formatNumber(order.discount) }}</td>
+                <td data-label="50% Técnico">${{ formatNumber(order.laborTotal * 0.5) }}</td>
+                <td data-label="50% Taller">${{ formatNumber(order.laborTotal * 0.5) }}</td>
+                <td data-label="A Pagar">${{ formatNumber(order.technicianShare) }}</td>
+              </tr>
+            </template>
+            <tr v-if="payrollRows.length === 0">
+              <td colspan="8">No hay datos de nómina disponibles.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Vista por Quincena -->
+      <div v-if="payrollViewMode === 'biweekly'" class="table-responsive" style="margin-top:16px;">
+        <table class="simple-table compact">
+          <colgroup>
+            <col style="width:20%" />
+            <col style="width:12%" />
+            <col style="width:16%" />
+            <col style="width:16%" />
+            <col style="width:16%" />
+            <col style="width:16%" />
+          </colgroup>
+          <thead class="table-header">
+            <tr>
+              <th>Quincena</th>
+              <th>Servicios</th>
+              <th>Total M.O.</th>
+              <th>Descuento</th>
               <th>50% Técnico</th>
               <th>50% Taller</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="row in payrollRows" :key="row.id">
-              <td data-label="Técnico">
-                <strong>{{ row.name }}</strong>
-                <div style="color:var(--muted);font-size:0.9rem;">{{ row.role }}</div>
-              </td>
-              <td data-label="Servicios">{{ row.ordersCount }}</td>
-              <td data-label="Total">${{ row.grossTotal.toLocaleString('es-CO') }}</td>
-              <td data-label="50% Técnico">${{ row.technicianShare.toLocaleString('es-CO') }}</td>
-              <td data-label="50% Taller">${{ row.workshopShare.toLocaleString('es-CO') }}</td>
+            <tr v-for="biweekly in payrollBiweeklyRows" :key="biweekly.period">
+              <td data-label="Quincena"><strong>{{ biweekly.period }}</strong></td>
+              <td data-label="Servicios">{{ biweekly.ordersCount }}</td>
+              <td data-label="Total M.O.">${{ formatNumber(biweekly.grossTotal) }}</td>
+              <td data-label="Descuento">${{ formatNumber(biweekly.totalDiscount) }}</td>
+              <td data-label="50% Técnico">${{ formatNumber(biweekly.technicianShare) }}</td>
+              <td data-label="50% Taller">${{ formatNumber(biweekly.workshopShare) }}</td>
             </tr>
-            <tr v-if="payrollRows.length === 0">
-              <td colspan="5">No hay datos de nómina disponibles.</td>
+            <tr v-if="payrollBiweeklyRows.length === 0">
+              <td colspan="6">No hay datos de quincenas disponibles.</td>
             </tr>
           </tbody>
         </table>
@@ -1599,21 +2005,30 @@
       </div>
     </div>
 
+
+
+
+    <!-- ==========================================================
+         PESTAÑA: AGENDA / CALENDARIO
+         Calendario mensual interactivo para programar órdenes
+         y citas, con vista de órdenes activas y agendamiento.
+         ========================================================== -->
     <!-- Pestaña: Agenda (Calendario) -->
     <div v-if="activeTab === 'agenda'" class="content-section">
       <div class="section-title-bar" style="display:flex;justify-content:space-between;align-items:center;">
         <h2 class="section-title">📅 Agenda</h2>
         <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn btn-primary" @click="openScheduleModal(null)">+ Crear Cita</button>
           <button class="btn" @click="prevMonth">◀</button>
           <div style="font-weight:700">{{ monthNames[calendarDate.getMonth()] }} {{ calendarDate.getFullYear() }}</div>
           <button class="btn" @click="nextMonth">▶</button>
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 340px;gap:16px;margin-top:12px;">
-        <div class="pro-card" style="padding:12px;">
+      <div style="display:grid;grid-template-columns:1fr 280px;gap:12px;margin-top:12px;">
+        <div class="pro-card" style="padding:8px;overflow:auto;">
           <div
-            style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-weight:700;padding:8px 0;gap:6px;">
+            style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-weight:700;padding:6px 0;gap:4px;font-size:0.75rem;">
             <div>Dom</div>
             <div>Lun</div>
             <div>Mar</div>
@@ -1622,73 +2037,88 @@
             <div>Vie</div>
             <div>Sáb</div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px;">
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px;">
             <div v-for="cell in monthDays" :key="cell.iso" :class="['calendar-cell', { 'other-month': !cell.inMonth }]"
-              style="min-height:90px;padding:8px;border-radius:8px;background:var(--brand-bg-end);">
+              style="min-height:68px;max-height:68px;padding:4px;border-radius:6px;background:var(--brand-bg-end);overflow:hidden;">
               <div style="display:flex;justify-content:space-between;align-items:center;">
-                <div :style="{ opacity: cell.inMonth ? 1 : 0.4 }">{{ cell.day }}</div>
-                <button class="btn btn-sm" style="padding:4px 6px" @click="openScheduleModal(null, cell.iso)">+</button>
+                <div :style="{ opacity: cell.inMonth ? 1 : 0.4, fontSize: '0.75rem' }">{{ cell.day }}</div>
+                <button class="btn btn-sm" style="padding:2px 5px;font-size:0.7rem;" @click="openScheduleModal(null, cell.iso)">+</button>
               </div>
-              <div style="margin-top:6px;display:flex;flex-direction:column;gap:6px;">
-                <div v-for="(ev, idx) in (eventsByDate[cell.iso] || []).slice(0, 3)" :key="idx"
-                  :style="{ padding: '6px', borderRadius: '8px', fontSize: '0.85rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', background: (ev.type === 'order' ? 'rgba(59,130,246,0.08)' : 'rgba(16,185,129,0.08)') }">
-                  <span v-if="ev.type === 'order'">🧾 {{ ev.client || ev.vehicle }}</span>
-                  <span v-else>📅 {{ ev.service || ev.client || ev.vehicle }}</span>
+              <div style="margin-top:2px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;max-height:48px;">
+                <!-- Órdenes en AZUL (no editables) -->
+                <div v-for="(ev, idx) in (eventsByDate[cell.iso] || []).filter(e => e.type === 'order').slice(0, 6)" :key="'order-'+idx"
+                  class="calendar-event order-event"
+                  @click="openOrderViewModal(ev.id)"
+                  :title="ev.client + ' - ' + ev.vehicle + ' #' + ev.id">
+                  <span class="event-dot blue"></span>
+                  <span class="event-text">{{ ev.vehicle || '-' }} - {{ ev.client || '-' }} #{{ ev.id }}</span>
                 </div>
-                <div v-if="(eventsByDate[cell.iso] || []).length > 3"><small>+{{ (eventsByDate[cell.iso] || []).length -
-                  3
-                    }}
-                    más</small></div>
+                <!-- Citas en VERDE (editables) -->
+                <div v-for="(ev, idx) in (eventsByDate[cell.iso] || []).filter(e => e.type === 'agenda').slice(0, 6)" :key="'agenda-'+idx"
+                  class="calendar-event agenda-event"
+                  @click="openEditAgendaModal(ev)"
+                  :title="ev.client + ' - ' + ev.vehicle">
+                  <span class="event-dot green"></span>
+                  <span class="event-text">{{ ev.client || '-' }} - {{ ev.vehicle || '-' }}</span>
+                </div>
+                <div v-if="(eventsByDate[cell.iso] || []).length > 6"><small style="font-size:0.65rem;">+{{ (eventsByDate[cell.iso] || []).length - 6 }} más</small></div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="pro-card" style="padding:12px;overflow:auto;max-height:640px;">
-          <h3 style="margin-top:0;margin-bottom:8px;">Órdenes activas — {{ monthNames[calendarDate.getMonth()] }} ({{
-            activeOrdersForMonth.length }})</h3>
-          <div v-if="activeOrdersForMonth.length === 0" style="color:var(--muted);margin-bottom:8px;">No hay órdenes
-            activas
-            para este mes.</div>
-          <div v-for="order in activeOrdersForMonth" :key="order.id"
-            style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--brand-border);">
-            <div>
-              <div style="font-weight:700">#{{ order.id }} — {{ order.client || '-' }}</div>
-              <div style="color:var(--brand-accent-alt);font-size:0.9rem">{{ order.vehicle || '-' }} · {{
-                (order.services &&
-                  order.services.length) ? order.services.join(', ') : (order.serviceType || 'General') }}</div>
-              <div v-if="order.deliveryDate" style="color:var(--brand-success);font-weight:700">Entrega: {{
-                order.deliveryDate }}</div>
+        <!-- Panel lateral reformado -->
+        <div class="pro-card" style="padding:10px;overflow:auto;max-height:480px;">
+          <!-- Citas (Verde) -->
+          <div style="margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <h3 style="margin:0;display:flex;align-items:center;gap:8px;">
+                <span style="width:10px;height:10px;border-radius:50%;background:#22c55e;display:inline-block;"></span>
+                Citas Programadas
+              </h3>
+              <span style="font-size:0.85rem;color:var(--brand-accent-alt);">{{ agendaItemsForMonth.length }}</span>
             </div>
-            <div style="display:flex;flex-direction:column;gap:6px;">
-              <button class="btn btn-sm btn-secondary" @click="autoScheduleOrder(order.id)">Agendar IA</button>
-              <button class="btn btn-sm btn-primary" @click="openScheduleModal(order.id)">Agendar</button>
+            <div v-if="agendaItemsForMonth.length === 0" style="color:var(--muted);font-size:0.9rem;margin-bottom:8px;">
+              No hay citas para este mes.
+            </div>
+            <div v-for="item in agendaItemsForMonth" :key="item.id"
+              class="agenda-list-item agenda-item-green"
+              @click="openEditAgendaModal(item)">
+              <div style="font-weight:600;font-size:0.9rem;">{{ item.client || '-' }} - {{ item.vehicle || '-' }}</div>
+              <div style="font-size:0.8rem;color:var(--brand-accent-alt);">{{ item.date }} {{ item.time ? '· ' + item.time : '' }}</div>
+              <div v-if="item.service" style="font-size:0.8rem;color:var(--brand-accent-alt);">{{ item.service }}</div>
             </div>
           </div>
-          <div v-if="unassignedActiveWorkOrders.length"
-            style="margin-top:12px;border-top:1px dashed var(--brand-border);padding-top:8px;">
-            <h4 style="margin:4px 0;">Sin fecha asignada ({{ unassignedActiveWorkOrders.length }})</h4>
-            <div v-for="o in unassignedActiveWorkOrders" :key="o.id"
-              style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.03);">
-              <div>
-                <div style="font-weight:700">#{{ o.id }} — {{ o.client || '-' }}</div>
-                <div style="font-size:0.9rem;color:var(--brand-accent-alt)">{{ o.vehicle || '-' }} · {{ (o.services &&
-                  o.services.length) ? o.services.join(', ') : (o.serviceType || 'General') }}</div>
-              </div>
-              <div style="display:flex;flex-direction:column;gap:6px;">
-                <button class="btn btn-sm btn-secondary" @click="autoScheduleOrder(o.id)">Agendar IA</button>
-                <button class="btn btn-sm btn-primary" @click="openScheduleModal(o.id)">Agendar</button>
+
+           <!-- Órdenes Activas con Fecha (Azul) -->
+          <div style="border-top:1px solid var(--brand-border);padding-top:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <h3 style="margin:0;display:flex;align-items:center;gap:8px;">
+                <span style="width:10px;height:10px;border-radius:50%;background:#3b82f6;display:inline-block;"></span>
+                Órdenes Activas
+              </h3>
+              <span style="font-size:0.85rem;color:var(--brand-accent-alt);">{{ activeOrdersForMonth.length }}</span>
+            </div>
+            <div v-if="activeOrdersForMonth.length === 0" style="color:var(--muted);font-size:0.9rem;margin-bottom:8px;">
+              No hay órdenes con fecha para este mes.
+            </div>
+            <div v-for="order in activeOrdersForMonth" :key="order.id"
+              class="agenda-list-item agenda-item-blue">
+              <div style="font-weight:600;font-size:0.9rem;">#{{ order.id }} — {{ order.client || '-' }}</div>
+              <div style="font-size:0.8rem;color:var(--brand-accent-alt);">{{ order.vehicle || '-' }} · {{ order.status }}</div>
+              <div v-if="order.deliveryDate" style="font-size:0.8rem;color:var(--brand-success);font-weight:600;">
+                Entrega: {{ order.deliveryDate }}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Modal agendar -->
+      <!-- Modal: Crear / Editar Cita -->
       <div v-if="showScheduleModal" class="modal-overlay" @click="showScheduleModal = false">
         <div class="modal" @click.stop>
           <div class="modal-header">
-            <h3>{{ scheduleSelectedOrderId ? 'Agendar Orden' : 'Crear Cita' }}</h3>
+            <h3>{{ editingAgendaId ? 'Editar Cita' : 'Crear Cita' }}</h3>
             <button class="modal-close" @click="showScheduleModal = false">✕</button>
           </div>
           <div class="modal-body">
@@ -1696,896 +2126,955 @@
               <label><strong>Fecha:</strong></label>
               <input type="date" v-model="scheduleDateIso" class="form-input" />
             </div>
-            <div class="form-group">
-              <label>Orden</label>
-              <select v-model="scheduleSelectedOrderId" class="form-input">
-                <option :value="null">Seleccionar orden</option>
-                <option v-for="o in activeWorkOrders" :key="o.id" :value="o.id">#{{ o.id }} — {{ o.client }}</option>
-              </select>
-            </div>
-            <div v-if="!scheduleSelectedOrderId"
-              style="margin-top:8px;border-top:1px dashed var(--brand-border);padding-top:8px;">
-              <small>Crear nueva cita/evento en la agenda</small>
+            <div style="margin-top:8px;border-top:1px dashed var(--brand-border);padding-top:8px;">
+              <small>{{ editingAgendaId ? 'Editar cita' : 'Crear nueva cita' }}</small>
               <div class="form-row">
-                <div class="form-group"><label>Placa</label><input v-model="newCalendarOrder.vehicle"
-                    class="form-input" />
-                </div>
-                <div class="form-group"><label>Cliente</label><input v-model="newCalendarOrder.client"
-                    class="form-input" />
-                </div>
+                <div class="form-group"><label>Placa / Carro</label><input v-model="newCalendarOrder.vehicle" class="form-input" /></div>
+                <div class="form-group"><label>Cliente</label><input v-model="newCalendarOrder.client" class="form-input" /></div>
               </div>
-              <div class="form-row">
-                <div class="form-group"><label>Asunto / Servicio</label><input v-model="newCalendarOrder.serviceType"
-                    class="form-input" /></div>
-                <div class="form-group"><label>Técnico</label>
-                  <select v-model="newCalendarOrder.mechanic" class="form-input">
-                    <option value="">Seleccionar técnico</option>
-                    <option v-for="emp in burnedEmployees" :key="emp.id" :value="emp.name">{{ emp.name }}</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label>Total</label><input v-model.number="newCalendarOrder.total" type="number"
-                    class="form-input" /></div>
-                <div class="form-group"><label>Diagnóstico</label><input v-model="newCalendarOrder.diagnosis"
-                    class="form-input" /></div>
+              <div class="form-group">
+                <label>Asunto / Servicio</label>
+                <input v-model="newCalendarOrder.serviceType" class="form-input" />
               </div>
             </div>
             <div class="form-group">
               <label>Hora</label>
               <input type="time" v-model="scheduleTime" class="form-input" />
             </div>
-            <div class="form-actions" style="margin-top:12px;">
+            <div class="form-actions" style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
+              <button v-if="editingAgendaId" class="btn btn-danger" @click="deleteEditingAgenda">Eliminar</button>
               <button class="btn btn-secondary" @click="showScheduleModal = false">Cancelar</button>
               <button class="btn btn-primary" @click="confirmSchedule">Guardar</button>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Modal: Ver Orden (solo lectura) -->
+      <div v-if="showOrderViewModal" class="modal-overlay" @click="showOrderViewModal = false">
+        <div class="modal" @click.stop style="max-width:480px;">
+          <div class="modal-header">
+            <h3>Orden #{{ orderViewData?.id }}</h3>
+            <button class="modal-close" @click="showOrderViewModal = false">✕</button>
+          </div>
+          <div class="modal-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+              <div class="form-group" style="margin:0;">
+                <label>Cliente</label>
+                <div class="form-input" style="background:rgba(15,23,42,0.3);cursor:default;">{{ orderViewData?.client || '-' }}</div>
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label>Vehículo</label>
+                <div class="form-input" style="background:rgba(15,23,42,0.3);cursor:default;">{{ orderViewData?.vehicle || '-' }}</div>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Estado</label>
+              <div class="form-input" style="background:rgba(15,23,42,0.3);cursor:default;">{{ orderViewData?.status || '-' }}</div>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Servicios</label>
+              <div class="form-input" style="background:rgba(15,23,42,0.3);cursor:default;">{{ orderViewData?.services?.join(', ') || orderViewData?.serviceType || 'General' }}</div>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Técnico</label>
+              <div class="form-input" style="background:rgba(15,23,42,0.3);cursor:default;">{{ orderViewData?.mechanic || '-' }}</div>
+            </div>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Diagnóstico</label>
+              <div class="form-input" style="background:rgba(15,23,42,0.3);cursor:default;min-height:60px;white-space:pre-wrap;">{{ orderViewData?.diagnosis || '-' }}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+              <div class="form-group" style="margin:0;">
+                <label>Fecha Entrega</label>
+                <div class="form-input" style="background:rgba(15,23,42,0.3);cursor:default;">{{ orderViewData?.deliveryDate || '-' }}</div>
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label>Fecha Creación</label>
+                <div class="form-input" style="background:rgba(15,23,42,0.3);cursor:default;">{{ orderViewData?.createdDate || '-' }}</div>
+              </div>
+            </div>
+            <div class="form-actions" style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
+              <button class="btn btn-secondary" @click="showOrderViewModal = false">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Pestaña: Reportes -->
-    <!-- <div v-if="activeTab === 'reports'" class="content-section">
-      <div class="section-title-bar">
-        <h2 class="section-title">📊 Dashboard</h2>
-      </div>
-      <div class="reports-grid">
-        <div class="pro-card report-card">
-          <h3 class="report-title">💰 Ingresos recientes</h3>
-          <ul class="report-list">
-            <li v-for="ing in burnedReports.ingresos" :key="ing.fecha" class="report-item">
-              <span class="report-label">{{ ing.fecha }}</span>
-              <span class="report-value">${{ ing.total.toLocaleString() }}</span>
-            </li>
-          </ul>
-        </div>
-        <div class="pro-card report-card">
-          <h3 class="report-title">🏆 Servicios más vendidos</h3>
-          <ul class="report-list">
-            <li v-for="srv in burnedReports.servicios" :key="srv.nombre" class="report-item">
-              <span class="report-label">{{ srv.nombre }}</span>
-              <span class="report-value">{{ srv.vendidos }} vendidos</span>
-            </li>
-          </ul>
-        </div>
-        <div class="pro-card report-card">
-          <h3 class="report-title">👥 Clientes frecuentes</h3>
-          <ul class="report-list">
-            <li v-for="cli in burnedReports.clientes" :key="cli.nombre" class="report-item">
-              <span class="report-label">{{ cli.nombre }}</span>
-              <span class="report-value">{{ cli.visitas }} visitas</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div> -->
-    <div class="tab-content">
-
-      <!-- Pestaña de Clientes (tabla) -->
-      <div v-if="activeTab === 'clients'" class="content-section">
-        <div class="section-header" style="flex-direction:column;align-items:center;gap:12px;">
-          <div style="width:100%;display:flex;align-items:center;justify-content:space-between;">
-            <h2>Clientes</h2>
-            <button class="btn btn-primary" @click="showCreateClient = true">➕ Crear Cliente</button>
+    <!-- ==========================================================
+          PESTAÑA: DASHBOARD / REPORTES
+          Panel de indicadores clave (KPIs): ingresos, órdenes,
+          desempeño de técnicos, garantías, alertas y gráficas.
+          ========================================================== -->
+    <!-- Dashboard: resumen y estadísticas -->
+    <div v-if="activeTab === 'reports'" class="content-section">
+      <div class="dashboard-professional-header">
+        <div class="dashboard-header-left">
+          <div class="dashboard-header-icon">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
           </div>
-          <div style="width:100%;display:flex;justify-content:center;margin-top:12px;">
-            <div class="search-input-wrapper" style="max-width:520px;">
-              <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-                <path fill="currentColor"
-                  d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
+          <div>
+            <h2 class="dashboard-title">Dashboard General</h2>
+            <p class="dashboard-subtitle">Visión general y métricas clave del taller</p>
+          </div>
+        </div>
+        <div class="dashboard-header-right">
+          <span class="dashboard-date">{{ currentDate }}</span>
+          <button @click="loadPurchases" class="btn btn-secondary" :disabled="isLoadingSales">
+            {{ isLoadingSales ? 'Cargando...' : 'Actualizar' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtro de Métricas Principales -->
+      <div class="dashboard-metrics-filter-bar">
+        <div class="dashboard-metrics-filter-tabs">
+          <button class="dashboard-metrics-filter-tab" :class="{ active: dashboardMetricsFilterMode === 'month' }" @click="dashboardMetricsFilterMode = 'month'">Mes</button>
+          <button class="dashboard-metrics-filter-tab" :class="{ active: dashboardMetricsFilterMode === 'range' }" @click="dashboardMetricsFilterMode = 'range'">Rango</button>
+          <button class="dashboard-metrics-filter-tab" :class="{ active: dashboardMetricsFilterMode === 'biweekly' }" @click="dashboardMetricsFilterMode = 'biweekly'">Quincena</button>
+        </div>
+        <div class="dashboard-metrics-filter-inputs">
+          <div v-if="dashboardMetricsFilterMode === 'month'" class="dashboard-date-range">
+            <input type="month" v-model="dashboardMetricsMonth" class="dashboard-date-input" />
+            <button v-if="dashboardMetricsMonth" class="dashboard-date-clear" @click="dashboardMetricsMonth = ''">✕</button>
+          </div>
+          <div v-if="dashboardMetricsFilterMode === 'range'" class="dashboard-date-range">
+            <input type="date" v-model="dashboardMetricsDateFrom" class="dashboard-date-input" />
+            <span class="dashboard-date-separator">→</span>
+            <input type="date" v-model="dashboardMetricsDateTo" class="dashboard-date-input" />
+            <button v-if="dashboardMetricsDateFrom || dashboardMetricsDateTo" class="dashboard-date-clear" @click="dashboardMetricsDateFrom = ''; dashboardMetricsDateTo = ''">✕</button>
+          </div>
+          <div v-if="dashboardMetricsFilterMode === 'biweekly'" class="dashboard-date-range">
+            <select v-model="dashboardMetricsBiweekly" class="dashboard-date-input">
+              <option value="">Todas</option>
+              <option v-for="p in dashboardAvailablePeriods.filter(p => p.value.includes('Q'))" :key="p.value" :value="p.value">{{ p.label }}</option>
+            </select>
+            <button v-if="dashboardMetricsBiweekly" class="dashboard-date-clear" @click="dashboardMetricsBiweekly = ''">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Métricas Principales -->
+      <div class="dashboard-metrics-grid">
+        <!-- 1. Órdenes Activas -->
+        <div class="dashboard-metric-card">
+          <div class="dashboard-metric-icon orange">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div class="dashboard-metric-info">
+            <p class="dashboard-metric-value">{{ filteredOrdersActiveCount }}</p>
+            <p class="dashboard-metric-label">Órdenes Activas</p>
+          </div>
+        </div>
+
+        <!-- 2. Órdenes Entregadas -->
+        <div class="dashboard-metric-card">
+          <div class="dashboard-metric-icon green">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+          </div>
+          <div class="dashboard-metric-info">
+            <p class="dashboard-metric-value">{{ filteredOrdersDeliveredCount }}</p>
+            <p class="dashboard-metric-label">Órdenes Entregadas</p>
+          </div>
+        </div>
+
+        <!-- 3. Vehículos Atendidos -->
+        <div class="dashboard-metric-card">
+          <div class="dashboard-metric-icon blue">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 17a2 2 0 1 1 4 0M15 17a2 2 0 1 1 4 0M5 17H3v-4h18v4h-2"/>
+              <path d="M3 13V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6"/>
+            </svg>
+          </div>
+          <div class="dashboard-metric-info">
+            <p class="dashboard-metric-value">{{ filteredVehiclesCount }}</p>
+            <p class="dashboard-metric-label">Vehículos Atendidos</p>
+          </div>
+        </div>
+
+        <!-- 4. Facturas Pendientes -->
+        <div class="dashboard-metric-card">
+          <div class="dashboard-metric-icon red">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div class="dashboard-metric-info">
+            <p class="dashboard-metric-value">{{ filteredPendingInvoices }}</p>
+            <p class="dashboard-metric-label">Facturas Pendientes</p>
+          </div>
+        </div>
+
+        <!-- 5. Facturas Pagadas -->
+        <div class="dashboard-metric-card">
+          <div class="dashboard-metric-icon purple">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          <div class="dashboard-metric-info">
+            <p class="dashboard-metric-value">{{ filteredPaidInvoices }}</p>
+            <p class="dashboard-metric-label">Facturas Pagadas</p>
+          </div>
+        </div>
+
+        <!-- 6. Ingresos Facturados -->
+        <div class="dashboard-metric-card">
+          <div class="dashboard-metric-icon teal">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <div class="dashboard-metric-info">
+            <p class="dashboard-metric-value">${{ filteredTotalInvoiced.toLocaleString() }}</p>
+            <p class="dashboard-metric-label">Ingresos Facturados</p>
+          </div>
+        </div>
+
+        <!-- 7. Ingresos Pagados -->
+        <div class="dashboard-metric-card">
+          <div class="dashboard-metric-icon green">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <div class="dashboard-metric-info">
+            <p class="dashboard-metric-value">${{ filteredTotalPaid.toLocaleString() }}</p>
+            <p class="dashboard-metric-label">Ingresos Pagados</p>
+          </div>
+        </div>
+      </div>
+      <!-- Próximas Citas - Primero de todo -->
+      <div class="dashboard-upcoming-section" v-if="upcomingAppointments.length > 0">
+        <div class="dashboard-upcoming-header">
+          <div class="dashboard-upcoming-header-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="dashboard-upcoming-title">Próximas Citas</h3>
+            <p class="dashboard-upcoming-subtitle">{{ upcomingAppointments.length }} citas programadas</p>
+          </div>
+        </div>
+        <div class="dashboard-upcoming-grid">
+          <div v-for="appt in upcomingAppointments.slice(0, 6)" :key="appt.id" class="dashboard-upcoming-card">
+            <div class="dashboard-upcoming-card-date">
+              <span class="dashboard-upcoming-day">{{ appt.date ? new Date(appt.date).getDate() : '-' }}</span>
+              <span class="dashboard-upcoming-month">{{ appt.date ? new Date(appt.date).toLocaleDateString('es-CO', { month: 'short' }) : '' }}</span>
+            </div>
+            <div class="dashboard-upcoming-card-info">
+              <div class="dashboard-upcoming-card-time">{{ appt.time }}</div>
+              <div class="dashboard-upcoming-card-client">{{ appt.client }}</div>
+              <div class="dashboard-upcoming-card-service">{{ appt.service || 'Servicio general' }}</div>
+            </div>
+            <div class="dashboard-upcoming-card-status" :class="getAppointmentStatusClass(appt)">
+              {{ getAppointmentStatusLabel(appt) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado de Facturas - Detalle -->
+      <div class="dashboard-panel" v-if="filteredInvoicesForDashboard.length > 0">
+        <div class="dashboard-panel-header">
+          <div class="dashboard-panel-header-left">
+            <div class="dashboard-panel-icon" style="background:rgba(139,92,246,0.15);color:#a78bfa;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
               </svg>
-              <input type="search" v-model="searchClients" placeholder="Buscar clientes..." aria-label="Buscar clientes"
-                class="search-input" />
-              <button v-if="searchClients" class="search-clear" @click.prevent="searchClients = ''"
-                aria-label="Limpiar búsqueda">X</button>
+            </div>
+            <div>
+              <h3 class="dashboard-panel-title">Estado de Facturas</h3>
+              <p class="dashboard-panel-subtitle">{{ filteredInvoicesForDashboard.length }} facturas en el período</p>
+            </div>
+          </div>
+          <div class="dashboard-panel-filters">
+            <div class="dashboard-date-range">
+              <input type="month" v-model="dashboardInvoiceMonth" class="dashboard-date-input" />
+              <button v-if="dashboardInvoiceMonth" class="dashboard-date-clear" @click="dashboardInvoiceMonth = ''">✕</button>
+            </div>
+            <div class="dashboard-date-range">
+              <input type="date" v-model="dashboardInvoiceDateFrom" class="dashboard-date-input" placeholder="Desde" />
+              <span class="dashboard-date-separator">→</span>
+              <input type="date" v-model="dashboardInvoiceDateTo" class="dashboard-date-input" placeholder="Hasta" />
+              <button v-if="dashboardInvoiceDateFrom || dashboardInvoiceDateTo" class="dashboard-date-clear" @click="dashboardInvoiceDateFrom = ''; dashboardInvoiceDateTo = ''">✕</button>
+            </div>
+            <div class="dashboard-date-range">
+              <select v-model="dashboardFilterPeriod" class="dashboard-date-input">
+                <option value="">Todas</option>
+                <option v-for="p in dashboardAvailablePeriods" :key="p.value" :value="p.value">{{ p.label }}</option>
+              </select>
+              <button v-if="dashboardFilterPeriod" class="dashboard-date-clear" @click="dashboardFilterPeriod = ''">✕</button>
             </div>
           </div>
         </div>
-
-        <!-- Modal para crear cliente (mantener) -->
-        <div v-if="showCreateClient" class="modal-overlay" @click="showCreateClient = false">
-          <div class="modal" @click.stop>
-            <div class="modal-header">
-              <h3>Registrar Cliente</h3>
-              <button class="modal-close" @click="showCreateClient = false">✕</button>
-            </div>
-            <div class="modal-body">
-              <form @submit.prevent="addBurnedClient">
-                <div class="form-group">
-                  <label>Nombre *</label>
-                  <input v-model="newClient.name" type="text" class="form-input" required
-                    placeholder="Ej: Juan Pérez" />
-                </div>
-                <div class="form-group">
-                  <label>Teléfono</label>
-                  <input v-model="newClient.phone" type="text" class="form-input" placeholder="Ej: 3001234567" />
-                </div>
-                <div class="form-group">
-                  <label>Email</label>
-                  <input v-model="newClient.email" type="email" class="form-input" placeholder="Ej: juan@email.com" />
-                </div>
-                <div class="form-group">
-                  <label>Notas internas</label>
-                  <textarea v-model="newClient.notes" class="form-input" rows="2"
-                    placeholder="Ej: Cliente exigente, siempre paga tarde"></textarea>
-                </div>
-                <!-- Campos de aviso removidos según requerimiento -->
-                <div class="form-group">
-                  <label>Fecha de Registro</label>
-                  <input v-model="newClient.registrationDate" type="date" class="form-input" />
-                </div>
-                <div class="form-actions">
-                  <button type="button" class="btn btn-secondary" @click="showCreateClient = false">Cancelar</button>
-                  <button type="submit" class="btn btn-primary">Registrar</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- Modal de edición de cliente -->
-        <div v-if="showEditClient && editingClient" class="modal-overlay" @click="closeEditClient">
-          <div class="modal" @click.stop>
-            <div class="modal-header">
-              <h3>Editar Cliente</h3>
-              <button class="modal-close" @click="closeEditClient">✕</button>
-            </div>
-            <div class="modal-body">
-              <form @submit.prevent="saveEditedClient">
-                <div class="form-group">
-                  <label>Nombre *</label>
-                  <input v-model="editingClient.name" type="text" class="form-input" required />
-                </div>
-                <div class="form-group">
-                  <label>Teléfono</label>
-                  <input v-model="editingClient.phone" type="text" class="form-input" />
-                </div>
-                <div class="form-group">
-                  <label>Email</label>
-                  <input v-model="editingClient.email" type="email" class="form-input" />
-                </div>
-                <!-- Campos de aviso removidos en edición -->
-                <div class="form-group">
-                  <label>Fecha de Registro</label>
-                  <input v-model="editingClient.registrationDate" type="date" class="form-input" />
-                </div>
-                <div class="form-group">
-                  <label>Notas</label>
-                  <textarea v-model="editingClient.notes" class="form-input" rows="2"></textarea>
-                </div>
-                <div class="form-actions">
-                  <button type="button" class="btn btn-secondary" @click="closeEditClient">Cancelar</button>
-                  <button type="submit" class="btn btn-primary">Guardar</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tabla de clientes -->
-        <div class="table-responsive" style="margin-top:16px;">
-          <table class="simple-table">
-            <colgroup>
-              <col style="width:6%" /> <!-- ID -->
-              <col style="width:18%" /> <!-- Nombre -->
-              <col style="width:12%" /> <!-- Teléfono -->
-              <col style="width:18%" /> <!-- Correo -->
-              <col style="width:12%" /> <!-- Fecha registro -->
-              <col style="width:22%" /> <!-- Notas -->
-              <col style="width:12%" /> <!-- Acciones (fijo) -->
-            </colgroup>
-            <thead class="table-header">
-              <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Teléfono</th>
-                <th>Correo</th>
-                <th>Fecha Registro</th>
-                <th>Notas</th>
-                <th style="text-align:center;">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="client in burnedClients.filter(c => {
-                if (!searchClients) return true
-                const q = searchClients.toLowerCase()
-                return (c.name && c.name.toLowerCase().includes(q)) || (c.email && c.email.toLowerCase().includes(q)) || (c.phone && c.phone.toLowerCase().includes(q))
-              })" :key="client.id">
-                <td data-label="ID">{{ client.id }}</td>
-                <td data-label="Nombre"><span class="client-name">{{ client.name }}</span></td>
-                <td data-label="Teléfono">{{ client.phone }}</td>
-                <td data-label="Correo"><span class="client-email">{{ client.email }}</span></td>
-                <td data-label="Fecha de Registro">{{ client.registrationDate ? formatShortDate(new
-                  Date(client.registrationDate)) : '-' }}</td>
-                <td data-label="Notas"><span class="client-notes">{{ client.notes }}</span></td>
-                <td data-label="Acciones">
-                  <div class="actions">
-                    <button class="btn btn-sm btn-secondary" @click="editClient(client)">✏️</button>
-                    <button class="btn btn-sm btn-danger" @click="deleteClient(client.id)">🗑️</button>
-                  </div>
-                </td>
-              </tr>
-              <tr v-if="burnedClients.length === 0">
-                <td colspan="7">No hay clientes registrados.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Pestaña de Servicios (antes Productos) -->
-      <div v-if="activeTab === 'services'" class="content-section">
-        <div class="section-header">
-          <h2>Gestión de Servicios</h2>
-          <button class="btn btn-primary" @click="showProductForm = true">
-            <span class="btn-icon">➕</span>
-            Nuevo Servicio
-          </button>
-        </div>
-
-        <!-- Barra de búsqueda para productos -->
-        <div class="search-bar">
-          <div class="search-input-wrapper">
-            <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-              <path fill="currentColor"
-                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
-            </svg>
-            <input type="search" v-model="searchProducts" placeholder="Buscar productos por nombre..."
-              aria-label="Buscar productos" class="search-input" />
-            <button v-if="searchProducts" class="search-clear" @click.prevent="searchProducts = ''"
-              aria-label="Limpiar búsqueda">X</button>
-          </div>
-        </div>
-
-        <!-- Lista de productos -->
-        <div class="products-grid">
-          <div v-for="product in filteredProducts" :key="product.id" class="product-card">
-            <div class="product-image">
-              <img v-if="product.images && product.images.length > 0" :src="product.images[0]" :alt="product.name" />
-              <div v-else class="no-image">📷</div>
-            </div>
-            <div class="product-info">
-              <h3>{{ product.name }}</h3>
-              <p class="product-description">{{ product.description }}</p>
-              <div class="product-meta">
-                <span class="price">${{ product.price.toLocaleString() }}</span>
-                <span :class="['status', product.status]">{{ getStatusText(product.status) }}</span>
-              </div>
-              <div class="product-actions">
-                <button class="btn btn-sm btn-secondary" @click="editProduct(product)">✏️ Editar</button>
-                <button class="btn btn-sm btn-danger" @click="deleteProductConfirm(product.id)">🗑️ Eliminar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Estado vacío o sin resultados -->
-        <div v-if="filteredProducts.length === 0 && !searchProducts" class="empty-state">
-          <div class="empty-icon">📦</div>
-          <h3>No hay servicios</h3>
-          <p>Comienza agregando tu primer servicio del taller</p>
-          <button class="btn btn-primary" @click="showProductForm = true">
-            Crear Primer Servicio
-          </button>
-        </div>
-        <div v-else-if="filteredProducts.length === 0 && searchProducts" class="empty-state">
-          <div class="empty-icon">🔍</div>
-          <h3>No se encontraron resultados</h3>
-          <p>No hay servicios que coincidan con "{{ searchProducts }}"</p>
-          <button class="btn btn-secondary" @click="searchProducts = ''">
-            Limpiar búsqueda
-          </button>
-        </div>
-      </div>
-
-      <!-- Pestaña de Categorías -->
-      <div v-if="activeTab === 'categories'" class="content-section">
-        <div class="section-header">
-          <h2>Gestión de Categorías</h2>
-          <button class="btn btn-primary" @click="showCategoryForm = true">
-            <span class="btn-icon">➕</span>
-            Nueva Categoría
-          </button>
-        </div>
-
-        <!-- Barra de búsqueda para categorías -->
-        <div class="search-bar">
-          <div class="search-input-wrapper">
-            <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-              <path fill="currentColor"
-                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
-            </svg>
-            <input type="search" v-model="searchCategories" placeholder="Buscar categorías por nombre..."
-              aria-label="Buscar categorías" class="search-input" />
-            <button v-if="searchCategories" class="search-clear" @click.prevent="searchCategories = ''"
-              aria-label="Limpiar búsqueda">X</button>
-          </div>
-        </div>
-
-        <!-- Lista de categorías -->
-        <div class="categories-list">
-          <div v-for="category in filteredCategories" :key="category.id" class="category-item">
-            <div class="category-info">
-              <h3>{{ category.name }}</h3>
-              <p>{{ category.description }}</p>
-              <span class="category-count">{{ getProductsInCategory(category.id) }} productos</span>
-            </div>
-            <div class="category-actions">
-              <button class="btn btn-sm btn-secondary" @click="editCategory(category)">✏️</button>
-              <button class="btn btn-sm btn-danger" @click="handleDeleteCategory(category.id)">🗑️</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Estado vacío o sin resultados -->
-        <div v-if="filteredCategories.length === 0 && !searchCategories" class="empty-state">
-          <div class="empty-icon">🏷️</div>
-          <h3>No hay categorías</h3>
-          <p>Crea categorías para organizar tus productos</p>
-          <button class="btn btn-primary" @click="showCategoryForm = true">
-            Crear Primera Categoría
-          </button>
-        </div>
-        <div v-else-if="filteredCategories.length === 0 && searchCategories" class="empty-state">
-          <div class="empty-icon">🔍</div>
-          <h3>No se encontraron resultados</h3>
-          <p>No hay categorías que coincidan con "{{ searchCategories }}"</p>
-          <button class="btn btn-secondary" @click="searchCategories = ''">
-            Limpiar búsqueda
-          </button>
-        </div>
-      </div>
-
-      <!-- Pestaña de Novedades (ProductShowcase) -->
-      <div v-if="activeTab === 'showcase'" class="content-section">
-        <div class="section-header">
-          <h2>Gestión de Novedades</h2>
-          <button class="btn btn-primary" @click="showShowcaseForm = true">
-            <span class="btn-icon">✨</span>
-            Nueva Novedad
-          </button>
-        </div>
-
-        <!-- Barra de búsqueda para novedades -->
-        <div class="search-bar">
-          <div class="search-input-wrapper">
-            <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-              <path fill="currentColor"
-                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
-            </svg>
-            <input type="search" v-model="searchShowcase" placeholder="Buscar novedades por nombre..."
-              aria-label="Buscar novedades" class="search-input" />
-            <button v-if="searchShowcase" class="search-clear" @click.prevent="searchShowcase = ''"
-              aria-label="Limpiar búsqueda">X</button>
-          </div>
-        </div>
-
-        <!-- Lista de productos showcase -->
-        <div class="showcase-grid">
-          <div v-for="product in filteredShowcase" :key="product.id" class="showcase-card">
-            <div class="showcase-image">
-              <img :src="product.image" :alt="product.name" />
-            </div>
-            <div class="showcase-info">
-              <h3>{{ product.name }}</h3>
-              <p class="showcase-description">{{ product.description }}</p>
-              <div class="showcase-meta">
-                <span class="showcase-category">{{ getCategoryById(product.category)?.name || 'Sin categoría' }}</span>
-                <span class="showcase-status available">
-                  Disponible
-                </span>
-              </div>
-            </div>
-            <div class="showcase-actions">
-              <button class="btn btn-sm btn-secondary" @click="editShowcaseProduct(product)">✏️</button>
-              <button class="btn btn-sm btn-danger" @click="deleteShowcaseConfirm(product.id)">🗑️</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Estado vacío o sin resultados -->
-        <div v-if="filteredShowcase.length === 0 && !searchShowcase" class="empty-state">
-          <div class="empty-icon">✨</div>
-          <h3>No hay novedades</h3>
-          <p>Agrega productos destacados para mostrar en la sección de novedades</p>
-          <button class="btn btn-primary" @click="showShowcaseForm = true">
-            Crear Primera Novedad
-          </button>
-        </div>
-        <div v-else-if="filteredShowcase.length === 0 && searchShowcase" class="empty-state">
-          <div class="empty-icon">🔍</div>
-          <h3>No se encontraron resultados</h3>
-          <p>No hay novedades que coincidan con "{{ searchShowcase }}"</p>
-          <button class="btn btn-secondary" @click="searchShowcase = ''">
-            Limpiar búsqueda
-          </button>
-        </div>
-      </div>
-
-      <!-- Pestaña de Gestión de Vehículos
-      <div v-if="activeTab === 'vehicles'" class="content-section">
-        <div class="section-header">
-          <h2>Gestión de vehículos</h2>
-        </div>
-
-        <div v-if="sales.length > 0">
-          <div class="sales-table-container">
-            <table class="sales-table vehicles-table">
-              <thead>
+        <div class="dashboard-panel-body">
+          <div class="table-responsive">
+            <table class="simple-table compact">
+              <thead class="table-header">
                 <tr>
-                  <th>Cliente</th>
-                  <th>Servicio</th>
-                  <th>Estado</th>
-                  <th>Fecha</th>
+                  <th style="text-align:center;"># Factura</th>
+                  <th style="text-align:left;">Cliente</th>
+                  <th style="text-align:center;">Placa</th>
+                  <th style="text-align:center;">Estado</th>
+                  <th style="text-align:right;">Total</th>
+                  <th style="text-align:right;">Abonado</th>
+                  <th style="text-align:right;">Saldo</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="sale in sales" :key="sale.id" class="sale-row">
-                  <td>
-                    <div class="customer-info">
-                      <div class="customer-name">{{ sale.customerName }}</div>
-                      <div class="customer-email">{{ sale.customerEmail }}</div>
-                    </div>
+                <tr v-for="inv in filteredInvoicesForDashboard.slice(0, 10)" :key="inv.id">
+                  <td style="text-align:center;font-weight:700;">#{{ inv.id }}</td>
+                  <td style="text-align:left;">
+                    <strong>{{ inv.client }}</strong>
+                    <div style="color:var(--muted);font-size:0.85rem;">{{ inv.vehicleBrand || '' }} {{ inv.vehicleModel || '' }}</div>
                   </td>
-                  <td>
-                    <div class="product-name">{{ sale.productName }}</div>
-                  </td>
-                  <td>
-                    <span :class="['status-badge', sale.status]">
-                      {{ getSaleStatusText(sale.status) }}
-                    </span>
-                  </td>
-                  <td>
-                    <span class="date">{{ formatDate(sale.date) }}</span>
-                  </td>
+                  <td style="text-align:center;"><span style="text-transform:uppercase;font-weight:700;">{{ inv.vehicle || '-' }}</span></td>
+                  <td style="text-align:center;"><span class="status-badge" :class="String(inv.status || 'Pendiente').toLowerCase()">{{ inv.status || 'Pendiente' }}</span></td>
+                  <td style="text-align:right;font-weight:600;">${{ invoiceTotal(inv).toLocaleString() }}</td>
+                  <td style="text-align:right;color:#22c55e;font-weight:600;">${{ invoiceDepositTotal(inv).toLocaleString() }}</td>
+                  <td style="text-align:right;color:#f59e0b;font-weight:600;">${{ (invoiceTotal(inv) - invoiceDepositTotal(inv)).toLocaleString() }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-        <div v-else class="empty-state">
-          <div class="empty-icon">🚗</div>
-          <h3>No hay vehículos registrados</h3>
-          <p>Cuando registres servicios o ventas, los vehículos aparecerán aquí.</p>
-        </div>
-      </div> -->
+      </div>
 
-      <!-- Dashboard: resumen y estadísticas -->
-      <div v-if="activeTab === 'reports'" class="content-section">
-        <div class="section-header">
-          <h2>📊 Dashboard</h2>
-          <button @click="loadPurchases" class="btn-secondary" :disabled="isLoadingSales">
-            {{ isLoadingSales ? 'Cargando...' : 'Actualizar' }}
-          </button>
+      <!-- Desempeño de Técnicos con Filtro -->
+      <div class="dashboard-panel">
+        <div class="dashboard-panel-header">
+          <div class="dashboard-panel-header-left">
+            <div class="dashboard-panel-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="8.5" cy="7" r="4"/>
+                <line x1="20" y1="8" x2="20" y2="14"/>
+                <line x1="23" y1="11" x2="17" y2="11"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="dashboard-panel-title">Desempeño de Técnicos</h3>
+              <p class="dashboard-panel-subtitle">Métricas de productividad por período</p>
+            </div>
+          </div>
+          <div class="dashboard-panel-filters">
+            <div class="dashboard-date-range">
+              <input type="month" v-model="dashboardSelectedMonth" class="dashboard-date-input" />
+              <button v-if="dashboardSelectedMonth" class="dashboard-date-clear" @click="dashboardSelectedMonth = ''">✕</button>
+            </div>
+            <div class="dashboard-date-range">
+              <input type="date" v-model="dashboardDateFrom" class="dashboard-date-input" />
+              <span class="dashboard-date-separator">→</span>
+              <input type="date" v-model="dashboardDateTo" class="dashboard-date-input" />
+              <button v-if="dashboardDateFrom || dashboardDateTo" class="dashboard-date-clear" @click="dashboardDateFrom = ''; dashboardDateTo = ''">✕</button>
+            </div>
+          </div>
         </div>
+        <div class="dashboard-panel-body">
+          <div v-if="dashboardTechniciansByMonth.length === 0" class="dashboard-empty">
+            <p>No hay datos de desempeño para el período seleccionado</p>
+          </div>
+          <div v-else class="dashboard-performance-grid">
+            <div v-for="tech in dashboardTechniciansByMonth" :key="tech.name" class="dashboard-performance-card">
+              <div class="dashboard-performance-header">
+                <div class="dashboard-tech-avatar">{{ getInitials(tech.name) }}</div>
+                <div class="dashboard-tech-info">
+                  <h4>{{ tech.name }}</h4>
+                  <span>{{ tech.role }}</span>
+                </div>
+              </div>
+              <div class="dashboard-performance-metrics">
+                <div class="dashboard-perf-metric">
+                  <span class="dashboard-perf-value">{{ tech.ordersCount }}</span>
+                  <span class="dashboard-perf-label">Órdenes</span>
+                </div>
+                <div class="dashboard-perf-metric">
+                  <span class="dashboard-perf-value">${{ tech.totalRevenue.toLocaleString() }}</span>
+                  <span class="dashboard-perf-label">Ingresos</span>
+                </div>
+                <div class="dashboard-perf-metric">
+                  <span class="dashboard-perf-value">${{ tech.technicianShare.toLocaleString() }}</span>
+                  <span class="dashboard-perf-label">Su 50%</span>
+                </div>
+                <div class="dashboard-perf-metric">
+                  <span class="dashboard-perf-value">${{ tech.workshopShare.toLocaleString() }}</span>
+                  <span class="dashboard-perf-label">Taller 50%</span>
+                </div>
+              </div>
+              <div class="dashboard-warranty-section">
+                <div class="dashboard-warranty-header">
+                  <span class="dashboard-warranty-label">Garantías</span>
+                  <span class="dashboard-warranty-value">{{ tech.warrantyCount }}</span>
+                </div>
+                <div class="dashboard-warranty-bar">
+                  <div class="dashboard-warranty-fill" :style="{ width: tech.ordersCount > 0 ? ((tech.warrantyCount / tech.ordersCount) * 100) + '%' : '0%' }"></div>
+                </div>
+                <div class="dashboard-warranty-sub">
+                  <span>${{ tech.warrantyValue.toLocaleString() }} en garantías</span>
+                  <span>{{ tech.ordersCount > 0 ? ((tech.warrantyCount / tech.ordersCount) * 100).toFixed(1) : '0.0' }}% de órdenes</span>
+                </div>
+              </div>
+              <div class="dashboard-performance-bar">
+                <div class="dashboard-progress-bar">
+                  <div class="dashboard-progress-fill" :style="{ width: tech.percentage + '%' }"></div>
+                </div>
+                <span class="dashboard-progress-label">{{ tech.percentage.toFixed(1) }}% del total</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <div class="dashboard-grid">
-          <div class="kpi-row">
-            <div class="kpi-card">
-              <div class="kpi-label">Ingresos por Quincena</div>
-              <div class="kpi-value">${{ dashboardBiweeklyLast.toLocaleString() }}</div>
+      <!-- Fila de dos columnas: Estado de Órdenes (izq) + Facturación (der) -->
+      <div class="dashboard-two-columns">
+        <!-- Estado de Órdenes (Izquierda) -->
+        <div class="dashboard-orders-status-panel">
+          <div class="dashboard-orders-status-header">
+            <div class="dashboard-orders-status-header-left">
+              <div class="dashboard-orders-status-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dashboard-orders-status-title">Estado de Órdenes</h3>
+                <p class="dashboard-orders-status-subtitle">{{ filteredOrderStats.total }} órdenes en total</p>
+              </div>
             </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Vehículos Atendidos</div>
-              <div class="kpi-value">{{ vehiclesCount }}</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Órdenes Abiertas</div>
-              <div class="kpi-value">{{ ordersOpenCount }}</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Órdenes Terminadas</div>
-              <div class="kpi-value">{{ ordersCompletedCount }}</div>
-            </div>
-            <div class="kpi-card">
-              <div class="kpi-label">Tiempo Promedio Servicio</div>
-              <div class="kpi-value">{{ avgServiceTime }}</div>
+            <div class="dashboard-panel-filters">
+              <div class="dashboard-date-range">
+                <input type="month" v-model="dashboardOrderMonth" class="dashboard-date-input" />
+                <button v-if="dashboardOrderMonth" class="dashboard-date-clear" @click="dashboardOrderMonth = ''">✕</button>
+              </div>
+              <div class="dashboard-date-range">
+                <input type="date" v-model="dashboardOrderDateFrom" class="dashboard-date-input" placeholder="Desde" />
+                <span class="dashboard-date-separator">→</span>
+                <input type="date" v-model="dashboardOrderDateTo" class="dashboard-date-input" placeholder="Hasta" />
+                <button v-if="dashboardOrderDateFrom || dashboardOrderDateTo" class="dashboard-date-clear" @click="dashboardOrderDateFrom = ''; dashboardOrderDateTo = ''">✕</button>
+              </div>
             </div>
           </div>
 
-          <div class="charts-row">
-            <!-- Dona grande y visual -->
-            <div class="chart-card donut-card">
-              <h3>Estado de Órdenes</h3>
-              <div class="donut-area">
-                <div class="donut-wrap">
-                  <apexchart type="donut" :options="donutOptions" :series="donutSeries" width="260" />
-                </div>
-                <div class="donut-legend">
-                  <ul class="status-list">
-                    <li v-for="(count, status, idx) in orderStatusCounts" :key="status">
-                      <span class="legend-color" :style="{ background: donutLegendColors[idx] || '#ccc' }"></span>
-                      <span class="legend-text">{{ status }}:</span>
-                      <span class="legend-value">{{ count }}</span>
-                    </li>
-                  </ul>
-                </div>
+          <div class="dashboard-orders-summary">
+            <div class="dashboard-orders-summary-item active">
+              <div class="dashboard-orders-summary-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+              <div class="dashboard-orders-summary-info">
+                <div class="dashboard-orders-summary-value">{{ filteredOrderStats.active }}</div>
+                <div class="dashboard-orders-summary-label">Activas / Terminadas</div>
+              </div>
+              <div class="dashboard-orders-summary-pct">{{ filteredOrderStats.total > 0 ? Math.round((filteredOrderStats.active / filteredOrderStats.total) * 100) : 0 }}%</div>
+            </div>
+            <div class="dashboard-orders-summary-item finished">
+              <div class="dashboard-orders-summary-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 6L9 17l-5-5"/>
+                </svg>
+              </div>
+              <div class="dashboard-orders-summary-info">
+                <div class="dashboard-orders-summary-value">{{ filteredOrderStats.finished }}</div>
+                <div class="dashboard-orders-summary-label">Entregadas</div>
+              </div>
+              <div class="dashboard-orders-summary-pct">{{ filteredOrderStats.total > 0 ? Math.round((filteredOrderStats.finished / filteredOrderStats.total) * 100) : 0 }}%</div>
+            </div>
+          </div>
+
+          <div class="dashboard-orders-pie-chart">
+            <apexchart type="pie" :options="ordersPieOptions" :series="ordersPieSeries" width="300" />
+          </div>
+        </div>
+
+        <!-- Facturación (Derecha) -->
+        <div class="dashboard-invoices-panel">
+          <div class="dashboard-invoices-header">
+            <div class="dashboard-invoices-header-left">
+              <div class="dashboard-invoices-icon">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="dashboard-invoices-title">Facturación</h3>
+                <p class="dashboard-invoices-subtitle">{{ filteredInvoiceStats.total }} facturas en total</p>
               </div>
             </div>
-
-            <!-- Tarjetas pequeñas a la derecha: Próximas Citas + Alertas -->
-            <div class="right-column small-cards">
-              <div class="chart-card upcoming-card">
-                <h3>Próximas Citas</h3>
-                <ul class="upcoming-list">
-                  <li v-for="appt in upcomingAppointments" :key="appt.id">{{ appt.date ? formatShortDate(new
-                    Date(appt.date)) : '—' }} · {{ appt.time }} · {{ appt.client }}</li>
-                  <li v-if="upcomingAppointments.length === 0">Sin próximas citas</li>
-                </ul>
+            <div class="dashboard-panel-filters">
+              <div class="dashboard-date-range">
+                <input type="month" v-model="dashboardInvoiceMonth" class="dashboard-date-input" />
+                <button v-if="dashboardInvoiceMonth" class="dashboard-date-clear" @click="dashboardInvoiceMonth = ''">✕</button>
               </div>
-
-              <div class="chart-card alerts-card">
-                <h3>Alertas</h3>
-                <ul>
-                  <li v-for="a in dashboardAlerts" :key="a">{{ a }}</li>
-                  <li v-if="dashboardAlerts.length === 0">Sin alertas</li>
-                </ul>
+              <div class="dashboard-date-range">
+                <input type="date" v-model="dashboardInvoiceDateFrom" class="dashboard-date-input" placeholder="Desde" />
+                <span class="dashboard-date-separator">→</span>
+                <input type="date" v-model="dashboardInvoiceDateTo" class="dashboard-date-input" placeholder="Hasta" />
+                <button v-if="dashboardInvoiceDateFrom || dashboardInvoiceDateTo" class="dashboard-date-clear" @click="dashboardInvoiceDateFrom = ''; dashboardInvoiceDateTo = ''">✕</button>
               </div>
             </div>
           </div>
 
-          <div class="bottom-row">
-            <div class="card warranty-card">
-              <h3>Garantía en Empleados</h3>
-              <table class="table small-table tech-table">
-                <thead>
+          <div class="dashboard-invoices-stats">
+            <div class="dashboard-invoices-stat-item pending">
+              <div class="dashboard-invoices-stat-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+              <div class="dashboard-invoices-stat-info">
+                <div class="dashboard-invoices-stat-value">{{ filteredInvoiceStats.pending }}</div>
+                <div class="dashboard-invoices-stat-label">Pendientes</div>
+              </div>
+              <div class="dashboard-invoices-stat-money">${{ filteredInvoiceStats.pendingValue.toLocaleString() }}</div>
+            </div>
+            <div class="dashboard-invoices-stat-item paid">
+              <div class="dashboard-invoices-stat-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+              </div>
+              <div class="dashboard-invoices-stat-info">
+                <div class="dashboard-invoices-stat-value">{{ filteredInvoiceStats.paid }}</div>
+                <div class="dashboard-invoices-stat-label">Pagadas</div>
+              </div>
+              <div class="dashboard-invoices-stat-money">${{ filteredInvoiceStats.paidValue.toLocaleString() }}</div>
+            </div>
+          </div>
+          <div class="dashboard-invoices-pie-chart">
+            <apexchart type="pie" :options="filteredInvoicePieOptions" :series="filteredInvoicePieSeries" width="300" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráficos Financieros -->
+      <div class="dashboard-financial-row">
+        <div class="dashboard-chart-card wide">
+          <h3>Ingresos por Quincena</h3>
+          <div class="dashboard-chart-area">
+            <apexchart type="line" :options="lineOptions" :series="lineSeries" height="180" />
+          </div>
+        </div>
+        <div class="dashboard-chart-card small">
+          <h3>Ingresos vs Costos</h3>
+          <div class="dashboard-mini-chart">
+            <div class="dashboard-bar rev" :style="{ width: revenueVsCosts.revPct + '%' }">Ingresos</div>
+            <div class="dashboard-bar cost" :style="{ width: revenueVsCosts.costPct + '%' }">Costos</div>
+          </div>
+          <div class="dashboard-mini-chart-legend">
+            <div><span class="dashboard-dot rev"></span> ${{ revenueVsCosts.rev.toLocaleString() }}</div>
+            <div><span class="dashboard-dot cost"></span> ${{ revenueVsCosts.cost.toLocaleString() }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================
+       MODALES GLOBALES DE FACTURACIÓN
+       Disponibles desde cualquier pestaña.
+       ========================================================== -->
+  <!-- Modal crear/editar factura -->
+  <div v-if="showInvoiceModal" class="modal-overlay" @click="showInvoiceModal = false">
+    <div class="modal" @click.stop style="max-width:960px;">
+      <div class="modal-header">
+        <h3>{{ editingInvoice ? 'Editar Factura #' + editingInvoice.id : 'Nueva Factura' }}</h3>
+        <button class="modal-close" @click="showInvoiceModal = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <form @submit.prevent="saveInvoice">
+
+          <!-- Cliente -->
+          <div class="form-section">
+            <div class="form-section-title">👤 Cliente</div>
+            <div class="form-row">
+              <div class="form-group"><label>Nombre *</label><input v-model="formInvoice.client" type="text" class="form-input" required placeholder="Ej: Juan Pérez" /></div>
+              <div class="form-group"><label>Teléfono</label><input v-model="formInvoice.clientPhone" type="text" class="form-input" placeholder="Ej: 3001234567" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Correo</label><input v-model="formInvoice.clientEmail" type="email" class="form-input" placeholder="Ej: juan@email.com" /></div>
+              <div class="form-group"><label>Dirección</label><input v-model="formInvoice.clientAddress" type="text" class="form-input" placeholder="Ej: Calle 123 #45-67" /></div>
+            </div>
+          </div>
+
+          <!-- Vehículo -->
+          <div class="form-section">
+            <div class="form-section-title">🚗 Vehículo</div>
+            <div class="form-row">
+              <div class="form-group"><label>Marca</label><input v-model="formInvoice.vehicleBrand" type="text" class="form-input" placeholder="Ej: Toyota" /></div>
+              <div class="form-group"><label>Modelo</label><input v-model="formInvoice.vehicleModel" type="text" class="form-input" placeholder="Ej: Corolla 2022" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Placa</label><input v-model="formInvoice.vehicle" type="text" class="form-input" placeholder="Ej: ABC123" style="text-transform:uppercase;" /></div>
+              <div class="form-group"><label>Kilometraje</label><input v-model="formInvoice.vehicleKm" type="text" class="form-input" placeholder="Ej: 45000" /></div>
+            </div>
+          </div>
+
+          <!-- Items -->
+          <div class="form-section">
+            <div class="form-section-title">🛠️ Productos y Servicios</div>
+            <table class="simple-table compact" style="margin-bottom:10px;">
+              <thead class="table-header">
+                <tr>
+                  <th style="width:40%">Descripción</th>
+                  <th style="width:10%">Cant.</th>
+                  <th style="width:15%">Valor Unit.</th>
+                  <th style="width:12%">Valor Total</th>
+                  <th style="width:8%">M.O</th>
+                  <th style="width:15%">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(it, idx) in formInvoice.items" :key="idx">
+                   <td><input v-model="it.description" class="form-input" placeholder="Descripción de mano de obra / servicio" /></td>
+                  <td><input :value="formatNumber(it.qty)" type="text" class="form-input" @input="it.qty = parseNumber(($event.target as HTMLInputElement).value)" /></td>
+                  <td><input :value="formatNumber(it.price)" type="text" class="form-input" @input="it.price = parseNumber(($event.target as HTMLInputElement).value)" /></td>
+                  <td style="text-align:right;font-weight:600;">${{ formatNumber((Number(it.qty)||0) * (Number(it.price)||0)) }}</td>
+                  <td style="text-align:center;white-space:nowrap;">
+                    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.85rem;justify-content:center;">
+                      <input v-model="it.isLabor" type="checkbox" style="width:16px;height:16px;cursor:pointer;" />
+                      <span>🛠️</span>
+                    </label>
+                  </td>
+                  <td><button type="button" class="btn btn-sm btn-danger" @click="removeInvoiceItem(idx)">−</button></td>
+                </tr>
+              </tbody>
+            </table>
+            <button type="button" class="btn btn-secondary" @click="addInvoiceItem">➕ Agregar item</button>
+          </div>
+
+          <!-- Resumen y Estado -->
+          <div class="form-section">
+            <div class="form-section-title">💰 Resumen Financiero</div>
+            <div class="form-row">
+              <div class="form-group" style="display:flex;align-items:center;gap:8px;min-height:48px;">
+                <label style="margin:0;">IVA (19%)</label>
+                <input v-model="formInvoice.applyTax" type="checkbox" style="width:20px;height:20px;cursor:pointer;" />
+              </div>
+              <div class="form-group"><label>Descuento ($)</label><input :value="formatNumber(formInvoice.discount)" type="text" class="form-input" @input="formInvoice.discount = parseNumber(($event.target as HTMLInputElement).value)" /></div>
+              <div class="form-group"><label>Retención ($)</label><input :value="formatNumber(formInvoice.retention)" type="text" class="form-input" @input="formInvoice.retention = parseNumber(($event.target as HTMLInputElement).value)" /></div>
+            </div>
+            <!-- Abonos -->
+            <div class="form-section">
+              <div class="form-section-title">💰 Abonos</div>
+              <table class="simple-table compact" style="margin-bottom:10px;">
+                <thead class="table-header">
                   <tr>
-                    <th>Técnico</th>
-                    <th>Garantías</th>
-                    <th style="text-align:right">Valor</th>
+                    <th style="width:30%">Fecha</th>
+                    <th style="width:30%">Método</th>
+                    <th style="width:25%">Monto</th>
+                    <th style="width:15%">Acción</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="row in warrantyPerformanceEnhanced" :key="row.name">
-                    <td class="tech-name">
-                      <strong>{{ row.name }}</strong>
-                      <div style="color:var(--brand-accent-alt);font-size:0.85rem;">{{ row.role }}</div>
-                    </td>
-                    <td class="tech-orders">
-                      <div class="orders-count">{{ row.warrantyOrders }}</div>
-                      <div class="orders-bar" role="progressbar" :aria-valuenow="row.warrantyPct" aria-valuemin="0"
-                        aria-valuemax="100">
-                        <div class="orders-bar-fill" :style="{ width: row.warrantyPct + '%' }"></div>
-                      </div>
-                    </td>
-                    <td style="text-align:right;font-weight:700;">${{ row.warrantyValueFormatted }}</td>
+                  <tr v-for="(dep, idx) in formInvoice.deposits" :key="idx">
+                    <td><input type="date" v-model="dep.date" class="form-input" /></td>
+                    <td><input v-model="dep.method" class="form-input" placeholder="Ej: Efectivo" /></td>
+                    <td><input :value="formatNumber(dep.amount)" type="text" class="form-input" @input="dep.amount = parseNumber(($event.target as HTMLInputElement).value)" placeholder="0" /></td>
+                    <td><button type="button" class="btn btn-sm btn-danger" @click="removeDeposit(idx)">−</button></td>
                   </tr>
                 </tbody>
               </table>
-            </div>
-
-            <div class="card tech-card">
-              <h3>Desempeño de Técnicos</h3>
-              <table class="table small-table tech-table">
-                <thead>
-                  <tr>
-                    <th>Técnico</th>
-                    <th>Trabajos</th>
-                    <th style="text-align:right">Ingresos</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="t in techniciansPerformanceEnhanced" :key="t.name">
-                    <td class="tech-name">{{ t.name }}</td>
-                    <td class="tech-orders">
-                      <div class="orders-count">{{ t.orders }}</div>
-                      <div class="orders-bar" role="progressbar" :aria-valuenow="t.ordersPct" aria-valuemin="0"
-                        aria-valuemax="100">
-                        <div class="orders-bar-fill" :style="{ width: t.ordersPct + '%' }"></div>
-                      </div>
-                    </td>
-                    <td class="tech-income">{{ t.incomeFormatted }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Fila financiera: Ingresos por Quincena + Ingresos vs Costos -->
-          <div class="financial-row">
-            <div class="card wide">
-              <h3>Ingresos por Quincena</h3>
-              <div class="chart-area">
-                <apexchart type="line" :options="lineOptions" :series="lineSeries" height="180" />
-              </div>
-            </div>
-            <div class="card small">
-              <h3>Ingresos vs Costos</h3>
-              <div class="mini-chart">
-                <div class="bar rev" :style="{ width: revenueVsCosts.revPct + '%' }">Ingresos</div>
-                <div class="bar cost" :style="{ width: revenueVsCosts.costPct + '%' }">Costos</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal de Producto -->
-    <div v-if="showProductForm" class="modal-overlay" @click="closeProductForm">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
-          <h3>{{ editingProduct ? 'Editar Producto' : 'Nuevo Producto' }}</h3>
-          <button class="modal-close" @click="closeProductForm">✕</button>
-        </div>
-        <div class="modal-body">
-          <form @submit.prevent="saveProduct">
-            <div class="form-group">
-              <label>Nombre del Producto *</label>
-              <input v-model="productForm.name" type="text" class="form-input" required
-                placeholder="Ej: iPhone 15 Pro" />
-            </div>
-
-            <div class="form-group">
-              <label>Descripción</label>
-              <textarea v-model="productForm.description" class="form-input" rows="3"
-                placeholder="Describe las características principales del producto"></textarea>
+              <button type="button" class="btn btn-secondary" @click="addDeposit">➕ Agregar abono</button>
             </div>
 
             <div class="form-row">
-              <div class="form-group">
-                <label>Precio *</label>
-                <div class="price-input">
-                  <span class="currency">$</span>
-                  <input v-model.number="productForm.price" type="number" class="form-input" step="1000" min="0"
-                    required placeholder="0" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Precio Original (descuento)</label>
-                <div class="price-input">
-                  <span class="currency">$</span>
-                  <input v-model.number="productForm.originalPrice" type="number" class="form-input" step="1000" min="0"
-                    placeholder="0" />
-                </div>
-              </div>
+              <div class="form-group"><label>Forma de pago</label><input v-model="formInvoice.payments" placeholder="Ej: Efectivo, Transferencia" class="form-input" /></div>
+              <div class="form-group"><label>Estado</label><select v-model="formInvoice.status" class="form-input">
+                  <option>Pendiente</option>
+                  <option>Abonado</option>
+                  <option>Pagado</option>
+                  <option>Anulado</option>
+                </select></div>
             </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label>Categoría *</label>
-                <select v-model="productForm.category" class="form-input" required>
-                  <option value="">Seleccionar categoría</option>
-                  <option v-for="category in categories" :key="category.id" :value="category.id">
-                    {{ category.name }}
-                  </option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Estado de Disponibilidad *</label>
-                <select v-model="productForm.status" class="form-input" required>
-                  <option value="available">✅ Disponible</option>
-                  <option value="out-of-stock">❌ Sin Stock</option>
-                  <option value="coming-soon">🔜 Próximamente</option>
-                </select>
-              </div>
+            <div class="invoice-totals-bar" style="margin-top:14px;display:flex;justify-content:flex-end;gap:18px;flex-wrap:wrap;">
+              <div><span style="color:var(--muted);">Subtotal</span> <strong style="font-size:1.1rem;">${{ invoiceSubtotal(formInvoice).toLocaleString() }}</strong></div>
+              <div><span style="color:var(--muted);">IVA</span> <strong style="font-size:1.1rem;">${{ invoiceTax(formInvoice).toLocaleString() }}</strong></div>
+              <div><span style="color:var(--muted);">Descuento</span> <strong style="font-size:1.1rem;color:#dc2626;">-${{ Number(formInvoice.discount).toLocaleString() }}</strong></div>
+              <div><span style="color:var(--muted);">Retención</span> <strong style="font-size:1.1rem;color:#dc2626;">-${{ Number(formInvoice.retention).toLocaleString() }}</strong></div>
+              <div style="border-left:2px solid var(--brand-border);padding-left:14px;"><span style="color:var(--muted);">TOTAL</span> <strong style="font-size:1.4rem;color:var(--brand-primary);">${{ invoiceTotal(formInvoice).toLocaleString() }}</strong></div>
+              <div v-if="invoiceDepositTotal(formInvoice) > 0" style="border-left:2px solid var(--brand-border);padding-left:14px;"><span style="color:var(--muted);">ABONADO</span> <strong style="font-size:1.1rem;color:#22c55e;">${{ invoiceDepositTotal(formInvoice).toLocaleString() }}</strong></div>
+              <div v-if="invoiceDepositTotal(formInvoice) > 0 && invoiceTotal(formInvoice) > invoiceDepositTotal(formInvoice)" style="border-left:2px solid var(--brand-border);padding-left:14px;"><span style="color:var(--muted);">SALDO</span> <strong style="font-size:1.1rem;color:#f59e0b;">${{ (invoiceTotal(formInvoice) - invoiceDepositTotal(formInvoice)).toLocaleString() }}</strong></div>
             </div>
+          </div>
 
-            <!-- Selector de Colores -->
+          <!-- Notas -->
+          <div class="form-section">
+            <div class="form-section-title">📝 Notas Adicionales</div>
             <div class="form-group">
-              <label>Colores Disponibles</label>
-              <div class="colors-selector">
-                <div class="colors-grid">
-                  <div v-for="color in appleColors" :key="color.name" class="color-option"
-                    :class="{ selected: isColorSelected(color.name) }" @click="toggleProductColor(color.name)">
-                    <div class="color-circle" :style="{ background: color.hex }">
-                      <span v-if="isColorSelected(color.name)" class="check-icon">✓</span>
-                    </div>
-                    <span class="color-name">{{ color.name }}</span>
-                  </div>
-                </div>
-                <div v-if="productForm.colors.length > 0" class="selected-colors">
-                  <span class="selected-label">Seleccionados: </span>
-                  <span class="selected-list">{{ productForm.colors.join(', ') }}</span>
-                </div>
-              </div>
+              <textarea v-model="formInvoice.notes" class="form-input" rows="2" placeholder="Notas internas sobre la factura"></textarea>
             </div>
+          </div>
 
-            <!-- Subida de imagen -->
-            <div class="form-group">
-              <label>Imagen del Producto *</label>
+          <div class="form-actions" style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary" @click="showInvoiceModal = false">Cancelar</button>
 
-              <!-- Tabs para elegir método de imagen -->
-              <div class="image-tabs">
-                <button type="button" class="tab-btn" :class="{ active: productImageUploadMethod === 'url' }"
-                  @click="productImageUploadMethod = 'url'">
-                  URL de Imagen
-                </button>
-                <button type="button" class="tab-btn" :class="{ active: productImageUploadMethod === 'file' }"
-                  @click="productImageUploadMethod = 'file'">
-                  Subir Archivo
-                </button>
-              </div>
-
-              <!-- Campo URL -->
-              <div v-if="productImageUploadMethod === 'url'" class="image-input-section">
-                <input :value="productForm.images[0] || ''"
-                  @input="(e) => { productForm.images = [(e.target as HTMLInputElement).value]; updateImagePreview(); }"
-                  type="url" class="form-input" required placeholder="https://ejemplo.com/imagen.jpg" />
-              </div>
-
-              <!-- Campo de archivo -->
-              <div v-if="productImageUploadMethod === 'file'" class="image-input-section">
-                <input ref="fileInput" type="file" class="file-input" accept="image/*" multiple
-                  @change="handleMultipleFileSelect" />
-                <div class="file-upload-area" @click="fileInput?.click()">
-                  <div v-if="productForm.images.length === 0" class="upload-placeholder">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                      <circle cx="9" cy="9" r="2" />
-                      <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                    </svg>
-                    <p>Haz clic para seleccionar imágenes</p>
-                    <span>JPG, PNG, GIF hasta 5MB (máximo 5 imágenes)</span>
-                  </div>
-                  <div v-if="productForm.images.length > 0" class="images-preview-grid">
-                    <div v-for="(image, index) in productForm.images" :key="index" class="image-preview-item">
-                      <img :src="image" :alt="`Preview ${index + 1}`" />
-                      <button type="button" class="remove-single-image" @click.stop="removeSingleImage(index)">
-                        ✕
-                      </button>
-                      <span class="image-index">{{ index + 1 }}</span>
-                      <div class="image-actions">
-                        <button type="button" class="img-action-btn" :disabled="index === 0"
-                          @click.stop="moveImageLeft(index)" title="Mover a la izquierda">←</button>
-                        <button type="button" class="img-action-btn" :disabled="index === productForm.images.length - 1"
-                          @click.stop="moveImageRight(index)" title="Mover a la derecha">→</button>
-                        <!-- Botón Portada removido temporalmente -->
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Información adicional -->
-            <div v-if="productForm.originalPrice && productForm.originalPrice > productForm.price"
-              class="discount-info">
-              <span class="discount-badge">
-                💰 Descuento: {{ Math.round(((productForm.originalPrice - productForm.price) /
-                  productForm.originalPrice) *
-                  100) }}%
-              </span>
-            </div>
-
-            <div class="form-actions">
-              <button type="button" class="btn btn-secondary" @click="closeProductForm">Cancelar</button>
-              <button type="submit" class="btn btn-primary" :disabled="!isFormValid">
-                {{ editingProduct ? 'Actualizar Producto' : 'Crear Producto' }}
-              </button>
-            </div>
-          </form>
-        </div>
+            <button type="submit" class="btn btn-primary">💾 Guardar Factura</button>
+          </div>
+        </form>
       </div>
     </div>
+  </div>
 
-    <!-- Modal de Categoría -->
-    <div v-if="showCategoryForm" class="modal-overlay" @click="closeCategoryForm">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
-          <h3>{{ editingCategory ? 'Editar Categoría' : 'Nueva Categoría' }}</h3>
-          <button class="modal-close" @click="closeCategoryForm">✕</button>
+  <!-- Modal vista previa factura (solo lectura) -->
+  <div v-if="showInvoicePreview" class="modal-overlay" @click="showInvoicePreview = false">
+    <div class="modal" @click.stop style="max-width:720px;">
+      <div class="modal-header">
+        <h3>Vista previa Factura #{{ previewInvoice?.id }}</h3>
+        <button class="modal-close" @click="showInvoicePreview = false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+          <div class="pro-card" style="padding:12px;">
+            <div style="font-size:0.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">👤 Cliente</div>
+            <div style="font-weight:700;">{{ previewInvoice?.client || '-' }}</div>
+            <div style="font-size:0.9rem;color:var(--brand-accent-alt);">{{ previewInvoice?.clientPhone || '' }}</div>
+            <div style="font-size:0.9rem;color:var(--brand-accent-alt);">{{ previewInvoice?.clientEmail || '' }}</div>
+            <div style="font-size:0.9rem;color:var(--brand-accent-alt);">{{ previewInvoice?.clientAddress || '' }}</div>
+          </div>
+          <div class="pro-card" style="padding:12px;">
+            <div style="font-size:0.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">🚗 Vehículo</div>
+            <div style="font-weight:700;">{{ previewInvoice?.vehicleBrand || '' }} {{ previewInvoice?.vehicleModel || '' }}</div>
+            <div style="font-size:0.9rem;color:var(--brand-accent-alt);">Placa: <strong>{{ previewInvoice?.vehicle || '-' }}</strong></div>
+            <div style="font-size:0.9rem;color:var(--brand-accent-alt);">Km: {{ previewInvoice?.vehicleKm || '-' }}</div>
+          </div>
+          <div class="pro-card" style="padding:12px;">
+            <div style="font-size:0.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">📋 Estado</div>
+            <span class="status-badge" :class="String(previewInvoice?.status || 'Pendiente').toLowerCase()">{{ previewInvoice?.status || 'Pendiente' }}</span>
+            <div style="font-size:0.85rem;color:var(--muted);margin-top:6px;">{{ previewInvoice?.createdAt ? formatShortDate(new Date(previewInvoice.createdAt)) : '-' }}</div>
+          </div>
         </div>
-        <div class="modal-body">
-          <form @submit.prevent="saveCategory">
-            <div class="form-group">
-              <label>Nombre de la Categoría</label>
-              <input v-model="categoryForm.name" type="text" class="form-input" required />
-            </div>
-            <div class="form-group">
-              <label>Descripción</label>
-              <textarea v-model="categoryForm.description" class="form-input" rows="3"></textarea>
-            </div>
-            <div class="form-actions">
-              <button type="button" class="btn btn-secondary" @click="closeCategoryForm">Cancelar</button>
-              <button type="submit" class="btn btn-primary">{{ editingCategory ? 'Actualizar' : 'Crear' }}</button>
-            </div>
-          </form>
+
+        <div style="font-size:0.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">🛠️ Productos y Servicios</div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:12px;">
+          <thead>
+            <tr>
+              <th style="text-align:left;border-bottom:1.5px solid #ccc;padding:6px;">Descripción</th>
+              <th style="text-align:center;border-bottom:1.5px solid #ccc;padding:6px;">Cant.</th>
+              <th style="text-align:right;border-bottom:1.5px solid #ccc;padding:6px;">Valor Unit.</th>
+              <th style="text-align:right;border-bottom:1.5px solid #ccc;padding:6px;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(it, idx) in (previewInvoice?.items || [])" :key="idx">
+              <td style="padding:6px 4px;">{{ it.description || it }}</td>
+              <td style="padding:6px 4px;text-align:center;">{{ it.qty ?? 1 }}</td>
+              <td style="padding:6px 4px;text-align:right;">${{ (it.price ?? 0).toLocaleString() }}</td>
+              <td style="padding:6px 4px;text-align:right;">${{ ((it.qty ?? 1) * (it.price ?? 0)).toLocaleString() }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+          <div style="width:260px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;">
+            <div style="display:flex;justify-content:space-between;font-size:0.95rem;"><span>Subtotal</span><strong>${{ invoiceSubtotal(previewInvoice).toLocaleString() }}</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.95rem;"><span>Descuento</span><strong style="color:#dc2626;">-${{ Number(previewInvoice?.discount || 0).toLocaleString() }}</strong></div>
+            <div v-if="(previewInvoice?.taxPct || 0) > 0" style="display:flex;justify-content:space-between;font-size:0.95rem;"><span>IVA ({{ previewInvoice?.taxPct || 19 }}%)</span><strong>${{ invoiceTax(previewInvoice).toLocaleString() }}</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.95rem;"><span>Retención</span><strong style="color:#dc2626;">-${{ Number(previewInvoice?.retention || 0).toLocaleString() }}</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:1.15rem;border-top:1.5px solid #d1d5db;padding-top:6px;margin-top:2px;"><span>TOTAL</span><strong>${{ invoiceTotal(previewInvoice).toLocaleString() }}</strong></div>
+            <div v-if="invoiceDepositTotal(previewInvoice) > 0" style="display:flex;justify-content:space-between;font-size:0.95rem;color:#22c55e;"><span>ABONADO</span><strong>${{ invoiceDepositTotal(previewInvoice).toLocaleString() }}</strong></div>
+            <div v-if="invoiceDepositTotal(previewInvoice) > 0 && invoiceTotal(previewInvoice) > invoiceDepositTotal(previewInvoice)" style="display:flex;justify-content:space-between;font-size:0.95rem;color:#f59e0b;"><span>SALDO</span><strong>${{ (invoiceTotal(previewInvoice) - invoiceDepositTotal(previewInvoice)).toLocaleString() }}</strong></div>
+          </div>
         </div>
+
+        <div style="margin-top:8px;font-size:0.9rem;"><strong>Pagos:</strong> {{ Array.isArray(previewInvoice?.payments) ? previewInvoice.payments.join(', ') : (previewInvoice?.payments || '-') }}</div>
+        <div style="margin-top:6px;font-size:0.9rem;"><strong>Notas:</strong> {{ previewInvoice?.notes || '-' }}</div>
+      </div>
+      <div class="modal-footer form-actions" style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn btn-secondary" @click="showInvoicePreview = false">Cerrar</button>
+        <button type="button" class="btn btn-secondary" @click="editPreviewInvoice">Editar</button>
+        <button type="button" class="btn btn-primary" @click="printPreviewInvoice">📄 Imprimir / PDF</button>
       </div>
     </div>
+  </div>
 
-    <!-- Modal de Novedad -->
-    <div v-if="showShowcaseForm" class="modal-overlay" @click="closeShowcaseForm">
-      <div class="modal" @click.stop>
-        <div class="modal-header">
-          <h3>{{ editingShowcaseProduct ? 'Editar Novedad' : 'Nueva Novedad' }}</h3>
-          <button class="modal-close" @click="closeShowcaseForm">✕</button>
+  <!-- Impresión factura moderna -->
+  <div v-if="printInvoice" class="print-area invoice-modern" aria-hidden="true">
+    <div class="inv-sheet">
+      <!-- Encabezado -->
+      <div class="inv-header">
+        <div class="inv-brand">
+          <img class="inv-logo" src="/images/logo.png" alt="Jobs Car logo" />
+          <div class="inv-brand-text">
+            <div class="inv-company">JOB'S CAR</div>
+            <div class="inv-tagline">Centro Automotriz Especializado</div>
+          </div>
         </div>
-        <div class="modal-body">
-          <form @submit.prevent="saveShowcaseProduct">
-            <div class="form-group">
-              <label>Nombre del Producto *</label>
-              <input v-model="showcaseForm.name" type="text" class="form-input" required />
-            </div>
-            <div class="form-group">
-              <label>Descripción *</label>
-              <textarea v-model="showcaseForm.description" class="form-input" rows="3" required></textarea>
-            </div>
-            <!-- Campo de precio oculto - siempre será 0 para novedades -->
-            <div class="form-group" style="display: none;">
-              <label>Precio</label>
-              <input v-model.number="showcaseForm.price" type="number" class="form-input" min="0" step="1000" />
-            </div>
-            <div class="form-group">
-              <label>Imagen del Producto *</label>
+        <div class="inv-badge-wrap">
+          <div class="inv-doc-type">FACTURA DE VENTA</div>
+          <div class="inv-doc-number">#FV-{{ String(printInvoice.id).padStart(6, '0') }}</div>
+          <div class="inv-date">Fecha: {{ new Date(printInvoice.createdAt || Date.now()).toLocaleDateString() }}</div>
+          <span class="inv-status" :class="String(printInvoice.status || 'Pendiente').toLowerCase()">{{ printInvoice.status || 'Pendiente' }}</span>
+        </div>
+      </div>
 
-              <!-- Tabs para elegir método de imagen -->
-              <div class="image-tabs">
-                <button type="button" class="tab-btn" :class="{ active: imageUploadMethod === 'url' }"
-                  @click="imageUploadMethod = 'url'">
-                  URL de Imagen
-                </button>
-                <button type="button" class="tab-btn" :class="{ active: imageUploadMethod === 'file' }"
-                  @click="imageUploadMethod = 'file'">
-                  Subir Archivo
-                </button>
-              </div>
+      <!-- Tarjetas de info -->
+      <div class="inv-cards">
+        <div class="inv-card">
+          <div class="inv-card-title">Cliente</div>
+          <div class="inv-card-body">
+            <div class="inv-line"><span class="inv-label">Nombre</span><span class="inv-val">{{ printInvoice.client || '-' }}</span></div>
+            <div class="inv-line"><span class="inv-label">Teléfono</span><span class="inv-val">{{ printInvoice.clientPhone || '-' }}</span></div>
+            <div class="inv-line"><span class="inv-label">Correo</span><span class="inv-val">{{ printInvoice.clientEmail || '-' }}</span></div>
+            <div class="inv-line"><span class="inv-label">Dirección</span><span class="inv-val">{{ printInvoice.clientAddress || '-' }}</span></div>
+          </div>
+        </div>
+        <div class="inv-card">
+          <div class="inv-card-title">Vehículo</div>
+          <div class="inv-card-body">
+            <div class="inv-line"><span class="inv-label">Marca</span><span class="inv-val">{{ printInvoice.vehicleBrand || '-' }}</span></div>
+            <div class="inv-line"><span class="inv-label">Modelo</span><span class="inv-val">{{ printInvoice.vehicleModel || '-' }}</span></div>
+            <div class="inv-line"><span class="inv-label">Placa</span><span class="inv-val">{{ printInvoice.vehicle || '-' }}</span></div>
+            <div class="inv-line"><span class="inv-label">Kilometraje</span><span class="inv-val">{{ printInvoice.vehicleKm || '-' }}</span></div>
+          </div>
+        </div>
+        <div class="inv-card">
+          <div class="inv-card-title">Validación</div>
+          <div class="inv-card-body">
+            <div class="inv-qr">{{ printInvoice.qrCode || '||||||||||||||||||||\n||||||||||||||||||||\n||||||||||||||||||||\n||||||||||||||||||||\n||||||||||||||||||||' }}</div>
+            <div class="inv-qr-hint">Escanee para validar la factura</div>
+          </div>
+        </div>
+      </div>
 
-              <!-- Campo URL -->
-              <div v-if="imageUploadMethod === 'url'" class="image-input-section">
-                <input v-model="showcaseForm.image" type="url" class="form-input" required
-                  placeholder="https://ejemplo.com/imagen.jpg" />
-              </div>
+      <!-- Tabla de productos y servicios -->
+      <div class="inv-table-wrap">
+        <div class="inv-section-title">Detalle de Productos y Servicios</div>
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th class="inv-col-num">#</th>
+              <th class="inv-col-desc">Descripción</th>
+              <th class="inv-col-qty">Cant.</th>
+              <th class="inv-col-price">Valor Unit.</th>
+              <th class="inv-col-tax">IVA</th>
+              <th class="inv-col-total">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(it, idx) in (printInvoice.items || [])" :key="idx">
+              <td class="inv-col-num">{{ idx + 1 }}</td>
+              <td class="inv-col-desc">{{ it.description || '-' }}</td>
+              <td class="inv-col-qty">{{ it.qty ?? 1 }}</td>
+              <td class="inv-col-price">${{ (Number(it.price) || 0).toLocaleString() }}</td>
+              <td class="inv-col-tax">{{ printInvoice.taxPct || 19 }}%</td>
+              <td class="inv-col-total">${{ ((Number(it.qty) || 1) * (Number(it.price) || 0)).toLocaleString() }}</td>
+            </tr>
+            <tr v-if="!(printInvoice.items && printInvoice.items.length)">
+              <td class="inv-col-num">1</td>
+              <td class="inv-col-desc">Servicio general</td>
+              <td class="inv-col-qty">1</td>
+              <td class="inv-col-price">${{ invoiceSubtotal(printInvoice).toLocaleString() }}</td>
+              <td class="inv-col-tax">{{ printInvoice.taxPct || 19 }}%</td>
+              <td class="inv-col-total">${{ invoiceSubtotal(printInvoice).toLocaleString() }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-              <!-- Campo de archivo -->
-              <div v-if="imageUploadMethod === 'file'" class="image-input-section">
-                <input ref="showcaseFileInput" type="file" class="file-input" accept="image/*"
-                  @change="handleShowcaseFileSelect" />
-                <div class="file-upload-area" @click="showcaseFileInput?.click()">
-                  <div v-if="!showcaseImagePreview" class="upload-placeholder">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                      <circle cx="9" cy="9" r="2" />
-                      <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                    </svg>
-                    <p>Haz clic para seleccionar una imagen</p>
-                    <span>JPG, PNG, GIF hasta 5MB</span>
-                  </div>
-                  <div v-if="showcaseImagePreview" class="image-preview">
-                    <img :src="showcaseImagePreview" alt="Preview" />
-                    <button type="button" class="remove-image" @click.stop="removeShowcaseImage">✕</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Categoría *</label>
-              <select v-model="showcaseForm.category" class="form-input" required>
-                <option value="">Seleccionar categoría</option>
-                <option v-for="category in categories" :key="category.id" :value="category.id">
-                  {{ category.name }}
-                </option>
-              </select>
-            </div>
-            <div class="form-actions">
-              <button type="button" class="btn btn-secondary" @click="closeShowcaseForm">Cancelar</button>
-              <button type="submit" class="btn btn-primary" :disabled="isSavingShowcase || !showcaseFormValid">
-                <span v-if="isSavingShowcase">Guardando...</span>
-                <span v-else>{{ editingShowcaseProduct ? 'Actualizar' : 'Crear' }}</span>
-              </button>
-            </div>
-          </form>
+      <!-- Resumen financiero -->
+      <div class="inv-summary">
+        <div class="inv-summary-box">
+          <div class="inv-row">
+            <span class="inv-row-label">Subtotal</span>
+            <span class="inv-row-val">${{ invoiceSubtotal(printInvoice).toLocaleString() }}</span>
+          </div>
+          <div class="inv-row">
+            <span class="inv-row-label">Descuentos</span>
+            <span class="inv-row-val">${{ Number(printInvoice.discount || 0).toLocaleString() }}</span>
+          </div>
+          <div v-if="(printInvoice.taxPct || 0) > 0" class="inv-row">
+            <span class="inv-row-label">IVA ({{ printInvoice.taxPct || 19 }}%)</span>
+            <span class="inv-row-val">${{ invoiceTax(printInvoice).toLocaleString() }}</span>
+          </div>
+          <div class="inv-row">
+            <span class="inv-row-label">Retenciones</span>
+            <span class="inv-row-val">${{ Number(printInvoice.retention || 0).toLocaleString() }}</span>
+          </div>
+          <div class="inv-row inv-total-row">
+            <span class="inv-row-label">TOTAL A PAGAR</span>
+            <span class="inv-row-val">${{ invoiceTotal(printInvoice).toLocaleString() }}</span>
+          </div>
+          <div v-if="invoiceDepositTotal(printInvoice) > 0" class="inv-row" style="color:#22c55e;">
+            <span class="inv-row-label">ABONADO</span>
+            <span class="inv-row-val">${{ invoiceDepositTotal(printInvoice).toLocaleString() }}</span>
+          </div>
+          <div v-if="invoiceDepositTotal(printInvoice) > 0 && invoiceTotal(printInvoice) > invoiceDepositTotal(printInvoice)" class="inv-row" style="color:#f59e0b;">
+            <span class="inv-row-label">SALDO PENDIENTE</span>
+            <span class="inv-row-val">${{ (invoiceTotal(printInvoice) - invoiceDepositTotal(printInvoice)).toLocaleString() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Evidencia fotográfica -->
+      <div class="inv-photos">
+        <div class="inv-section-title">Evidencia Fotográfica</div>
+        <div class="inv-photo-grid">
+          <div class="inv-photo-group">
+            <div class="inv-photo-label">Antes del servicio</div>
+            <div class="inv-photo-thumb inv-placeholder">📷 Sin fotografía</div>
+          </div>
+          <div class="inv-photo-group">
+            <div class="inv-photo-label">Después del servicio</div>
+            <div class="inv-photo-thumb inv-placeholder">📷 Sin fotografía</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Firmas -->
+      <div class="inv-signatures">
+        <div class="inv-sig-box">
+          <div class="inv-sig-line"></div>
+          <div class="inv-sig-label">Firma del Cliente</div>
+          <div class="inv-sig-name">{{ printInvoice.client || '' }}</div>
+        </div>
+        <div class="inv-sig-box">
+          <div class="inv-sig-line"></div>
+          <div class="inv-sig-label">Firma del Responsable</div>
+          <div class="inv-sig-name">JOB'S CAR</div>
+        </div>
+      </div>
+
+      <!-- Pie de página -->
+      <div class="inv-footer">
+        <div class="inv-footer-col">
+          <span class="inv-footer-icon">📞</span>
+          <span>+57 300 123 4567</span>
+        </div>
+        <div class="inv-footer-col">
+          <span class="inv-footer-icon">📍</span>
+          <span>Calle 123 # 45-67, Bogotá</span>
+        </div>
+        <div class="inv-footer-col">
+          <span class="inv-footer-icon">✉️</span>
+          <span>contacto@jobscar.com</span>
+        </div>
+        <div class="inv-footer-col">
+          <span class="inv-footer-icon">🌐</span>
+          <span>www.jobscar.com</span>
         </div>
       </div>
     </div>
@@ -2662,17 +3151,25 @@ interface VehicleRow extends Vehicle {
 
 const burnedVehicles = reactive<VehicleRow[]>([])
 
-const mapVehicleToRow = (vehicle: Vehicle): VehicleRow => ({
-  ...vehicle,
-  clientId: vehicle.clientId,
-  client: vehicle.client ?? '',
-  km: vehicle.km,
-  mileage: vehicle.mileage ?? vehicle.km,
-  registrationDate: vehicle.registrationDate || vehicle.createdAt || '',
-  lastServiceDate: vehicle.lastServiceDate || '',
-  nextServiceKm: vehicle.nextServiceKm ?? 0,
-  observations: vehicle.observations || '',
-})
+const mapVehicleToRow = (vehicle: Vehicle): VehicleRow => {
+  // Resolver nombre real del cliente desde burnedClients si el backend devuelve un placeholder
+  let clientName = vehicle.client ?? ''
+  if (!clientName || clientName.startsWith('Client #')) {
+    const found = burnedClients.value.find(c => c.id === vehicle.clientId)
+    if (found?.name) clientName = found.name
+  }
+  return {
+    ...vehicle,
+    clientId: vehicle.clientId,
+    client: clientName,
+    km: vehicle.km,
+    mileage: vehicle.mileage ?? vehicle.km,
+    registrationDate: vehicle.registrationDate || vehicle.createdAt || '',
+    lastServiceDate: vehicle.lastServiceDate || '',
+    nextServiceKm: vehicle.nextServiceKm ?? 0,
+    observations: vehicle.observations || '',
+  }
+}
 
 const loadBurnedVehicles = async () => {
   try {
@@ -2864,6 +3361,9 @@ const searchSales = ref('')
 const searchClients = ref('')
 const searchEmployees = ref('')
 const searchVehicles = ref('')
+const searchOrders = ref('')
+const searchCash = ref('')
+const searchInventory = ref('')
 
 // Vehículos: modal y formulario rápido
 const showCreateVehicle = ref(false)
@@ -3042,6 +3542,8 @@ onMounted(async () => {
   await loadBurnedClients()
   await loadBurnedVehicles()
   await loadBurnedEmployees()
+  await refreshWorkOrders()
+  await refreshAppointments()
 
   console.log('🔄 Cargando categorías y productos al montar el componente...')
   await loadCategories()
@@ -3052,6 +3554,13 @@ onMounted(async () => {
   console.log('✅ Productos cargados:', products.value)
   console.log('✅ Productos showcase cargados:', showcaseProducts.value)
 })
+
+// Watcher para re-mapear órdenes cuando los vehículos cambien (evita "Client #")
+watch(() => burnedVehicles, () => {
+  if (rawApiOrders.length > 0) {
+    burnedOrders.splice(0, burnedOrders.length, ...rawApiOrders.map(mapApiWorkOrderToDashboardOrder))
+  }
+}, { deep: true })
 
 // Watcher para debug: observar cambios en categorías
 watch(categories, (newCategories) => {
@@ -3196,25 +3705,43 @@ const tabs = [
   { id: 'vehicles', name: 'Vehículos', icon: '🚗' },
   { id: 'orders', name: 'Órdenes', icon: '📝' },
   { id: 'invoices', name: 'Facturación', icon: '💵' },
-  { id: 'inventory', name: 'Inventario', icon: '🧰' },
+  { id: 'inventory', name: 'Repuestos', icon: '🧰' },
   { id: 'cash', name: 'Caja', icon: '💰' },
   { id: 'employees', name: 'Empleados', icon: '🧑‍🔧' },
   { id: 'agenda', name: 'Agenda', icon: '📅' },
   { id: 'reports', name: 'Dashboard', icon: '📊' }
 ]
 const burnedOrders = reactive<any[]>([])
+let rawApiOrders: any[] = []
 
 const mapApiWorkOrderToDashboardOrder = (order: any) => {
   const services = Array.isArray(order?.services) ? order.services.filter(Boolean).map((service: any) => String(service).trim()) : []
   const createdDate = order?.createdAt ? String(order.createdAt).slice(0, 10) : ''
+  // Resolver nombre del técnico (puede venir como string, objeto o ID)
+  let mechanicName = ''
+  if (order?.mechanic) {
+    if (typeof order.mechanic === 'object' && order.mechanic !== null) {
+      mechanicName = order.mechanic.name || ''
+    } else {
+      mechanicName = String(order.mechanic)
+    }
+  }
+  if (!mechanicName && order?.mechanicId) {
+    const found = burnedEmployees.find((e: any) => String(e.id) === String(order.mechanicId))
+    mechanicName = found?.name || ''
+  }
+  // Resolver nombre real del cliente desde burnedVehicles (evita "Client #3")
+  const vehicleId = order?.vehicleId
+  const vehicleObj = Array.isArray(burnedVehicles) ? burnedVehicles.find((v: any) => v.id === vehicleId) : null
+  const clientName = vehicleObj?.client || order?.vehicle?.client || ''
   return {
     id: order?.id,
     vehicle: order?.vehicle?.plate || String(order?.vehicleId || ''),
-    client: order?.vehicle?.client || '',
+    client: clientName,
     diagnosis: order?.diagnosis || '',
     services,
     parts: [],
-    mechanic: order?.mechanicId ? String(order.mechanicId) : '',
+    mechanic: mechanicName,
     mechanicId: order?.mechanicId || null,
     vehicleId: order?.vehicleId || null,
     status: order?.status || 'Recepción',
@@ -3224,10 +3751,15 @@ const mapApiWorkOrderToDashboardOrder = (order: any) => {
     observations: order?.observations || '',
     garantia: Number(order?.garantia) || 0,
     createdDate,
+    createdAt: order?.createdAt || createdDate,
+    date: order?.createdAt || createdDate,
     deliveryDate: order?.deliveryDate ? String(order.deliveryDate).slice(0, 10) : null,
     deliveryTime: '',
     gases: Boolean(order?.gases),
     escaner: Boolean(order?.escaner),
+    showTechnicianInPdf: getShowTechPdf(order?.id),
+    vehicleType: vehicleObj?.vehicleType || order?.vehicleType || '',
+    vehicleModel: vehicleObj?.model || order?.vehicle?.model || '',
     backendId: order?.id,
   }
 }
@@ -3236,9 +3768,11 @@ const refreshWorkOrders = async () => {
   try {
     const response = await workOrderService.getWorkOrders()
     const apiOrders = response.data?.workOrders || []
+    rawApiOrders = apiOrders
     burnedOrders.splice(0, burnedOrders.length, ...apiOrders.map(mapApiWorkOrderToDashboardOrder))
   } catch (error) {
     console.error('No se pudieron cargar las órdenes reales', error)
+    rawApiOrders = []
     burnedOrders.splice(0, burnedOrders.length)
   }
 }
@@ -3246,7 +3780,20 @@ const refreshWorkOrders = async () => {
 const INVOICES_STORAGE_KEY = 'jobscar_invoices'
 const INVOICES_STORAGE_VERSION_KEY = 'jobscar_invoices_seed_version'
 // Incrementar esta versión cuando actualices los ejemplos para forzar recarga
-const INVOICES_SEED_VERSION = 'v1'
+const INVOICES_SEED_VERSION = 'v2'
+
+const SHOW_TECH_PDF_KEY = 'jobscar_show_tech_pdf'
+function getShowTechPdf(orderId: number | string): boolean {
+  try {
+    const raw = localStorage.getItem(`${SHOW_TECH_PDF_KEY}_${orderId}`)
+    return raw !== null ? raw === 'true' : true
+  } catch { return true }
+}
+function setShowTechPdf(orderId: number | string, value: boolean) {
+  try {
+    localStorage.setItem(`${SHOW_TECH_PDF_KEY}_${orderId}`, String(value))
+  } catch { /* noop */ }
+}
 
 const _storedInvoices = (() => {
   try {
@@ -3264,16 +3811,7 @@ const _storedInvoices = (() => {
   }
 })()
 
-const DEFAULT_INVOICES = [
-  { id: 1001, client: 'Juan Pérez', vehicle: 'ABC123', total: 350000, status: 'Pagado', payments: ['Efectivo'], items: ['Cambio aceite', 'Revisión general'], createdAt: '2026-04-10' },
-  { id: 1002, client: 'María Gómez', vehicle: 'XYZ789', total: 220000, status: 'Pendiente', payments: ['Transferencia'], items: ['Revisión frenos', 'Pastillas'], createdAt: '2026-04-12' },
-  { id: 1003, client: 'Carlos Ramírez', vehicle: 'JKL456', status: 'Pagado', payments: ['Tarjeta'], items: [{ description: 'Alineación', qty: 1, price: 80000 }, { description: 'Balanceo', qty: 1, price: 30000 }], createdAt: '2026-04-13' },
-  { id: 1004, client: 'Ana López', vehicle: 'QWE321', total: 120000, status: 'Anulado', payments: [], items: ['Cambio de bujías'], createdAt: '2026-04-08' },
-  { id: 1005, client: 'Pedro Martínez', vehicle: '', status: 'Pendiente', payments: ['Efectivo'], items: [{ description: 'Mano de obra', qty: 2, price: 45000 }], createdAt: '2026-04-15' },
-  { id: 1006, client: 'Laura García', vehicle: 'TYU987', status: 'Pagado', payments: ['Transferencia'], items: [{ description: 'Reparación motor', qty: 1, price: 600000 }, { description: 'Filtro', qty: 1, price: 20000 }], createdAt: '2026-04-02' },
-  { id: 1007, client: 'Esteban Ruiz', vehicle: 'MNO234', total: 0, status: 'Pendiente', payments: [], items: [], createdAt: '2026-04-16' },
-  { id: 1008, client: 'Empresa XYZ', vehicle: '', status: 'Pagado', payments: ['Contrato'], items: [{ description: 'Contrato mantenimiento mensual', qty: 3, price: 120000 }], createdAt: '2026-03-30' }
-]
+const DEFAULT_INVOICES: any[] = []
 
 const burnedInvoices = reactive(_storedInvoices || DEFAULT_INVOICES.map((i: any) => ({ ...i })))
 
@@ -3297,13 +3835,25 @@ const editingInvoice: Ref<any | null> = ref(null)
 const formInvoice = reactive({
   id: 0,
   client: '',
+  clientPhone: '',
+  clientEmail: '',
+  clientAddress: '',
   vehicle: '',
-  items: [{ description: '', qty: 1, price: 0 }],
+  vehicleBrand: '',
+  vehicleModel: '',
+  vehicleKm: '',
+  advisorName: '',
+  items: [{ description: '', qty: 1, price: 0, isLabor: false }],
   taxPct: 19,
+  applyTax: true,
+  discount: 0,
+  retention: 0,
+  deposits: [] as { amount: number; date: string; method: string }[],
   payments: [] as string[],
   status: 'Pendiente',
   notes: '',
-  createdAt: ''
+  createdAt: '',
+  orderId: null
 })
 const printInvoice: Ref<any | null> = ref(null)
 const showInvoicePreview = ref(false)
@@ -3339,8 +3889,44 @@ function invoiceSubtotal(inv: any) {
   return 0
 }
 
+function formatNumber(n: number | string): string {
+  const num = Number(n) || 0
+  return num.toLocaleString('es-CO')
+}
+
+function parseNumber(s: string): number {
+  if (!s) return 0
+  return Number(String(s).replace(/\./g, '').replace(/,/g, '.')) || 0
+}
+
+function onNumberInput(e: Event, isEditing: boolean, field: string) {
+  const target = isEditing ? editingInventory.value : newInventoryItem
+  if (!target) return
+  const input = e.target as HTMLInputElement
+  const raw = input.value
+  const numeric = parseNumber(raw)
+  target[field] = numeric
+  input.value = formatNumber(numeric)
+  if (field === 'unitCost') onUnitCostChange(isEditing)
+  else if (field === 'unitValue') onUnitValueChange(isEditing)
+  else if (field === 'cost') onTotalCostChange(isEditing)
+  else if (field === 'invoiceValue') onTotalValueChange(isEditing)
+  else if (field === 'quantity') onQuantityChange(isEditing)
+}
+
+function onNumberInputCash(e: Event, isEditing: boolean) {
+  const target = isEditing ? editingCash.value : newCashItem
+  if (!target) return
+  const input = e.target as HTMLInputElement
+  const raw = input.value
+  const numeric = parseNumber(raw)
+  target.amount = numeric
+  input.value = formatNumber(numeric)
+}
+
 function invoiceTax(inv: any) {
   try {
+    if (inv.applyTax === false || (typeof inv.taxPct === 'number' && inv.taxPct === 0)) return 0
     const pct = typeof inv.taxPct === 'number' ? inv.taxPct : 19
     return Math.round(invoiceSubtotal(inv) * (pct / 100))
   } catch (e) { /* noop */ }
@@ -3349,16 +3935,43 @@ function invoiceTax(inv: any) {
 
 function invoiceTotal(inv: any) {
   if (typeof inv.total === 'number') return inv.total
-  return invoiceSubtotal(inv) + invoiceTax(inv)
+  return invoiceSubtotal(inv) + invoiceTax(inv) - Number(inv.discount || 0) - Number(inv.retention || 0)
+}
+
+function invoiceDepositTotal(inv: any): number {
+  if (Array.isArray(inv.deposits)) {
+    return inv.deposits.reduce((sum: number, d: any) => sum + (Number(d.amount) || 0), 0)
+  }
+  // fallback para datos antiguos
+  return Number(inv.deposit || 0)
+}
+
+function invoicePayrollDiscount(inv: any): number {
+  if (!Array.isArray(inv.items)) return 0
+  return inv.items.reduce((sum: number, it: any) => {
+    const desc = String(it.description || '').trim().toLowerCase()
+    if (desc === 'gases' || desc === 'escaner') {
+      return sum + (Number(it.price) || 0)
+    }
+    return sum
+  }, 0)
 }
 
 function addInvoiceItem() {
-  formInvoice.items.push({ description: '', qty: 1, price: 0 })
+  formInvoice.items.push({ description: '', qty: 1, price: 0, isLabor: false })
 }
 
 function removeInvoiceItem(idx: number) {
   if (formInvoice.items.length === 1) formInvoice.items.splice(0, 1)
   else formInvoice.items.splice(idx, 1)
+}
+
+function addDeposit() {
+  formInvoice.deposits.push({ amount: 0, date: new Date().toISOString().slice(0, 10), method: '' })
+}
+
+function removeDeposit(idx: number) {
+  formInvoice.deposits.splice(idx, 1)
 }
 
 const nextInvoiceId = () => {
@@ -3367,53 +3980,180 @@ const nextInvoiceId = () => {
 }
 
 function openCreateInvoice() {
-  Object.assign(formInvoice, { id: 0, client: '', vehicle: '', items: [{ description: '', qty: 1, price: 0 }], taxPct: 19, payments: [], status: 'Pendiente', notes: '', createdAt: new Date().toISOString() })
+  Object.assign(formInvoice, {
+    id: 0,
+    client: '', clientPhone: '', clientEmail: '', clientAddress: '',
+    vehicle: '', vehicleBrand: '', vehicleModel: '', vehicleKm: '',
+    advisorName: '',
+  items: [{ description: '', qty: 1, price: 0, isLabor: false }],
+    taxPct: 19, applyTax: true, discount: 0, retention: 0, deposits: [],
+    payments: [], status: 'Pendiente', notes: '',
+    createdAt: new Date().toISOString(),
+    orderId: null
+  })
   editingInvoice.value = null
   showInvoiceModal.value = true
+}
+
+function findInvoiceByOrderId(orderId: number | string | undefined) {
+  if (!orderId) return null
+  return burnedInvoices.find((inv: any) => Number(inv.orderId) === Number(orderId)) || null
+}
+
+function syncInvoiceFromOrder(order: any) {
+  const existingInvoice = findInvoiceByOrderId(order.id)
+  if (!existingInvoice) {
+    alert('Esta orden no tiene factura creada aún')
+    return
+  }
+  try {
+    const vehicle = Array.isArray(burnedVehicles)
+      ? burnedVehicles.find((v: any) => String(v.plate || '').trim().toUpperCase() === String(order.vehicle || '').trim().toUpperCase())
+      : null
+    const client = Array.isArray(burnedClients.value)
+      ? burnedClients.value.find((c: any) => String(c.name || '').trim().toLowerCase() === String(order.client || '').trim().toLowerCase())
+      : null
+    const items: any[] = []
+    if (Array.isArray(order.services) && order.services.length) {
+      order.services.forEach((s: string) => {
+        items.push({ description: s, qty: 1, price: 0, isLabor: true })
+      })
+    } else {
+      items.push({ description: order.serviceType || 'Servicio general', qty: 1, price: 0, isLabor: true })
+    }
+    if (order.gases) {
+      items.push({ description: 'Gases', qty: 1, price: 20000, isLabor: false })
+    }
+    if (order.escaner) {
+      const scannerPrice = String(vehicle?.vehicleType || '').toLowerCase() === 'camioneta' ? 50000 : 30000
+      items.push({ description: 'Escaner', qty: 1, price: scannerPrice, isLabor: true })
+    }
+    const payload = {
+      client: order.client || '',
+      clientPhone: client?.phone || '',
+      clientEmail: client?.email || '',
+      vehicle: order.vehicle || '',
+      vehicleBrand: vehicle?.brand || '',
+      vehicleModel: vehicle?.model || '',
+      vehicleKm: vehicle?.km ? String(vehicle.km) : '',
+      advisorName: order.mechanic || '',
+      items,
+      orderId: order.id || null
+    }
+    const idx = burnedInvoices.findIndex((i: any) => i.id === existingInvoice.id)
+    if (idx > -1) {
+      burnedInvoices.splice(idx, 1, { ...existingInvoice, ...payload })
+    }
+    alert('Factura actualizada correctamente desde la orden')
+  } catch (e) {
+    console.error('Error al sincronizar factura desde orden:', e)
+    alert('Error al actualizar la factura')
+  }
+}
+
+function openInvoiceForOrder(order: any) {
+  const existingInvoice = findInvoiceByOrderId(order.id)
+  if (existingInvoice) {
+    syncInvoiceFromOrder(order)
+  } else {
+    createInvoiceFromOrder(order)
+  }
+}
+
+function createInvoiceFromOrder(order: any) {
+  console.log('🧾 createInvoiceFromOrder llamado', order)
+  try {
+    const vehicle = Array.isArray(burnedVehicles)
+      ? burnedVehicles.find((v: any) => String(v.plate || '').trim().toUpperCase() === String(order.vehicle || '').trim().toUpperCase())
+      : null
+    const client = Array.isArray(burnedClients.value)
+      ? burnedClients.value.find((c: any) => String(c.name || '').trim().toLowerCase() === String(order.client || '').trim().toLowerCase())
+      : null
+    const items: any[] = []
+    // Agregar servicios como items (mano de obra)
+    if (Array.isArray(order.services) && order.services.length) {
+      order.services.forEach((s: string) => {
+        items.push({ description: s, qty: 1, price: 0, isLabor: true })
+      })
+    } else {
+      items.push({ description: order.serviceType || 'Servicio general', qty: 1, price: 0, isLabor: true })
+    }
+    // Agregar Gases si aplica (repuesto)
+    if (order.gases) {
+      items.push({ description: 'Gases', qty: 1, price: 20000, isLabor: false })
+    }
+    // Agregar Escaner si aplica (servicio / mano de obra)
+    if (order.escaner) {
+      const scannerPrice = String(vehicle?.vehicleType || '').toLowerCase() === 'camioneta' ? 50000 : 30000
+      items.push({ description: 'Escaner', qty: 1, price: scannerPrice, isLabor: true })
+    }
+    formInvoice.id = 0
+    formInvoice.client = order.client || ''
+    formInvoice.clientPhone = client?.phone || ''
+    formInvoice.clientEmail = client?.email || ''
+    formInvoice.clientAddress = ''
+    formInvoice.vehicle = order.vehicle || ''
+    formInvoice.vehicleBrand = vehicle?.brand || ''
+    formInvoice.vehicleModel = vehicle?.model || ''
+    formInvoice.vehicleKm = vehicle?.km ? String(vehicle.km) : ''
+    formInvoice.advisorName = order.mechanic || ''
+    formInvoice.items = items
+    formInvoice.taxPct = 19
+    formInvoice.applyTax = true
+    formInvoice.discount = 0
+    formInvoice.retention = 0
+    formInvoice.deposits = []
+    formInvoice.payments = []
+    formInvoice.status = 'Pendiente'
+    formInvoice.notes = ''
+    formInvoice.createdAt = new Date().toISOString()
+    formInvoice.orderId = order.id || null
+    editingInvoice.value = null
+    showInvoiceModal.value = true
+    console.log('✅ Modal factura abierto con items:', items)
+  } catch (e) {
+    console.error('❌ Error al crear factura desde orden:', e)
+    alert('Error al abrir factura. Revisa la consola.')
+  }
 }
 
 function saveInvoice() {
   const subtotal = invoiceSubtotal(formInvoice)
   const tax = invoiceTax(formInvoice)
-  const total = subtotal + tax
+  const total = subtotal + tax - Number(formInvoice.discount || 0) - Number(formInvoice.retention || 0)
   if (!formInvoice.client) { alert('Cliente requerido'); return }
+  const payload = {
+    client: String(formInvoice.client),
+    clientPhone: formInvoice.clientPhone || '',
+    clientEmail: formInvoice.clientEmail || '',
+    clientAddress: formInvoice.clientAddress || '',
+    vehicle: formInvoice.vehicle || '',
+    vehicleBrand: formInvoice.vehicleBrand || '',
+    vehicleModel: formInvoice.vehicleModel || '',
+    vehicleKm: formInvoice.vehicleKm || '',
+    advisorName: formInvoice.advisorName || '',
+    items: formInvoice.items.map((it: any) => ({ ...it })),
+    taxPct: formInvoice.applyTax ? (formInvoice.taxPct || 19) : 0,
+    discount: Number(formInvoice.discount) || 0,
+    retention: Number(formInvoice.retention) || 0,
+    deposits: formInvoice.deposits.map((d: any) => ({ ...d })),
+    payments: Array.isArray(formInvoice.payments) ? formInvoice.payments : String(formInvoice.payments).split(',').map((s: any) => s.trim()),
+    status: formInvoice.status || 'Pendiente',
+    notes: formInvoice.notes || '',
+    subtotal,
+    tax,
+    total,
+    createdAt: formInvoice.createdAt || new Date().toISOString(),
+    orderId: formInvoice.orderId || null
+  }
   if (editingInvoice.value) {
     const idx = burnedInvoices.findIndex((i: any) => i.id === editingInvoice.value.id)
     if (idx > -1) {
-      const updated = {
-        ...editingInvoice.value,
-        client: String(formInvoice.client),
-        vehicle: formInvoice.vehicle || '',
-        items: formInvoice.items.map((it: any) => ({ ...it })),
-        taxPct: formInvoice.taxPct,
-        payments: Array.isArray(formInvoice.payments) ? formInvoice.payments : String(formInvoice.payments).split(',').map((s: any) => s.trim()),
-        status: formInvoice.status || 'Pendiente',
-        notes: formInvoice.notes || '',
-        subtotal,
-        tax,
-        total,
-        createdAt: formInvoice.createdAt || new Date().toISOString()
-      }
-      burnedInvoices.splice(idx, 1, updated)
+      burnedInvoices.splice(idx, 1, { ...editingInvoice.value, ...payload })
     }
     editingInvoice.value = null
   } else {
-    const id = nextInvoiceId()
-    const newInv = {
-      id,
-      client: String(formInvoice.client),
-      vehicle: formInvoice.vehicle || '',
-      items: formInvoice.items.map((it: any) => ({ ...it })),
-      taxPct: formInvoice.taxPct,
-      payments: Array.isArray(formInvoice.payments) ? formInvoice.payments : String(formInvoice.payments).split(',').map((s: any) => s.trim()),
-      status: formInvoice.status || 'Pendiente',
-      subtotal,
-      tax,
-      total,
-      createdAt: formInvoice.createdAt || new Date().toISOString(),
-      notes: formInvoice.notes || ''
-    }
-    burnedInvoices.push(newInv)
+    burnedInvoices.push({ id: nextInvoiceId(), ...payload })
   }
   showInvoiceModal.value = false
 }
@@ -3422,9 +4162,20 @@ function editInvoice(inv: any) {
   editingInvoice.value = { ...inv }
   formInvoice.id = inv.id
   formInvoice.client = inv.client || ''
+  formInvoice.clientPhone = inv.clientPhone || ''
+  formInvoice.clientEmail = inv.clientEmail || ''
+  formInvoice.clientAddress = inv.clientAddress || ''
   formInvoice.vehicle = inv.vehicle || ''
-  formInvoice.items = Array.isArray(inv.items) && inv.items.length ? inv.items.map((it: any) => ({ ...it })) : [{ description: '', qty: 1, price: 0 }]
+  formInvoice.vehicleBrand = inv.vehicleBrand || ''
+  formInvoice.vehicleModel = inv.vehicleModel || ''
+  formInvoice.vehicleKm = inv.vehicleKm || ''
+  formInvoice.advisorName = inv.advisorName || ''
+  formInvoice.items = Array.isArray(inv.items) && inv.items.length ? inv.items.map((it: any) => ({ ...it, isLabor: it.isLabor ?? true })) : [{ description: '', qty: 1, price: 0, isLabor: false }]
   formInvoice.taxPct = inv.taxPct || 19
+  formInvoice.applyTax = (inv.taxPct || 0) > 0
+  formInvoice.discount = inv.discount || 0
+  formInvoice.retention = inv.retention || 0
+  formInvoice.deposits = Array.isArray(inv.deposits) ? inv.deposits.map((d: any) => ({ ...d })) : []
   formInvoice.payments = Array.isArray(inv.payments) ? inv.payments.slice() : (inv.payments ? String(inv.payments).split(',').map((s: any) => s.trim()) : [])
   formInvoice.status = inv.status || 'Pendiente'
   formInvoice.notes = inv.notes || ''
@@ -3432,19 +4183,156 @@ function editInvoice(inv: any) {
   showInvoiceModal.value = true
 }
 
+function buildInvoiceHtml(inv: any): string {
+  const subtotal = invoiceSubtotal(inv)
+  const tax = invoiceTax(inv)
+  const total = subtotal + tax - Number(inv.discount || 0) - Number(inv.retention || 0)
+  const dateStr = new Date(inv.createdAt || Date.now()).toLocaleDateString()
+  const dueStr = inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : '-'
+  const items = Array.isArray(inv.items) ? inv.items : []
+  const itemsHtml = items.map((it: any, idx: number) => {
+    const qty = it.qty ?? 1
+    const price = Number(it.price) || 0
+    return `<tr><td class="inv-col-num">${idx + 1}</td><td class="inv-col-desc">${it.description || '-'}</td><td class="inv-col-qty">${qty}</td><td class="inv-col-price">$${price.toLocaleString()}</td><td class="inv-col-tax">${(inv.applyTax !== false && (inv.taxPct || 0) > 0) ? (inv.taxPct || 19) + '%' : '-'}</td><td class="inv-col-total">$${(qty * price).toLocaleString()}</td></tr>`
+  }).join('')
+  const fallbackRow = `<tr><td class="inv-col-num">1</td><td class="inv-col-desc">Servicio general</td><td class="inv-col-qty">1</td><td class="inv-col-price">$${subtotal.toLocaleString()}</td><td class="inv-col-tax">${(inv.applyTax !== false && (inv.taxPct || 0) > 0) ? (inv.taxPct || 19) + '%' : '-'}</td><td class="inv-col-total">$${subtotal.toLocaleString()}</td></tr>`
+  const statusClass = String(inv.status || 'Pendiente').toLowerCase()
+  const statusLabel = inv.status || 'Pendiente'
+  const discountRow = inv.discount ? `<div class="inv-totals-row discount"><span>Descuento</span><span>-$${Number(inv.discount).toLocaleString()}</span></div>` : ''
+  const retentionRow = inv.retention ? `<div class="inv-totals-row retention"><span>Retención</span><span>-$${Number(inv.retention).toLocaleString()}</span></div>` : ''
+  const taxRow = (inv.applyTax !== false && (inv.taxPct || 0) > 0) ? `<div class="inv-totals-row"><span>IVA (${inv.taxPct || 19}%)</span><span>$${tax.toLocaleString()}</span></div>` : ''
+  const depositTotal = invoiceDepositTotal(inv)
+  const depositRow = depositTotal > 0 ? `<div class="inv-totals-row" style="color:#166534;"><span>ABONADO</span><span>$${depositTotal.toLocaleString()}</span></div>` : ''
+  const balanceRow = depositTotal > 0 && total > depositTotal ? `<div class="inv-totals-row" style="color:#b45309;"><span>SALDO PENDIENTE</span><span>$${(total - depositTotal).toLocaleString()}</span></div>` : ''
+  const photosHtml = (Array.isArray(inv.photos) ? inv.photos : []).map((ph: string) => `<img src="${ph}" class="inv-photo" alt="Foto" />`).join('')
+  return `<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Factura #FV-${String(inv.id).padStart(6,'0')} - JOB'S CAR</title>
+<style>
+@page { margin: 10mm 8mm; size: A4 portrait; }
+body { margin:0; padding:0; background:#fff; color:#111827; font-family:'Inter','Segoe UI',Arial,sans-serif; }
+.inv-sheet { max-width:210mm; margin:0 auto; padding:12mm 10mm; }
+.inv-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; padding-bottom:10px; border-bottom:2px solid #1f2937; }
+.inv-header-left { display:flex; align-items:center; gap:10px; }
+.inv-logo { height:46px; width:auto; display:block; }
+.inv-brand-text h1 { font-size:18px; font-weight:700; color:#111827; margin:0; line-height:1.2; }
+.inv-brand-text p { font-size:11px; color:#6b7280; margin:2px 0 0 0; line-height:1.2; }
+.inv-header-right { text-align:right; }
+.inv-header-right .inv-doc-title { font-size:16px; font-weight:700; color:#1f2937; margin:0; }
+.inv-header-right .inv-doc-id { font-size:12px; color:#6b7280; margin:4px 0 0 0; }
+.inv-status { display:inline-block; padding:3px 10px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+.inv-status.pendiente { background:#fef9c3; color:#854d0e; border:1px solid #fde047; }
+.inv-status.pagada { background:#dcfce7; color:#166534; border:1px solid #86efac; }
+.inv-status.abonada, .inv-status.abonado { background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; }
+.inv-status.anulada { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
+.inv-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
+.inv-card { background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:10px 12px; }
+.inv-card h3 { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#9ca3af; margin:0 0 6px 0; }
+.inv-card p { font-size:11px; color:#374151; margin:0 0 3px 0; line-height:1.3; }
+.inv-card .inv-val { font-weight:600; color:#111827; }
+.inv-table { width:100%; border-collapse:collapse; margin-bottom:14px; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; }
+.inv-table th { background:#f9fafb; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#6b7280; padding:8px 10px; text-align:left; border-bottom:1px solid #e5e7eb; }
+.inv-table td { font-size:11px; color:#374151; padding:8px 10px; border-bottom:1px solid #f3f4f6; }
+.inv-table tr:last-child td { border-bottom:none; }
+.inv-col-num { width:30px; text-align:center; }
+.inv-col-qty { width:50px; text-align:center; }
+.inv-col-price,.inv-col-tax,.inv-col-total { width:90px; text-align:right; }
+.inv-totals { display:flex; justify-content:flex-end; margin-bottom:14px; }
+.inv-totals-box { width:260px; border:1px solid #e5e7eb; border-radius:8px; padding:12px 14px; background:#f9fafb; }
+.inv-totals-row { display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px; color:#374151; }
+.inv-totals-row.discount { color:#dc2626; }
+.inv-totals-row.retention { color:#ea580c; }
+.inv-totals-row.total { font-size:14px; font-weight:700; color:#111827; margin-top:8px; padding-top:8px; border-top:1px solid #d1d5db; }
+.inv-notes-box { background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:10px 12px; margin-bottom:14px; }
+.inv-notes-box h3 { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#6b7280; margin:0 0 6px 0; }
+.inv-notes-box p { font-size:10px; color:#374151; margin:0; line-height:1.4; }
+.inv-photos { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+.inv-photo { width:90px; height:60px; object-fit:cover; border-radius:4px; border:1px solid #e5e7eb; }
+.inv-signatures { display:flex; gap:20px; margin-bottom:14px; }
+.inv-sig-block { flex:1; border-top:1px solid #9ca3af; padding-top:6px; text-align:center; }
+.inv-sig-block p { font-size:9px; color:#6b7280; margin:0; }
+.inv-footer { text-align:center; font-size:9px; color:#9ca3af; border-top:1px solid #e5e7eb; padding-top:8px; }
+</style>
+</head>
+<body>
+  <div class="inv-sheet">
+  <div class="inv-header">
+    <div class="inv-header-left"><img src="/images/logobn.png" class="inv-logo" alt="JOB'S CAR" /><div class="inv-brand-text"><h1>JOB'S CAR</h1><p>Taller especializado</p></div></div>
+    <div class="inv-header-right">
+      <p class="inv-doc-title">FACTURA DE VENTA</p>
+      <p class="inv-doc-id">No. FV-${String(inv.id).padStart(6,'0')}</p>
+      <span class="inv-status ${statusClass}">${statusLabel}</span>
+    </div>
+  </div>
+  <div class="inv-grid">
+    <div class="inv-card"><h3>Cliente</h3><p class="inv-val">${inv.client || '-'}</p><p>${inv.clientPhone || '-'}</p><p>${inv.clientEmail || '-'}</p><p>${inv.clientAddress || '-'}</p></div>
+    <div class="inv-card"><h3>Vehículo</h3><p class="inv-val">${inv.vehicle || '-'} — ${inv.vehicleBrand || '-'} ${inv.vehicleModel || '-'}</p><p>Km: ${inv.vehicleKm || '-'}</p></div>
+    <div class="inv-card"><h3>Detalles</h3><p><strong>Fecha:</strong> ${dateStr}</p><p><strong>Vence:</strong> ${dueStr}</p></div>
+  </div>
+  <table class="inv-table">
+    <thead><tr><th class="inv-col-num">#</th><th class="inv-col-desc">Descripción</th><th class="inv-col-qty">Cant.</th><th class="inv-col-price">Precio</th><th class="inv-col-tax">IVA</th><th class="inv-col-total">Total</th></tr></thead>
+    <tbody>${itemsHtml || fallbackRow}</tbody>
+  </table>
+  <div class="inv-totals">
+    <div class="inv-totals-box">
+      <div class="inv-totals-row"><span>Subtotal</span><span>$${subtotal.toLocaleString()}</span></div>
+      ${taxRow}
+      ${discountRow}
+      ${retentionRow}
+      <div class="inv-totals-row total"><span>TOTAL</span><span>$${total.toLocaleString()}</span></div>
+      ${depositRow}
+      ${balanceRow}
+    </div>
+  </div>
+  <div class="inv-notes-box"><h3>Notas / Condiciones</h3><p>${inv.notes || 'Sin notas adicionales.'}</p></div>
+  <div class="inv-photos">${photosHtml}</div>
+  <div class="inv-signatures">
+    <div class="inv-sig-block"><p>Firma del Cliente</p></div>
+    <div class="inv-sig-block"><p>Firma del Responsable</p></div>
+    <div class="inv-sig-block"><p>Sello del Taller</p></div>
+  </div>
+  <div class="inv-footer"><p>Generado por JOB'S CAR — Gracias por confiar en nosotros</p></div>
+</div>
+</body>
+</html>`
+}
+
 function viewInvoice(inv: any) {
-  printInvoice.value = { ...inv }
-  nextTick(() => window.print())
+  const html = buildInvoiceHtml(inv)
+  const iframe = document.createElement('iframe')
+  iframe.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;z-index:-1;'
+  document.body.appendChild(iframe)
+  const doc = iframe.contentDocument || iframe.contentWindow?.document
+  if (!doc) {
+    if (iframe.parentNode) iframe.parentNode.removeChild(iframe)
+    return
+  }
+  doc.open()
+  doc.write(html)
+  doc.close()
+  setTimeout(() => {
+    iframe.contentWindow?.print()
+    setTimeout(() => {
+      if (iframe.parentNode) iframe.parentNode.removeChild(iframe)
+    }, 1000)
+  }, 400)
 }
 
 function deleteInvoice(id: any) {
-  if (!confirm('¿Eliminar factura?')) return
+  if (!confirm('¿Estás seguro de eliminar esta factura?')) return
   const idx = burnedInvoices.findIndex((i: any) => i.id === id)
   if (idx > -1) burnedInvoices.splice(idx, 1)
 }
 
 function toggleInvoicePaid(inv: any) {
-  inv.status = (inv.status === 'Pagado') ? 'Pendiente' : 'Pagado'
+  const statusMap: Record<string, string> = {
+    'Pendiente': 'Abonado',
+    'Abonado': 'Pagado',
+    'Pagado': 'Pendiente'
+  }
+  inv.status = statusMap[inv.status] || 'Pendiente'
   const idx = burnedInvoices.findIndex((i: any) => i.id === inv.id)
   if (idx > -1) burnedInvoices.splice(idx, 1, { ...inv })
 }
@@ -3461,12 +4349,14 @@ function exportInvoicesCsv() {
         subtotal: invoiceSubtotal(inv),
         tax: invoiceTax(inv),
         total: invoiceTotal(inv),
+        deposit: invoiceDepositTotal(inv),
+        balance: Math.max(0, invoiceTotal(inv) - invoiceDepositTotal(inv)),
         status: inv.status
       }
     })
     const csv = [
-      ['id', 'date', 'client', 'vehicle', 'items', 'subtotal', 'tax', 'total', 'status'],
-      ...rows.map((r: any) => [r.id, r.date, `"${(r.client || '').replace(/"/g, '""')}"`, `"${(r.vehicle || '').replace(/"/g, '""')}"`, `"${(r.items || '').replace(/"/g, '""')}"`, r.subtotal, r.tax, r.total, r.status])
+      ['id', 'date', 'client', 'vehicle', 'items', 'subtotal', 'tax', 'total', 'deposit', 'balance', 'status'],
+      ...rows.map((r: any) => [r.id, r.date, `"${(r.client || '').replace(/"/g, '""')}"`, `"${(r.vehicle || '').replace(/"/g, '""')}"`, `"${(r.items || '').replace(/"/g, '""')}"`, r.subtotal, r.tax, r.total, r.deposit, r.balance, r.status])
     ].map((r: any) => r.join(',')).join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
@@ -3633,50 +4523,126 @@ function goToPage(n: number) { currentPage.value = Math.min(Math.max(1, n), tota
 
 // --- Fin mejoras ---
 
-const burnedInventory = reactive([
-  { id: 1, date: '2026-03-09', activity: 'Mantenimiento', quantity: 1, cost: 368000, invoiceValue: 715000, netProfit: 347000 },
-  { id: 2, date: '2026-03-10', activity: 'Reparación', quantity: 1, cost: 260000, invoiceValue: 380000, netProfit: 120000 },
-  { id: 3, date: '2026-03-12', activity: 'Diagnóstico', quantity: 1, cost: 40000, invoiceValue: 100000, netProfit: 60000 },
-  { id: 4, date: '2026-03-13', activity: 'Mecánica general', quantity: 1, cost: 1698000, invoiceValue: 2560000, netProfit: 862000 },
-  { id: 5, date: '2026-03-14', activity: 'Revisión de repuestos', quantity: 1, cost: 285000, invoiceValue: 440000, netProfit: 155000 }
-])
+const burnedInventory = reactive<any[]>([])
+
+function saveInventoryToLocalStorage() {
+  try {
+    localStorage.setItem('burnedInventory', JSON.stringify(burnedInventory))
+  } catch (e) {
+    console.warn('Error guardando inventario en localStorage:', e)
+  }
+}
+
+function loadInventoryFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem('burnedInventory')
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (Array.isArray(parsed)) {
+        burnedInventory.splice(0, burnedInventory.length, ...parsed)
+      }
+    }
+  } catch (e) {
+    console.warn('Error cargando inventario desde localStorage:', e)
+  }
+}
 
 const showCreateInventory = ref(false)
 const showEditInventory = ref(false)
 const newInventoryItem = reactive({
+  orderId: 0,
+  invoiceId: null as any,
+  invoiceItemIndex: null as number | null,
   date: new Date().toISOString().slice(0, 10),
   activity: '',
   quantity: 1,
+  unitCost: 0,
   cost: 0,
+  unitValue: 0,
   invoiceValue: 0,
   netProfit: 0
 })
 const editingInventory = ref<any | null>(null)
+const expandedInventoryOrders = reactive<Set<number>>(new Set())
+
+function toggleInventoryOrder(orderId: number) {
+  if (expandedInventoryOrders.has(orderId)) {
+    expandedInventoryOrders.delete(orderId)
+  } else {
+    expandedInventoryOrders.add(orderId)
+  }
+}
 
 function nextInventoryId(): number {
   const ids = Array.isArray(burnedInventory) ? burnedInventory.map((item: any) => Number(item.id)).filter((id) => Number.isFinite(id)) : []
   return ids.length ? Math.max(...ids) + 1 : 1
 }
 
+function getInventoryGroups() {
+  const groups: Record<number, any[]> = {}
+  burnedInventory.forEach((item: any) => {
+    const oid = item.orderId || 0
+    if (!groups[oid]) groups[oid] = []
+    groups[oid].push(item)
+  })
+  return groups
+}
+
+function getOrderForInventory(orderId: number) {
+  return burnedOrders.find((o: any) => o.id === orderId) || null
+}
+
+function getInvoiceForInventory(invoiceId: number | null) {
+  if (!invoiceId) return null
+  return burnedInvoices.find((i: any) => i.id === invoiceId) || null
+}
+
 function addInventoryItem() {
   const activity = String(newInventoryItem.activity || '').trim()
-  if (!newInventoryItem.date || !activity) return
+  if (!newInventoryItem.date || !activity || !newInventoryItem.orderId) {
+    alert('Fecha, actividad y orden son obligatorios')
+    return
+  }
+  calculateNetProfit(false)
+  const invId = newInventoryItem.invoiceId || null
   burnedInventory.push({
     id: nextInventoryId(),
+    orderId: Number(newInventoryItem.orderId),
+    invoiceId: invId,
     date: newInventoryItem.date,
     activity,
     quantity: Number(newInventoryItem.quantity) || 1,
+    unitCost: Number(newInventoryItem.unitCost) || 0,
     cost: Number(newInventoryItem.cost) || 0,
+    unitValue: Number(newInventoryItem.unitValue) || 0,
     invoiceValue: Number(newInventoryItem.invoiceValue) || 0,
     netProfit: Number(newInventoryItem.netProfit) || 0
   })
+  // Si está anclado a una factura, agregar el item a la factura
+  if (invId) {
+    const invoice = burnedInvoices.find((i: any) => i.id === invId)
+    if (invoice) {
+      if (!Array.isArray(invoice.items)) invoice.items = []
+      invoice.items.push({
+        description: activity,
+        qty: Number(newInventoryItem.quantity) || 1,
+        price: Number(newInventoryItem.unitValue) || 0
+      })
+    }
+  }
+  newInventoryItem.orderId = 0
+  newInventoryItem.invoiceId = null
+  newInventoryItem.invoiceItemIndex = null
   newInventoryItem.date = new Date().toISOString().slice(0, 10)
   newInventoryItem.activity = ''
   newInventoryItem.quantity = 1
+  newInventoryItem.unitCost = 0
   newInventoryItem.cost = 0
+  newInventoryItem.unitValue = 0
   newInventoryItem.invoiceValue = 0
   newInventoryItem.netProfit = 0
   showCreateInventory.value = false
+  saveInventoryToLocalStorage()
 }
 
 function editInventoryItem(item: any) {
@@ -3688,21 +4654,167 @@ function saveEditedInventory() {
   if (!editingInventory.value) return
   const idx = burnedInventory.findIndex((entry: any) => entry.id === editingInventory.value.id)
   if (idx === -1) return
+  calculateNetProfit(true)
+  const invId = editingInventory.value.invoiceId || null
+  const oldItem = burnedInventory[idx]
   burnedInventory.splice(idx, 1, {
     ...editingInventory.value,
+    orderId: Number(editingInventory.value.orderId) || 0,
+    invoiceId: invId,
     quantity: Number(editingInventory.value.quantity) || 1,
+    unitCost: Number(editingInventory.value.unitCost) || 0,
     cost: Number(editingInventory.value.cost) || 0,
+    unitValue: Number(editingInventory.value.unitValue) || 0,
     invoiceValue: Number(editingInventory.value.invoiceValue) || 0,
     netProfit: Number(editingInventory.value.netProfit) || 0
   })
+  // Si está anclado a una factura, sincronizar el item en la factura
+  if (invId) {
+    const invoice = burnedInvoices.find((i: any) => i.id === invId)
+    if (invoice) {
+      if (!Array.isArray(invoice.items)) invoice.items = []
+      // Si antes también estaba anclado a esta misma factura, actualizar el item existente
+      if (oldItem && oldItem.invoiceId === invId) {
+        const existingItem = invoice.items.find((it: any) => it.description === oldItem.activity)
+        if (existingItem) {
+          existingItem.description = editingInventory.value.activity
+          existingItem.qty = Number(editingInventory.value.quantity) || 1
+          existingItem.price = Number(editingInventory.value.unitValue) || 0
+        } else {
+          invoice.items.push({
+            description: editingInventory.value.activity,
+            qty: Number(editingInventory.value.quantity) || 1,
+            price: Number(editingInventory.value.unitValue) || 0
+          })
+        }
+      } else {
+        // Si es nuevo en esta factura, agregarlo
+        invoice.items.push({
+          description: editingInventory.value.activity,
+          qty: Number(editingInventory.value.quantity) || 1,
+          price: Number(editingInventory.value.unitValue) || 0
+        })
+      }
+    }
+  }
   editingInventory.value = null
   showEditInventory.value = false
+  saveInventoryToLocalStorage()
 }
 
 function deleteInventoryItem(id: number) {
   if (!confirm('¿Eliminar este registro de inventario?')) return
   const idx = burnedInventory.findIndex((item: any) => item.id === id)
   if (idx > -1) burnedInventory.splice(idx, 1)
+  saveInventoryToLocalStorage()
+}
+
+function createInventoryFromInvoice(invoice: any) {
+  if (!invoice || !invoice.items || !invoice.items.length) {
+    alert('La factura no tiene items para generar inventario')
+    return
+  }
+  const orderId = invoice.orderId || null
+  if (!orderId) {
+    alert('La factura no está vinculada a una orden')
+    return
+  }
+
+  let count = 0
+  invoice.items.forEach((item: any) => {
+    if (item.description && item.price > 0) {
+      burnedInventory.push({
+        id: nextInventoryId(),
+        orderId: Number(orderId),
+        invoiceId: invoice.id,
+        date: new Date().toISOString().slice(0, 10),
+        activity: item.description,
+        quantity: Number(item.qty) || 1,
+        cost: 0,
+        invoiceValue: Number(item.price) * (Number(item.qty) || 1),
+        netProfit: 0
+      })
+      count++
+    }
+  })
+
+  if (count > 0) {
+    alert(`Se generaron ${count} registros de inventario desde la factura`)
+  } else {
+    alert('No se generaron registros de inventario')
+  }
+  saveInventoryToLocalStorage()
+}
+
+function populateFromInvoiceItem(isEditing: boolean = false) {
+  const target = isEditing ? editingInventory.value : newInventoryItem
+  if (!target || !target.invoiceId || target.invoiceItemIndex === null) return
+
+  const invoice = burnedInvoices.find((i: any) => i.id === target.invoiceId)
+  if (!invoice || !Array.isArray(invoice.items)) return
+
+  const item = invoice.items[target.invoiceItemIndex]
+  if (!item) return
+
+  target.activity = item.description || target.activity || ''
+  target.unitValue = Number(item.price) || 0
+  target.quantity = Number(item.qty) || target.quantity || 1
+  onUnitValueChange(isEditing)
+}
+
+function onUnitCostChange(isEditing: boolean) {
+  const target = isEditing ? editingInventory.value : newInventoryItem
+  if (!target) return
+  const qty = Number(target.quantity) || 1
+  const unitCost = Number(target.unitCost) || 0
+  target.cost = unitCost * qty
+  calculateNetProfit(isEditing)
+}
+
+function onTotalCostChange(isEditing: boolean) {
+  const target = isEditing ? editingInventory.value : newInventoryItem
+  if (!target) return
+  const qty = Number(target.quantity) || 1
+  const cost = Number(target.cost) || 0
+  target.unitCost = qty > 0 ? cost / qty : 0
+  calculateNetProfit(isEditing)
+}
+
+function onUnitValueChange(isEditing: boolean) {
+  const target = isEditing ? editingInventory.value : newInventoryItem
+  if (!target) return
+  const qty = Number(target.quantity) || 1
+  const unitValue = Number(target.unitValue) || 0
+  target.invoiceValue = unitValue * qty
+  calculateNetProfit(isEditing)
+}
+
+function onTotalValueChange(isEditing: boolean) {
+  const target = isEditing ? editingInventory.value : newInventoryItem
+  if (!target) return
+  const qty = Number(target.quantity) || 1
+  const invoiceValue = Number(target.invoiceValue) || 0
+  target.unitValue = qty > 0 ? invoiceValue / qty : 0
+  calculateNetProfit(isEditing)
+}
+
+function onQuantityChange(isEditing: boolean) {
+  const target = isEditing ? editingInventory.value : newInventoryItem
+  if (!target) return
+  const qty = Number(target.quantity) || 1
+  const unitCost = Number(target.unitCost) || 0
+  const unitValue = Number(target.unitValue) || 0
+  target.cost = unitCost * qty
+  target.invoiceValue = unitValue * qty
+  calculateNetProfit(isEditing)
+}
+
+function calculateNetProfit(isEditing: boolean) {
+  const target = isEditing ? editingInventory.value : newInventoryItem
+  if (!target) return
+  const cost = Number(target.cost) || 0
+  const invoiceValue = Number(target.invoiceValue) || 0
+  target.netProfit = Math.max(0, invoiceValue - cost)
 }
 
 const burnedEmployees = reactive<Employee[]>([])
@@ -3857,9 +4969,45 @@ const showScheduleModal = ref(false)
 const scheduleSelectedOrderId = ref(null)
 const scheduleDateIso = ref('')
 const scheduleTime = ref('09:00')
+const editingAgendaId = ref<number | null>(null)
+const showOrderViewModal = ref(false)
+const orderViewData = ref<any>(null)
 const orderPlateSearch = ref('')
+const showPlateDropdownCreate = ref(false)
+const showPlateDropdownEdit = ref(false)
 
 const newCalendarOrder = reactive({ vehicle: '', client: '', serviceType: '', mechanic: '', total: 0, diagnosis: '' })
+
+function openOrderViewModal(orderId: number | string) {
+  const order = burnedOrders.find((o: any) => o.id === orderId)
+  if (!order) return
+  orderViewData.value = order
+  showOrderViewModal.value = true
+}
+
+function selectPlateForOrder(vehicle: any, isEditing: boolean) {
+  orderPlateSearch.value = vehicle.plate
+  if (isEditing && editingOrder.value) {
+    editingOrder.value.vehicle = vehicle.plate
+    editingOrder.value.client = vehicle.client || ''
+    editingOrder.value.vehicleType = vehicle.vehicleType || ''
+    editingOrder.value.vehicleModel = vehicle.model || ''
+  } else {
+    newOrder.vehicle = vehicle.plate
+    newOrder.client = vehicle.client || ''
+    newOrder.vehicleType = vehicle.vehicleType || ''
+    newOrder.vehicleModel = vehicle.model || ''
+  }
+  showPlateDropdownCreate.value = false
+  showPlateDropdownEdit.value = false
+}
+
+function blurPlateDropdown(isEditing: boolean) {
+  setTimeout(() => {
+    if (isEditing) showPlateDropdownEdit.value = false
+    else showPlateDropdownCreate.value = false
+  }, 150)
+}
 
 function getOrderPlateOptions(selectedPlate = '') {
   const query = orderPlateSearch.value.trim().toLowerCase()
@@ -3901,7 +5049,7 @@ const monthDays = computed(() => {
 
 const eventsByDate = computed(() => {
   const map: Record<string, any[]> = {}
-  // burnedAgenda items
+  // 1) Citas manuales (burnedAgenda) - VERDE
   if (Array.isArray(burnedAgenda)) {
     burnedAgenda.forEach((a: any) => {
       if (a.date) {
@@ -3911,9 +5059,13 @@ const eventsByDate = computed(() => {
       }
     })
   }
-  // burnedOrders scheduled events
+  // 2) Órdenes de trabajo (burnedOrders) - AZUL
+  // NO mostrar órdenes en estado "Entregado"
   if (Array.isArray(burnedOrders)) {
     burnedOrders.forEach((o: any) => {
+      const st = normalizeText(String(o.status || '')).trim()
+      // Filtrar órdenes entregadas - NO aparecen en calendario
+      if (st === 'entregado' || st === 'entregada') return
       const iso = o.deliveryDate ? String(o.deliveryDate).slice(0, 10) : null
       if (iso) {
         map[iso] = map[iso] || []
@@ -3929,15 +5081,26 @@ const unassignedActiveWorkOrders = computed(() => {
   return Array.isArray(arr) ? arr.filter((o: any) => !o.deliveryDate) : []
 })
 
+const agendaItemsForMonth = computed(() => {
+  const month = calendarDate.value.getMonth()
+  const year = calendarDate.value.getFullYear()
+  if (!Array.isArray(burnedAgenda)) return []
+  return burnedAgenda.filter((a: any) => {
+    if (!a.date) return false
+    const d = new Date(a.date)
+    return d.getFullYear() === year && d.getMonth() === month
+  })
+})
+
 const activeOrdersForMonth = computed(() => {
   const month = calendarDate.value.getMonth()
   const year = calendarDate.value.getFullYear()
   const arr = (activeWorkOrders && 'value' in activeWorkOrders) ? activeWorkOrders.value : activeWorkOrders
   if (!Array.isArray(arr)) return []
   return arr.filter((o: any) => {
-    const dateStr = o.deliveryDate || o.createdDate
-    if (!dateStr) return false
-    const d = new Date(dateStr)
+    // Solo órdenes con fecha de entrega (deliveryDate)
+    if (!o.deliveryDate) return false
+    const d = new Date(o.deliveryDate)
     return d.getFullYear() === year && d.getMonth() === month
   })
 })
@@ -3955,10 +5118,23 @@ function nextMonth() {
 }
 
 function openScheduleModal(orderId = null, dateIso = '') {
+  editingAgendaId.value = null
   scheduleSelectedOrderId.value = orderId || null
-  // si no viene fecha, usar fecha actual
   scheduleDateIso.value = dateIso || (new Date()).toISOString().slice(0, 10)
   scheduleTime.value = '09:00'
+  Object.assign(newCalendarOrder, { vehicle: '', client: '', serviceType: '', mechanic: '', total: 0, diagnosis: '' })
+  showScheduleModal.value = true
+}
+
+function openEditAgendaModal(agendaItem: any) {
+  if (!agendaItem || !agendaItem.id) return
+  editingAgendaId.value = agendaItem.id
+  scheduleSelectedOrderId.value = null
+  scheduleDateIso.value = agendaItem.date || (new Date()).toISOString().slice(0, 10)
+  scheduleTime.value = agendaItem.time || '09:00'
+  newCalendarOrder.vehicle = agendaItem.vehicle || ''
+  newCalendarOrder.client = agendaItem.client || ''
+  newCalendarOrder.serviceType = agendaItem.service || ''
   showScheduleModal.value = true
 }
 
@@ -3967,13 +5143,23 @@ function confirmSchedule() {
   const dateIso = scheduleDateIso.value
   const time = scheduleTime.value || '09:00'
   if (!dateIso) { alert('Selecciona fecha'); return }
-  if (id) {
+  if (editingAgendaId.value) {
+    updateAgendaEvent(editingAgendaId.value, dateIso, { ...newCalendarOrder })
+  } else if (id) {
     scheduleOrder(id, dateIso, time)
   } else {
-    // crear nuevo evento/cita en la agenda en lugar de crear una orden
     createAgendaEvent(dateIso, time, { ...newCalendarOrder })
   }
   showScheduleModal.value = false
+  editingAgendaId.value = null
+}
+
+async function deleteEditingAgenda() {
+  if (!editingAgendaId.value) return
+  if (!confirm('¿Eliminar esta cita?')) return
+  await deleteAgendaEvent(editingAgendaId.value)
+  showScheduleModal.value = false
+  editingAgendaId.value = null
 }
 
 async function createAgendaEvent(dateIso: string, time: string, payload: any) {
@@ -3995,12 +5181,15 @@ async function createAgendaEvent(dateIso: string, time: string, payload: any) {
   }
 }
 
-async function updateAgendaEvent(appointmentId: number, dateIso: string, subject: string) {
+async function updateAgendaEvent(appointmentId: number, dateIso: string, payload: any) {
   try {
-    const isoDateTime = `${dateIso}T09:00:00.000Z`
+    const time = payload.time || '09:00'
+    const isoDateTime = `${dateIso}T${time}:00.000Z`
     const request = {
       date: isoDateTime,
-      subject: String(subject || '')
+      plate: String(payload.vehicle || ''),
+      client: String(payload.client || ''),
+      subject: String(payload.serviceType || '')
     }
     await appointmentService.updateAppointment(appointmentId, request)
     await refreshAppointments()
@@ -4094,7 +5283,7 @@ const burnedReports = {
   ]
 }
 
-const burnedCashMovements = [
+const burnedCashMovements = reactive([
   { id: 1, date: '2026-03-27', reference: '', name: 'NISSAN', concept: 'TRABAJO REALIZADO', movement: 'Ingreso', amount: 80000, account: 'Banco', observation: '' },
   { id: 2, date: '2026-03-27', reference: '', name: 'BYD', concept: 'TRABAJO REALIZADO', movement: 'Ingreso', amount: 850000, account: 'Banco', observation: '' },
   { id: 3, date: '2026-03-27', reference: '', name: 'ACOPLES', concept: 'GASTO TALLER', movement: 'Egreso', amount: 10000, account: 'Caja Menor', observation: '' },
@@ -4104,7 +5293,75 @@ const burnedCashMovements = [
   { id: 7, date: '2026-03-28', reference: '', name: 'PAGO FONDO', concept: 'GASTO CESAR', movement: 'Egreso', amount: 100000, account: 'Caja Menor', observation: '' },
   { id: 8, date: '2026-03-28', reference: '2X', name: 'VALE FREDY', concept: 'VALE EMPLEADO', movement: 'Egreso', amount: 250000, account: 'Banco', observation: '' },
   { id: 9, date: '2026-03-28', reference: '', name: 'CESAR', concept: 'GASTO CESAR', movement: 'Egreso', amount: 200000, account: 'Caja Menor', observation: '' }
-]
+])
+
+const showCreateCash = ref(false)
+const showEditCash = ref(false)
+const newCashItem = reactive({
+  date: new Date().toISOString().slice(0, 10),
+  reference: '',
+  name: '',
+  concept: '',
+  movement: 'Ingreso',
+  amount: 0,
+  account: 'Banco',
+  observation: ''
+})
+const editingCash = ref<any | null>(null)
+
+function nextCashId(): number {
+  const ids = Array.isArray(burnedCashMovements) ? burnedCashMovements.map((item: any) => Number(item.id)).filter((id) => Number.isFinite(id)) : []
+  return ids.length ? Math.max(...ids) + 1 : 1
+}
+
+function addCashItem() {
+  const name = String(newCashItem.name || '').trim()
+  const concept = String(newCashItem.concept || '').trim()
+  if (!newCashItem.date || !name || !concept) return
+  burnedCashMovements.push({
+    id: nextCashId(),
+    date: newCashItem.date,
+    reference: newCashItem.reference || '',
+    name,
+    concept,
+    movement: newCashItem.movement,
+    amount: Number(newCashItem.amount) || 0,
+    account: newCashItem.account || 'Banco',
+    observation: newCashItem.observation || ''
+  })
+  newCashItem.date = new Date().toISOString().slice(0, 10)
+  newCashItem.reference = ''
+  newCashItem.name = ''
+  newCashItem.concept = ''
+  newCashItem.movement = 'Ingreso'
+  newCashItem.amount = 0
+  newCashItem.account = 'Banco'
+  newCashItem.observation = ''
+  showCreateCash.value = false
+}
+
+function editCashItem(item: any) {
+  editingCash.value = { ...item }
+  showEditCash.value = true
+}
+
+function saveEditedCash() {
+  if (!editingCash.value) return
+  const idx = burnedCashMovements.findIndex((entry: any) => entry.id === editingCash.value.id)
+  if (idx === -1) return
+  burnedCashMovements.splice(idx, 1, {
+    ...editingCash.value,
+    amount: Number(editingCash.value.amount) || 0
+  })
+  editingCash.value = null
+  showEditCash.value = false
+}
+
+function deleteCashItem(id: number) {
+  if (!confirm('¿Eliminar este movimiento de caja?')) return
+  const idx = burnedCashMovements.findIndex((item: any) => item.id === id)
+  if (idx > -1) burnedCashMovements.splice(idx, 1)
+}
 
 // Asegurar que la pestaña activa siempre sea válida
 if (!tabs.some((t) => t.id === activeTab.value)) {
@@ -4254,12 +5511,211 @@ const ordersCompletedPercent = computed(() => {
   if (ordersTotal.value === 0) return 0
   return Math.round((ordersCompletedCount.value / ordersTotal.value) * 100)
 })
+
+// Estadísticas de órdenes: Activas vs Terminadas/Entregadas
+const ordersActiveCount = computed(() => {
+  let c = 0
+  Object.keys(orderStatusCounts.value).forEach(k => {
+    const kl = normalizeText(k)
+    if (kl === 'recepcion' || kl === 'diagnostico' || kl === 'en proceso' || kl === 'en-proceso' || kl === 'pendiente') {
+      c += orderStatusCounts.value[k]
+    }
+  })
+  return c
+})
+
+const ordersFinishedCount = computed(() => {
+  let c = 0
+  Object.keys(orderStatusCounts.value).forEach(k => {
+    const kl = normalizeText(k)
+    if (kl === 'terminado' || kl === 'terminada' || kl === 'entregado' || kl === 'entregada' || kl === 'completado') {
+      c += orderStatusCounts.value[k]
+    }
+  })
+  return c
+})
+
+// Helper: filtrar por período de métricas principales
+function matchesDashboardMetricsPeriod(dateStr: string | null | undefined): boolean {
+  const mode = dashboardMetricsFilterMode.value
+  const hasFilter = (mode === 'month' && dashboardMetricsMonth.value) ||
+    (mode === 'range' && (dashboardMetricsDateFrom.value || dashboardMetricsDateTo.value)) ||
+    (mode === 'biweekly' && dashboardMetricsBiweekly.value)
+  // Si no hay filtro activo, incluir todo (incluso sin fecha)
+  if (!hasFilter) return true
+  // Si hay filtro pero no hay fecha, excluir
+  if (!dateStr) return false
+  const date = new Date(dateStr)
+  if (Number.isNaN(date.getTime())) return false
+  if (mode === 'month') {
+    const month = dashboardMetricsMonth.value
+    const d = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    return d === month
+  }
+  if (mode === 'range') {
+    const from = dashboardMetricsDateFrom.value
+    const to = dashboardMetricsDateTo.value
+    const fromDate = from ? new Date(from + 'T00:00:00') : null
+    const toDate = to ? new Date(to + 'T23:59:59') : null
+    if (fromDate && date < fromDate) return false
+    if (toDate && date > toDate) return false
+    return true
+  }
+  if (mode === 'biweekly') {
+    const bw = dashboardMetricsBiweekly.value
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const quincena = day <= 15 ? 'Q1' : 'Q2'
+    const periodStr = `${year}-${String(month).padStart(2, '0')} ${quincena}`
+    return periodStr === bw
+  }
+  return true
+}
+
+// Métricas principales filtradas por período
+const filteredOrdersActiveCount = computed(() => {
+  if (!Array.isArray(burnedOrders)) return 0
+  return burnedOrders.filter((o: any) => {
+    if (!matchesDashboardMetricsPeriod(o.createdAt || o.date)) return false
+    const st = normalizeText(String(o.status || '')).trim()
+    return st === 'recepcion' || st === 'diagnostico' || st === 'en proceso' || st === 'en-proceso' || st === 'pendiente' || st === 'terminado' || st === 'terminada'
+  }).length
+})
+
+const filteredOrdersDeliveredCount = computed(() => {
+  if (!Array.isArray(burnedOrders)) return 0
+  return burnedOrders.filter((o: any) => {
+    if (!matchesDashboardMetricsPeriod(o.createdAt || o.date)) return false
+    const st = normalizeText(String(o.status || '')).trim()
+    return st === 'entregado' || st === 'entregada'
+  }).length
+})
+
+const filteredVehiclesCount = computed(() => {
+  if (!Array.isArray(burnedOrders)) return 0
+  const plates = new Set<string>()
+  burnedOrders.forEach((o: any) => {
+    if (matchesDashboardMetricsPeriod(o.createdAt || o.date) && o.vehicle) {
+      plates.add(String(o.vehicle))
+    }
+  })
+  return plates.size
+})
+
+const filteredPendingInvoices = computed(() => {
+  if (!Array.isArray(burnedInvoices)) return 0
+  return burnedInvoices.filter((inv: any) => {
+    if (!matchesDashboardMetricsPeriod(inv.createdAt)) return false
+    const st = String(inv.status || '').toLowerCase().trim()
+    return !(st === 'pagada' || st === 'pagado' || st === 'completed' || st === 'completada' || st === 'abonada' || st === 'abonado')
+  }).length
+})
+
+const filteredPaidInvoices = computed(() => {
+  if (!Array.isArray(burnedInvoices)) return 0
+  return burnedInvoices.filter((inv: any) => {
+    if (!matchesDashboardMetricsPeriod(inv.createdAt)) return false
+    const st = String(inv.status || '').toLowerCase().trim()
+    return st === 'pagada' || st === 'pagado' || st === 'completed' || st === 'completada'
+  }).length
+})
+
+const filteredTotalInvoiced = computed(() => {
+  if (!Array.isArray(burnedInvoices)) return 0
+  return burnedInvoices.filter((inv: any) => matchesDashboardMetricsPeriod(inv.createdAt))
+    .reduce((sum: number, inv: any) => sum + Number(inv.total || 0), 0)
+})
+
+const filteredTotalPaid = computed(() => {
+  if (!Array.isArray(burnedInvoices)) return 0
+  return burnedInvoices.filter((inv: any) => {
+    if (!matchesDashboardMetricsPeriod(inv.createdAt)) return false
+    const st = String(inv.status || '').toLowerCase().trim()
+    return st === 'pagada' || st === 'pagado' || st === 'completed' || st === 'completada'
+  }).reduce((sum: number, inv: any) => sum + Number(inv.total || 0), 0)
+})
+
+const filteredDepositInvoices = computed(() => {
+  if (!Array.isArray(burnedInvoices)) return 0
+  return burnedInvoices.filter((inv: any) => {
+    if (!matchesDashboardMetricsPeriod(inv.createdAt)) return false
+    const st = String(inv.status || '').toLowerCase().trim()
+    return st === 'abonado' || st === 'abonada'
+  }).length
+})
+
+const filteredTotalDeposits = computed(() => {
+  if (!Array.isArray(burnedInvoices)) return 0
+  return burnedInvoices.filter((inv: any) => matchesDashboardMetricsPeriod(inv.createdAt))
+    .reduce((sum: number, inv: any) => sum + invoiceDepositTotal(inv), 0)
+})
+
+const filteredTotalBalance = computed(() => {
+  if (!Array.isArray(burnedInvoices)) return 0
+  return burnedInvoices.filter((inv: any) => matchesDashboardMetricsPeriod(inv.createdAt))
+    .reduce((sum: number, inv: any) => sum + Math.max(0, Number(inv.total || 0) - invoiceDepositTotal(inv)), 0)
+})
+
+// Estadísticas de Facturación
+const invoiceStats = computed(() => {
+  const invoices = Array.isArray(burnedInvoices) ? burnedInvoices : []
+  const total = invoices.length
+  let pending = 0
+  let paid = 0
+  let deposit = 0
+  let pendingValue = 0
+  let paidValue = 0
+  let depositValue = 0
+  let balanceValue = 0
+  invoices.forEach((inv: any) => {
+    const st = String(inv.status || '').toLowerCase().trim()
+    const val = Number(inv.total || 0)
+    const dep = invoiceDepositTotal(inv)
+    if (st === 'pagada' || st === 'pagado' || st === 'completed' || st === 'completada') {
+      paid += 1
+      paidValue += val
+    } else if (st === 'abonada' || st === 'abonado') {
+      deposit += 1
+      depositValue += dep
+      balanceValue += Math.max(0, val - dep)
+    } else {
+      pending += 1
+      pendingValue += val
+    }
+  })
+  return { total, pending, paid, deposit, totalValue: pendingValue + paidValue + depositValue + balanceValue, pendingValue, paidValue, depositValue, balanceValue }
+})
+
+const invoicePieSeries = computed(() => [invoiceStats.value.paid, invoiceStats.value.pending, invoiceStats.value.deposit])
+const invoicePieOptions = computed(() => ({
+  labels: ['Pagadas', 'Pendientes', 'Abonadas'],
+  colors: ['#22c55e', '#f59e0b', '#3b82f6'],
+  legend: { show: true, position: 'bottom', labels: { colors: 'var(--brand-accent-alt)' } },
+  dataLabels: { enabled: true, style: { colors: ['#fff'] } },
+  chart: { background: 'transparent', foreColor: 'var(--brand-accent-alt)' },
+  plotOptions: { pie: { expandOnClick: false } }
+}))
+
 // Filtrar órdenes activas e histórico (activo = status !== 'Entregado')
 const activeWorkOrders = computed(() => {
   if (!Array.isArray(burnedOrders)) return []
   return burnedOrders.filter((o: any) => {
     const st = (o.status || '').toString().toLowerCase().trim()
     return st !== 'entregado'
+  })
+})
+
+const filteredActiveWorkOrders = computed(() => {
+  if (!searchOrders.value) return activeWorkOrders.value
+  const q = searchOrders.value.toLowerCase().trim()
+  return activeWorkOrders.value.filter((o: any) => {
+    return (o.client && o.client.toLowerCase().includes(q)) ||
+      (o.vehicle && o.vehicle.toLowerCase().includes(q)) ||
+      (o.status && o.status.toLowerCase().includes(q)) ||
+      (o.mechanic && o.mechanic.toLowerCase().includes(q)) ||
+      (o.observations && o.observations.toLowerCase().includes(q)) ||
+      (o.id && String(o.id).includes(q))
   })
 })
 
@@ -4319,42 +5775,158 @@ const warrantyPerformanceEnhanced = computed(() => {
   }))
 })
 
-const payrollRows = computed(() => {
-  return burnedEmployees.map((employee: any) => {
-    const mechanicKey = String(employee.name || '').trim().toLowerCase()
-    const orders = historicalWorkOrders.value.filter((order: any) => {
-      const orderMechanic = String(order.mechanic || '').trim().toLowerCase()
-      return mechanicKey && orderMechanic === mechanicKey && Number(order.total || 0) > 0
-    })
-    const grossTotal = orders.reduce((sum: number, order: any) => sum + (Number(order.total) || 0), 0)
+const payrollViewMode = ref('employee')
+const payrollBiweeklyFilter = ref('')
+const payrollEmployeeFilter = ref('')
+const dashboardSelectedMonth = ref('')
+const dashboardFilterPeriod = ref('')
+const dashboardDateFrom = ref('')
+const dashboardDateTo = ref('')
+const dashboardOrderMonth = ref('')
+const dashboardOrderDateFrom = ref('')
+const dashboardOrderDateTo = ref('')
+const dashboardInvoiceMonth = ref('')
+const dashboardInvoiceDateFrom = ref('')
+const dashboardInvoiceDateTo = ref('')
+const dashboardMetricsFilterMode = ref<'month'|'range'|'biweekly'>('month')
+const dashboardMetricsMonth = ref('')
+const dashboardMetricsDateFrom = ref('')
+const dashboardMetricsDateTo = ref('')
+const dashboardMetricsBiweekly = ref('')
+const expandedPayrollEmployees = reactive<Set<number>>(new Set())
 
-    return {
-      id: employee.id,
-      name: employee.name,
-      role: employee.role,
-      ordersCount: orders.length,
-      grossTotal,
-      technicianShare: grossTotal * 0.5,
-      workshopShare: grossTotal * 0.5
-    }
-  })
+function togglePayrollEmployee(employeeId: number) {
+  if (expandedPayrollEmployees.has(employeeId)) {
+    expandedPayrollEmployees.delete(employeeId)
+  } else {
+    expandedPayrollEmployees.add(employeeId)
+  }
+}
+
+const payrollRows = computed(() => {
+  return burnedEmployees
+    .filter((employee: any) => {
+      if (!payrollEmployeeFilter.value) return true
+      return String(employee.name || '').toLowerCase() === String(payrollEmployeeFilter.value).toLowerCase()
+    })
+    .map((employee: any) => {
+      const mechanicKey = String(employee.name || '').trim().toLowerCase()
+      const invoices = burnedInvoices.filter((inv: any) => {
+        const advisorName = String(inv.advisorName || '').trim().toLowerCase()
+        if (!mechanicKey || advisorName !== mechanicKey || Number(inv.total || 0) <= 0) return false
+        if (!payrollBiweeklyFilter.value) return true
+        const date = inv.createdAt ? new Date(inv.createdAt) : new Date()
+        const year = date.getFullYear()
+        const month = date.getMonth() + 1
+        const day = date.getDate()
+        const quincena = day <= 15 ? '1' : '2'
+        const period = `${year}-${String(month).padStart(2, '0')} Q${quincena}`
+        return period === payrollBiweeklyFilter.value
+      })
+      const grossTotal = invoices.reduce((sum: number, inv: any) => {
+        const laborTotal = Array.isArray(inv.items)
+          ? inv.items.reduce((s: number, it: any) => s + (it.isLabor ? (Number(it.qty) || 0) * (Number(it.price) || 0) : 0), 0)
+          : 0
+        return sum + laborTotal
+      }, 0)
+      const totalDiscount = invoices.reduce((sum: number, inv: any) => sum + invoicePayrollDiscount(inv), 0)
+      const technicianShare = Math.max(0, grossTotal * 0.5 - totalDiscount)
+
+      return {
+        id: employee.id,
+        name: employee.name,
+        role: employee.role,
+        ordersCount: invoices.length,
+        grossTotal,
+        totalDiscount,
+        technicianShare,
+        workshopShare: grossTotal * 0.5,
+        orders: invoices.map((inv: any) => {
+          const laborTotal = Array.isArray(inv.items)
+            ? inv.items.reduce((s: number, it: any) => s + (it.isLabor ? (Number(it.qty) || 0) * (Number(it.price) || 0) : 0), 0)
+            : 0
+          const discount = invoicePayrollDiscount(inv)
+          return {
+            id: inv.id,
+            vehicle: inv.vehicle || '-',
+            client: inv.client || '-',
+            createdDate: inv.createdAt ? String(inv.createdAt).slice(0, 10) : '',
+            total: Number(inv.total) || 0,
+            laborTotal,
+            discount,
+            technicianShare: Math.max(0, laborTotal * 0.5 - discount)
+          }
+        })
+      }
+    })
 })
 
 const payrollTotals = computed(() => {
   const grossTotal = payrollRows.value.reduce((sum: number, row: any) => sum + (Number(row.grossTotal) || 0), 0)
+  const totalDiscount = payrollRows.value.reduce((sum: number, row: any) => sum + (Number(row.totalDiscount) || 0), 0)
   return {
     grossTotal,
-    technicianShare: grossTotal * 0.5,
+    totalDiscount,
+    technicianShare: payrollRows.value.reduce((sum: number, row: any) => sum + (Number(row.technicianShare) || 0), 0),
     workshopShare: grossTotal * 0.5,
-    ordersCount: historicalWorkOrders.value.filter((order: any) => Number(order.total || 0) > 0 && String(order.mechanic || '').trim()).length
+    ordersCount: payrollRows.value.reduce((sum: number, row: any) => sum + (Number(row.ordersCount) || 0), 0)
   }
+})
+
+const payrollBiweeklyPeriods = computed(() => {
+  const periods = new Set<string>()
+  burnedInvoices.forEach((inv: any) => {
+    const laborTotal = Array.isArray(inv.items)
+      ? inv.items.reduce((s: number, it: any) => s + (it.isLabor ? (Number(it.qty) || 0) * (Number(it.price) || 0) : 0), 0)
+      : 0
+    if (laborTotal <= 0) return
+    const date = inv.createdAt ? new Date(inv.createdAt) : new Date()
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const quincena = day <= 15 ? '1' : '2'
+    periods.add(`${year}-${String(month).padStart(2, '0')} Q${quincena}`)
+  })
+  return Array.from(periods).sort().reverse()
+})
+
+const payrollBiweeklyRows = computed(() => {
+  const groups: Record<string, { period: string; ordersCount: number; grossTotal: number; totalDiscount: number; technicianShare: number; workshopShare: number }> = {}
+
+  burnedInvoices.forEach((inv: any) => {
+    const laborTotal = Array.isArray(inv.items)
+      ? inv.items.reduce((s: number, it: any) => s + (it.isLabor ? (Number(it.qty) || 0) * (Number(it.price) || 0) : 0), 0)
+      : 0
+    if (laborTotal <= 0) return
+
+    const date = inv.createdAt ? new Date(inv.createdAt) : new Date()
+    const year = date.getFullYear()
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+    const quincena = day <= 15 ? '1' : '2'
+    const period = `${year}-${String(month).padStart(2, '0')} Q${quincena}`
+
+    if (payrollBiweeklyFilter.value && period !== payrollBiweeklyFilter.value) return
+
+    const discount = invoicePayrollDiscount(inv)
+    if (!groups[period]) {
+      groups[period] = { period, ordersCount: 0, grossTotal: 0, totalDiscount: 0, technicianShare: 0, workshopShare: 0 }
+    }
+    groups[period].ordersCount += 1
+    groups[period].grossTotal += laborTotal
+    groups[period].totalDiscount += discount
+    groups[period].technicianShare = Math.max(0, groups[period].grossTotal * 0.5 - groups[period].totalDiscount)
+    groups[period].workshopShare = groups[period].grossTotal * 0.5
+  })
+
+  return Object.values(groups).sort((a, b) => b.period.localeCompare(a.period))
 })
 
 // UI state y helpers para crear/editar/eliminar órdenes
 const showCreateOrder = ref(false)
 const showEditOrder = ref(false)
 const editingOrder: Ref<any | null> = ref(null)
-const newOrder = reactive({ vehicle: '', client: '', status: 'Recepción', serviceType: '', services: [] as string[], parts: [] as string[], mechanic: '', mileage: null as number | null, total: 0, diagnosis: '', observations: '', garantia: 0, createdDate: '', deliveryDate: '', gases: false, escaner: false })
+const newOrder = reactive({ vehicle: '', client: '', status: 'Recepción', serviceType: '', services: [] as string[], parts: [] as string[], mechanic: '', mileage: null as number | null, total: 0, diagnosis: '', observations: '', garantia: 0, createdDate: '', deliveryDate: '', gases: false, escaner: false, showTechnicianInPdf: true, vehicleType: '', vehicleModel: '' })
 
 // Estado para manejo de 'Tipo de servicio' como lista
 const newServiceItem = ref('')
@@ -4423,6 +5995,7 @@ function exportOrderPdf(order: any) {
   // Imprimir en la misma pestaña usando un iframe oculto con HTML mínimo.
   try {
     // Preparar datos
+    const showTech = order.showTechnicianInPdf !== false
     const vehicleObj = (Array.isArray(burnedVehicles) ? burnedVehicles.find((v: any) => v.plate === order.vehicle) : null) || null
     const issueDate = order.createdDate ? (new Date(order.createdDate).toLocaleDateString()) : (new Date().toLocaleDateString())
     const servicesHtml = (Array.isArray(order.services) && order.services.length)
@@ -4431,6 +6004,7 @@ function exportOrderPdf(order: any) {
     const partsText = (Array.isArray(order.parts) && order.parts.length) ? ('<div style="margin-top:8px;font-size:0.95rem;color:#334155">Repuestos: ' + order.parts.join(', ') + '</div>') : ''
     const flagsHtml = ((order.gases ? '<div style="margin-top:8px;font-size:0.95rem;color:#334155">Gases: Sí</div>' : '') + (order.escaner ? '<div style="margin-top:4px;font-size:0.95rem;color:#334155">Escaner: Sí</div>' : ''))
     const observationsHtml = (String(order.observations || '').trim() || partsText) ? (`<div>${String(order.observations || '').trim().replace(/\n/g, '<br/>')}</div>${partsText}`) : '-'
+    const techHtml = showTech ? `<div class="so-meta-card"><span>Técnico</span><strong>${order.mechanic || '-'}</strong></div>` : ''
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>Job's Car | Taller Automotriz en Bogotá - Mantenimiento y Reparación de Vehículos</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>
       @page { margin: 12mm; }
       body { font-family: Arial, Helvetica, sans-serif; color:#111827; background:#ffffff; margin:0; padding:0; }
@@ -4449,7 +6023,7 @@ function exportOrderPdf(order: any) {
       .so-number span { display:block; font-size:9pt; text-transform:uppercase; letter-spacing:.12em; color:#9ca3af; }
       .so-number strong { display:block; margin-top:4px; font-size:18pt; line-height:1; color:#6b7280; }
       .so-number .date { font-size:10pt; color:#9ca3af; }
-      .so-meta-grid { display:grid; grid-template-columns: 1fr 1.35fr 0.75fr; gap:12px; padding: 18px 24px 0 24px; }
+      .so-meta-grid { display:grid; grid-template-columns: ${showTech ? '1fr 1.35fr 0.75fr' : '1fr 1fr'}; gap:12px; padding: 18px 24px 0 24px; }
       .so-meta-card { border:1px solid #e6e9ef; background:#f7f7f9; border-radius:14px; padding:12px 14px; }
       .so-meta-card span { display:block; font-size:9pt; text-transform:uppercase; letter-spacing:.08em; color:#64748b; margin-bottom:6px; }
       .so-meta-card strong { display:block; font-size:11pt; color:#0f172a; line-height:1.25; }
@@ -4476,7 +6050,7 @@ function exportOrderPdf(order: any) {
         <div class="so-meta-grid">
           <div class="so-meta-card"><span>Cliente</span><strong>${order.client || '-'}</strong></div>
           <div class="so-meta-card"><span>Vehículo</span><strong>${order.vehicle || '-'}${vehicleObj ? ((vehicleObj.brand ? ' · ' + vehicleObj.brand : '') + (vehicleObj.model ? ' · ' + vehicleObj.model : '')) : ''}</strong></div>
-          <div class="so-meta-card"><span>Técnico</span><strong>${order.mechanic || '-'}</strong></div>
+          ${techHtml}
         </div>
         <div class="so-section-grid">
           <div class="so-panel so-panel-wide">
@@ -4556,10 +6130,11 @@ function clearPrintOrder() {
   printInvoice.value = null
 }
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('afterprint', clearPrintOrder)
-  refreshWorkOrders()
-  refreshAppointments()
+  loadInventoryFromLocalStorage()
+  await refreshWorkOrders()
+  await refreshAppointments()
 })
 
 onBeforeUnmount(() => {
@@ -4585,21 +6160,17 @@ function resolveMechanicIdByName(name: string): number | null {
   return employee?.id ? Number(employee.id) : null
 }
 
-function buildWorkOrderPayload(source: any) {
+function buildWorkOrderPayload(source: any): any {
   const vehicleId = Number(source?.vehicleId || resolveVehicleIdByPlate(source?.vehicle || ''))
-  const mechanicId = Number(source?.mechanicId || resolveMechanicIdByName(source?.mechanic || ''))
+  const mechanicId = resolveMechanicIdByName(source?.mechanic || '')
 
   if (!vehicleId) {
     throw new Error('No se pudo resolver el vehículo para la orden')
   }
 
-  if (!mechanicId) {
-    throw new Error('Selecciona un técnico válido para la orden')
-  }
-
   return {
     vehicleId,
-    mechanicId,
+    mechanicId: mechanicId || undefined,
     status: String(source?.status || 'Recepción'),
     services: getOrderServiceChips(source),
     gases: Boolean(source?.gases),
@@ -4608,12 +6179,13 @@ function buildWorkOrderPayload(source: any) {
     diagnosis: String(source?.diagnosis || ''),
     deliveryDate: source?.deliveryDate || undefined,
     garantia: Number(source?.garantia) || 0,
-    total: Number(source?.total) || 0
+    total: Number(source?.total) || 0,
+    vehicleType: String(source?.vehicleType || '')
   }
 }
 
 function openCreateOrder() {
-  Object.assign(newOrder, { vehicle: '', client: '', status: 'Recepción', serviceType: '', services: [], parts: [], mechanic: '', mileage: null, total: 0, diagnosis: '', observations: '', garantia: 0, gases: false, escaner: false })
+  Object.assign(newOrder, { vehicle: '', client: '', status: 'Recepción', serviceType: '', services: [], parts: [], mechanic: '', mileage: null, total: 0, diagnosis: '', observations: '', garantia: 0, gases: false, escaner: false, showTechnicianInPdf: true, vehicleType: '' })
   orderPlateSearch.value = ''
   newServiceItem.value = ''
   showCreateOrder.value = true
@@ -4622,9 +6194,12 @@ function openCreateOrder() {
 async function createOrder() {
   try {
     const payload = buildWorkOrderPayload(newOrder)
-    await workOrderService.createWorkOrder(payload)
+    const response = await workOrderService.createWorkOrder(payload)
+    if (response.data?.id) {
+      setShowTechPdf(response.data.id, newOrder.showTechnicianInPdf !== false)
+    }
     await refreshWorkOrders()
-    Object.assign(newOrder, { vehicle: '', client: '', status: 'Recepción', serviceType: '', services: [], parts: [], mechanic: '', mileage: null, total: 0, diagnosis: '', observations: '', garantia: 0, createdDate: '', deliveryDate: '', gases: false, escaner: false })
+    Object.assign(newOrder, { vehicle: '', client: '', status: 'Recepción', serviceType: '', services: [], parts: [], mechanic: '', mileage: null, total: 0, diagnosis: '', observations: '', garantia: 0, createdDate: '', deliveryDate: '', gases: false, escaner: false, showTechnicianInPdf: true, vehicleType: '', vehicleModel: '' })
     showCreateOrder.value = false
   } catch (error) {
     console.error('No se pudo crear la orden', error)
@@ -4637,6 +6212,14 @@ function editOrder(order: any) {
   // asegurar campos booleanos para edición
   if (typeof editingOrder.value.gases === 'undefined') editingOrder.value.gases = false
   if (typeof editingOrder.value.escaner === 'undefined') editingOrder.value.escaner = false
+  if (typeof editingOrder.value.showTechnicianInPdf === 'undefined') editingOrder.value.showTechnicianInPdf = true
+  if (typeof editingOrder.value.vehicleType === 'undefined') editingOrder.value.vehicleType = ''
+  if (typeof editingOrder.value.vehicleModel === 'undefined') editingOrder.value.vehicleModel = ''
+  // Resolver nombre del técnico si viene como ID o está vacío
+  if ((!editingOrder.value.mechanic || /^\d+$/.test(String(editingOrder.value.mechanic))) && editingOrder.value.mechanicId) {
+    const found = burnedEmployees.find((e: any) => String(e.id) === String(editingOrder.value.mechanicId))
+    if (found?.name) editingOrder.value.mechanic = found.name
+  }
   // asegurar que exista el array services para la edición
   if (!editingOrder.value.services || !Array.isArray(editingOrder.value.services)) {
     editingOrder.value.services = editingOrder.value.serviceType ? [String(editingOrder.value.serviceType)] : []
@@ -4651,6 +6234,7 @@ async function saveEditedOrder() {
   try {
     const payload = buildWorkOrderPayload(editingOrder.value)
     await workOrderService.updateWorkOrder(editingOrder.value.id, payload)
+    setShowTechPdf(editingOrder.value.id, editingOrder.value.showTechnicianInPdf !== false)
     await refreshWorkOrders()
     showEditOrder.value = false
     editingOrder.value = null
@@ -4661,9 +6245,15 @@ async function saveEditedOrder() {
 }
 
 async function deleteOrder(id: number) {
-  if (!confirm('¿Estás seguro de eliminar esta orden?')) return
+  if (!confirm('¿Estás seguro de eliminar esta orden?\n\n⚠️ Si tiene una factura asociada, también se eliminará.')) return
   try {
     await workOrderService.deleteWorkOrder(id)
+    // Eliminar factura asociada si existe
+    const invoiceIdx = burnedInvoices.findIndex((inv: any) => inv.orderId === id)
+    if (invoiceIdx > -1) {
+      burnedInvoices.splice(invoiceIdx, 1)
+      console.log('✅ Factura asociada eliminada')
+    }
     await refreshWorkOrders()
   } catch (error) {
     console.error('No se pudo eliminar la orden', error)
@@ -4680,6 +6270,14 @@ function statusClass(status: string) {
   if (s.includes('termin') || s === 'terminado') return 'terminado'
   if (s.includes('entreg') || s === 'entregado') return 'entregado'
   return s.replace(/\s+/g, '-')
+}
+
+function isOrderBillable(status: string): boolean {
+  if (!status) return false
+  const s = normalizeText(status.toString().trim())
+  // Solo permitir facturar desde: En Proceso, Pendiente
+  // No permitir facturar desde: Recepción, Diagnóstico, Terminado, Entregado
+  return s === 'en proceso' || s === 'en-proceso' || s === 'pendiente'
 }
 
 function getOrderServiceChips(order: any): string[] {
@@ -4867,6 +6465,302 @@ const revenueVsCosts = computed(() => {
   return { rev, cost, revPct: Math.round((rev / total) * 100), costPct: Math.round((cost / total) * 100) }
 })
 
+const dashboardAvailableMonths = computed(() => {
+  const months = []
+  const now = new Date()
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    months.push({
+      value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+      label: d.toLocaleDateString('es-CO', { year: 'numeric', month: 'long' })
+    })
+  }
+  return months
+})
+
+const dashboardAvailablePeriods = computed(() => {
+  const periods = [{ value: '', label: 'Todos los períodos' }]
+  const now = new Date()
+
+  // Meses
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const monthValue = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    const monthLabel = d.toLocaleDateString('es-CO', { year: 'numeric', month: 'long' })
+    periods.push({ value: monthValue, label: `Mes: ${monthLabel}` })
+  }
+
+  // Quincenas (últimas 6)
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth(), 1)
+    d.setMonth(d.getMonth() - i)
+    const year = d.getFullYear()
+    const month = d.getMonth() + 1
+    const q1 = `${year}-${String(month).padStart(2, '0')} Q1`
+    const q2 = `${year}-${String(month).padStart(2, '0')} Q2`
+    const monthName = d.toLocaleDateString('es-CO', { month: 'long' })
+    periods.push({ value: q1, label: `Quincena: ${monthName} Q1 (1-15)` })
+    periods.push({ value: q2, label: `Quincena: ${monthName} Q2 (16-31)` })
+  }
+
+  return periods
+})
+
+function matchesPeriod(dateStr: string | null | undefined, period: string): boolean {
+  if (!period || !dateStr) return true
+  const date = new Date(dateStr)
+  if (Number.isNaN(date.getTime())) return false
+  const year = date.getFullYear()
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+
+  // Es mes
+  if (!period.includes(' Q')) {
+    const monthStr = `${year}-${String(month).padStart(2, '0')}`
+    return monthStr === period
+  }
+
+  // Es quincena
+  const quincena = day <= 15 ? 'Q1' : 'Q2'
+  const periodStr = `${year}-${String(month).padStart(2, '0')} ${quincena}`
+  return periodStr === period
+}
+
+function matchesDateRange(dateStr: string | null | undefined, from: string, to: string): boolean {
+  if (!dateStr) return false
+  const date = new Date(dateStr)
+  let fromDate: Date | null = null
+  let toDate: Date | null = null
+  if (from) {
+    // Si es formato mes (YYYY-MM), usar primer día del mes
+    if (from.length === 7) {
+      const [y, m] = from.split('-').map(Number)
+      fromDate = new Date(y, m - 1, 1, 0, 0, 0)
+    } else {
+      fromDate = new Date(from + 'T00:00:00')
+    }
+  }
+  if (to) {
+    // Si es formato mes (YYYY-MM), usar último día del mes
+    if (to.length === 7) {
+      const [y, m] = to.split('-').map(Number)
+      toDate = new Date(y, m, 0, 23, 59, 59)
+    } else {
+      toDate = new Date(to + 'T23:59:59')
+    }
+  }
+  if (fromDate && date < fromDate) return false
+  if (toDate && date > toDate) return false
+  return true
+}
+
+// Estadísticas de Órdenes filtradas por período
+const filteredOrdersForDashboard = computed(() => {
+  const period = dashboardFilterPeriod.value
+  const orderMonth = dashboardOrderMonth.value
+  const dateFrom = dashboardOrderDateFrom.value
+  const dateTo = dashboardOrderDateTo.value
+  if (!period && !orderMonth && !dateFrom && !dateTo) return burnedOrders
+  return burnedOrders.filter((o: any) => {
+    if (orderMonth) {
+      if (!matchesDateRange(o.createdAt || o.date, orderMonth, orderMonth)) return false
+    }
+    if (dateFrom || dateTo) {
+      if (!matchesDateRange(o.createdAt || o.date, dateFrom, dateTo)) return false
+    }
+    if (period) {
+      if (!matchesPeriod(o.createdAt || o.date, period)) return false
+    }
+    return true
+  })
+})
+
+function normalizeText(text: string): string {
+  return text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+const filteredOrderStats = computed(() => {
+  const orders = filteredOrdersForDashboard.value
+  const total = orders.length
+  let active = 0
+  let finished = 0
+
+  orders.forEach((o: any) => {
+    const st = normalizeText(String(o.status || '')).trim()
+    // Activas: recepcion, diagnostico, en-proceso, pendiente, terminado
+    if (st === 'recepcion' || st === 'diagnostico' || st === 'en proceso' || st === 'en-proceso' || st === 'pendiente' || st === 'terminado' || st === 'terminada') {
+      active += 1
+    } else if (st === 'entregado' || st === 'entregada') {
+      // Entregadas
+      finished += 1
+    }
+  })
+
+  return { total, active, finished }
+})
+
+const ordersPieSeries = computed(() => [filteredOrderStats.value.active, filteredOrderStats.value.finished])
+const ordersPieOptions = computed(() => ({
+  labels: ['Activas / Terminadas', 'Entregadas'],
+  colors: ['#3b82f6', '#22c55e'],
+  legend: { show: true, position: 'bottom', labels: { colors: 'var(--brand-accent-alt)' } },
+  dataLabels: { enabled: true, style: { colors: ['#fff'] } },
+  chart: { background: 'transparent', foreColor: 'var(--brand-accent-alt)' },
+  plotOptions: { pie: { expandOnClick: false } }
+}))
+
+// Estadísticas de Facturación filtradas por período
+const filteredInvoicesForDashboard = computed(() => {
+  const period = dashboardFilterPeriod.value
+  const invoiceMonth = dashboardInvoiceMonth.value
+  const dateFrom = dashboardInvoiceDateFrom.value
+  const dateTo = dashboardInvoiceDateTo.value
+  if (!period && !invoiceMonth && !dateFrom && !dateTo) return burnedInvoices
+  return burnedInvoices.filter((inv: any) => {
+    if (invoiceMonth) {
+      if (!matchesDateRange(inv.createdAt, invoiceMonth, invoiceMonth)) return false
+    }
+    if (dateFrom || dateTo) {
+      if (!matchesDateRange(inv.createdAt, dateFrom, dateTo)) return false
+    }
+    if (period) {
+      if (!matchesPeriod(inv.createdAt, period)) return false
+    }
+    return true
+  })
+})
+
+const dashboardDepositInvoices = computed(() => {
+  if (!Array.isArray(burnedInvoices)) return []
+  return burnedInvoices.filter((inv: any) => {
+    const st = String(inv.status || '').toLowerCase().trim()
+    return st === 'abonada' || st === 'abonado'
+  }).sort((a: any, b: any) => {
+    const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0)
+    const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0)
+    return dateB.getTime() - dateA.getTime()
+  })
+})
+
+const dashboardRecentInvoices = computed(() => {
+  if (!Array.isArray(burnedInvoices)) return []
+  return burnedInvoices.filter((inv: any) => {
+    const st = String(inv.status || '').toLowerCase().trim()
+    return st !== 'anulada' && st !== 'anulado'
+  }).sort((a: any, b: any) => {
+    const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0)
+    const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0)
+    return dateB.getTime() - dateA.getTime()
+  })
+})
+
+const filteredInvoiceStats = computed(() => {
+  const invoices = filteredInvoicesForDashboard.value
+  const total = invoices.length
+  let pending = 0
+  let paid = 0
+  let pendingValue = 0
+  let paidValue = 0
+
+  invoices.forEach((inv: any) => {
+    const st = String(inv.status || '').toLowerCase().trim()
+    const val = Number(inv.total || 0)
+    if (st === 'pagada' || st === 'pagado' || st === 'completed' || st === 'completada') {
+      paid += 1
+      paidValue += val
+    } else {
+      pending += 1
+      pendingValue += val
+    }
+  })
+
+  return { total, pending, paid, totalValue: pendingValue + paidValue, pendingValue, paidValue }
+})
+
+const filteredInvoicePieSeries = computed(() => [filteredInvoiceStats.value.paid, filteredInvoiceStats.value.pending])
+const filteredInvoicePieOptions = computed(() => ({
+  labels: ['Pagadas', 'Pendientes'],
+  colors: ['#22c55e', '#f59e0b'],
+  legend: { show: true, position: 'bottom', labels: { colors: 'var(--brand-accent-alt)' } },
+  dataLabels: { enabled: true, style: { colors: ['#fff'] } },
+  chart: { background: 'transparent', foreColor: 'var(--brand-accent-alt)' },
+  plotOptions: { pie: { expandOnClick: false } }
+}))
+
+const dashboardTechniciansByMonth = computed(() => {
+  const employees = Array.isArray(burnedEmployees) ? burnedEmployees : []
+  if (!employees.length) return []
+  const selectedMonth = dashboardSelectedMonth.value
+  const from = dashboardDateFrom.value
+  const to = dashboardDateTo.value
+  const allInvoices = Array.isArray(burnedInvoices) ? burnedInvoices : []
+  const allOrders = Array.isArray(burnedOrders) ? burnedOrders : []
+
+  const total = employees.reduce((sum: number, e: any) => {
+    const mechanicKey = String(e.name || '').trim().toLowerCase()
+    const invoices = allInvoices.filter((inv: any) => {
+      const advisorName = String(inv.advisorName || '').trim().toLowerCase()
+      if (advisorName !== mechanicKey || Number(inv.total || 0) <= 0) return false
+      if (selectedMonth) {
+        const date = inv.createdAt ? new Date(inv.createdAt) : new Date()
+        const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        if (month !== selectedMonth) return false
+      }
+      if (from || to) {
+        if (!matchesDateRange(inv.createdAt, from, to)) return false
+      }
+      return true
+    })
+    return sum + invoices.reduce((s: number, i: any) => s + Number(i.total || 0), 0)
+  }, 0)
+
+  return employees.map((e: any) => {
+    const mechanicKey = String(e.name || '').trim().toLowerCase()
+    const invoices = allInvoices.filter((inv: any) => {
+      const advisorName = String(inv.advisorName || '').trim().toLowerCase()
+      if (advisorName !== mechanicKey || Number(inv.total || 0) <= 0) return false
+      if (selectedMonth) {
+        const date = inv.createdAt ? new Date(inv.createdAt) : new Date()
+        const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        if (month !== selectedMonth) return false
+      }
+      if (from || to) {
+        if (!matchesDateRange(inv.createdAt, from, to)) return false
+      }
+      return true
+    })
+
+    // Contar garantías del técnico (desde órdenes históricas)
+    const warrantyOrders = allOrders.filter((o: any) => {
+      const orderMechanic = String(o.mechanic || '').trim().toLowerCase()
+      if (orderMechanic !== mechanicKey) return false
+      if (Number(o.garantia || 0) <= 0) return false
+      if (selectedMonth) {
+        const date = o.createdAt ? new Date(o.createdAt) : new Date()
+        const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        if (month !== selectedMonth) return false
+      }
+      if (from || to) {
+        if (!matchesDateRange(o.createdAt || o.date, from, to)) return false
+      }
+      return true
+    })
+
+    const revenue = invoices.reduce((s: number, i: any) => s + Number(i.total || 0), 0)
+    return {
+      name: e.name || 'Sin nombre',
+      role: e.role || 'Técnico',
+      ordersCount: invoices.length,
+      totalRevenue: revenue,
+      technicianShare: revenue * 0.5,
+      workshopShare: revenue * 0.5,
+      percentage: total > 0 ? (revenue / total) * 100 : 0,
+      warrantyCount: warrantyOrders.length,
+      warrantyValue: warrantyOrders.reduce((s: number, o: any) => s + Number(o.total || 0), 0)
+    }
+  }).sort((a: any, b: any) => b.totalRevenue - a.totalRevenue)
+})
+
 const avgServiceTime = computed(() => '2.4 Días')
 
 // Computed properties para búsqueda y filtrado
@@ -5037,6 +6931,51 @@ const formatDate = (date: Date) => {
 // Fecha corta, formato local (ej. 10/04/2026)
 const formatShortDate = (date: Date) => {
   return date.toLocaleDateString('es-CO')
+}
+
+const currentDate = computed(() => {
+  return new Date().toLocaleDateString('es-CO', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+})
+
+const getInitials = (name: string) => {
+  return name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+const getStatusClassForDashboard = (status: string) => {
+  const s = normalizeText(status.toString().trim())
+  if (s.includes('recepcion')) return 'recepcion'
+  if (s.includes('diagnostico')) return 'diagnostico'
+  if (s.includes('proceso') || s.includes('progreso')) return 'en-proceso'
+  if (s.includes('termin') || s.includes('complet')) return 'terminado'
+  if (s.includes('entreg')) return 'entregado'
+  return 'default'
+}
+
+const getAppointmentStatusClass = (appt: any) => {
+  if (!appt) return 'pending'
+  const status = String(appt.status || '').toLowerCase()
+  if (status.includes('confirm') || status.includes('confirmada')) return 'confirmed'
+  if (status.includes('complet') || status.includes('realizada')) return 'completed'
+  if (status.includes('cancel')) return 'cancelled'
+  return 'pending'
+}
+
+const getAppointmentStatusLabel = (appt: any) => {
+  const status = String(appt.status || '').toLowerCase()
+  if (status.includes('confirm')) return 'Confirmada'
+  if (status.includes('complet')) return 'Realizada'
+  if (status.includes('cancel')) return 'Cancelada'
+  return 'Pendiente'
 }
 
 // Devuelve sólo el tipo de aviso para mostrar en la UI.
@@ -5867,7 +7806,7 @@ const closeCategoryForm = () => {
 
 .search-input {
   width: 100%;
-  padding: 0.875rem 3.5rem 0.875rem 2.75rem;
+  padding: .875rem 4.5rem 0.875rem 2.75rem;
   border-radius: 999px;
   border: 1px solid var(--brand-border);
   background: var(--brand-bg-end);
@@ -6457,6 +8396,14 @@ const closeCategoryForm = () => {
 
 .form-input::placeholder {
   color: var(--brand-accent-alt);
+}
+
+.form-input[readonly], .form-input-readonly {
+  background: var(--brand-bg) !important;
+  border: 2px solid var(--brand-border) !important;
+  cursor: not-allowed;
+  opacity: 0.85;
+  color: var(--brand-primary-contrast);
 }
 
 .price-input {
@@ -7927,6 +9874,50 @@ const closeCategoryForm = () => {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 }
 
+/* Estilos para tabla de inventario colapsable */
+.inventory-group-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--brand-border);
+}
+
+.inventory-group-row:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.inventory-item-row {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--brand-border);
+}
+
+.inventory-item-row td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* Estilos para tabla de nómina colapsable */
+.payroll-group-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--brand-border);
+}
+
+.payroll-group-row:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.payroll-item-row {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--brand-border);
+}
+
+.payroll-item-row td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
 .reports-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -8166,6 +10157,13 @@ const closeCategoryForm = () => {
   box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }
 
+.status-badge.abonado,
+.status-badge.abonada {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
 .status-badge.cancelado,
 .status-badge.cancelled {
   background: linear-gradient(135deg, #f87171 0%, #ef4444 100%);
@@ -8346,6 +10344,12 @@ const closeCategoryForm = () => {
   background: linear-gradient(135deg, rgba(127, 29, 29, 0.94), rgba(153, 27, 27, 0.82));
   border-color: rgba(248, 113, 113, 0.22);
   color: #fff1f2;
+}
+
+.order-action-btn.success {
+  background: linear-gradient(135deg, rgba(22, 101, 52, 0.92), rgba(34, 197, 94, 0.82));
+  border-color: rgba(74, 222, 128, 0.28);
+  color: #f0fdf4;
 }
 
 .order-title-row {
@@ -9464,8 +11468,12 @@ const closeCategoryForm = () => {
   }
 
   /* Mostrar únicamente la zona preparada para imprimir */
+  .print-area,
+  .print-area * {
+    display: revert !important;
+  }
+
   .print-area {
-    display: block !important;
     position: relative !important;
     left: auto !important;
     top: auto !important;
@@ -9476,11 +11484,379 @@ const closeCategoryForm = () => {
     margin: 0 auto !important;
   }
 
-  .print-area * {
-    display: block !important;
+  /* ======= Factura moderna ======= */
+  .inv-sheet {
+    max-width: 210mm;
+    margin: 0 auto;
+    background: #fff !important;
+    color: #111827 !important;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+    padding: 16mm 14mm;
+    box-sizing: border-box;
   }
 
-  /* Estilos de la tarjeta dentro del área de impresión */
+  .inv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid #e5e7eb;
+  }
+
+  .inv-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .inv-logo {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    border-radius: 10px;
+    background: #0f172a;
+    padding: 6px;
+  }
+
+  .inv-brand-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .inv-company {
+    font-size: 20pt;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+
+  .inv-tagline {
+    font-size: 9.5pt;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  .inv-badge-wrap {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .inv-doc-type {
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #9ca3af;
+  }
+
+  .inv-doc-number {
+    font-size: 18pt;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+  }
+
+  .inv-date {
+    font-size: 9.5pt;
+    color: #6b7280;
+  }
+
+  .inv-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 4px;
+  }
+
+  .inv-status.pagado,
+  .inv-status.paid {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+  }
+
+  .inv-status.pendiente,
+  .inv-status.pending {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+  }
+
+  .inv-status.anulado,
+  .inv-status.cancelled {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+  }
+
+  .inv-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .inv-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .inv-card-title {
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #9ca3af;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .inv-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .inv-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 9pt;
+    line-height: 1.35;
+  }
+
+  .inv-label {
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  .inv-val {
+    color: #111827;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .inv-qr {
+    font-family: monospace;
+    font-size: 7pt;
+    line-height: 1.15;
+    color: #111827;
+    text-align: center;
+    letter-spacing: 0.12em;
+    white-space: pre;
+    margin-bottom: 4px;
+  }
+
+  .inv-qr-hint {
+    font-size: 7.5pt;
+    color: #6b7280;
+    text-align: center;
+  }
+
+  .inv-table-wrap {
+    margin-bottom: 18px;
+  }
+
+  .inv-section-title {
+    font-size: 10pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #374151;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1.5px solid #e5e7eb;
+  }
+
+  .inv-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 9.5pt;
+  }
+
+  .inv-table thead th {
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 8pt;
+    letter-spacing: 0.06em;
+    padding: 8px 10px;
+    border-bottom: 1.5px solid #d1d5db;
+    text-align: left;
+  }
+
+  .inv-table tbody td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #1f2937;
+    vertical-align: middle;
+  }
+
+  .inv-table tbody tr:last-child td {
+    border-bottom: 1.5px solid #d1d5db;
+  }
+
+  .inv-col-num { width: 5%; text-align: center; }
+  .inv-col-desc { width: 44%; }
+  .inv-col-qty { width: 9%; text-align: center; }
+  .inv-col-price { width: 16%; text-align: right; }
+  .inv-col-tax { width: 10%; text-align: center; }
+  .inv-col-total { width: 16%; text-align: right; font-weight: 700; }
+
+  .inv-summary {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+  }
+
+  .inv-summary-box {
+    width: 260px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .inv-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9.5pt;
+    color: #4b5563;
+  }
+
+  .inv-row-label {
+    font-weight: 500;
+  }
+
+  .inv-row-val {
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .inv-total-row {
+    border-top: 1.5px solid #d1d5db;
+    padding-top: 8px;
+    margin-top: 2px;
+    font-size: 12pt;
+    color: #0f172a;
+  }
+
+  .inv-total-row .inv-row-label,
+  .inv-total-row .inv-row-val {
+    font-weight: 800;
+  }
+
+  .inv-photos {
+    margin-bottom: 20px;
+  }
+
+  .inv-photo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .inv-photo-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .inv-photo-label {
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .inv-photo-thumb {
+    width: 100%;
+    height: 120px;
+    background: #f3f4f6;
+    border: 1.5px dashed #d1d5db;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9pt;
+    color: #9ca3af;
+  }
+
+  .inv-signatures {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    margin-bottom: 18px;
+    padding: 0 20px;
+  }
+
+  .inv-sig-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .inv-sig-line {
+    width: 100%;
+    border-bottom: 1.5px solid #9ca3af;
+    height: 40px;
+  }
+
+  .inv-sig-label {
+    font-size: 8.5pt;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+
+  .inv-sig-name {
+    font-size: 9pt;
+    color: #111827;
+    font-weight: 700;
+  }
+
+  .inv-footer {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    border-top: 1.5px solid #e5e7eb;
+    padding-top: 12px;
+    margin-top: 4px;
+  }
+
+  .inv-footer-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 8.5pt;
+    color: #6b7280;
+    text-align: center;
+  }
+
+  .inv-footer-icon {
+    font-size: 10pt;
+  }
+
+  /* ======= Orden de servicio (mantener existente) ======= */
   .service-order-card {
     max-width: 860px;
     margin: 0 auto;
@@ -9491,9 +11867,6 @@ const closeCategoryForm = () => {
     border-radius: 18px;
     overflow: hidden;
     box-shadow: 0 10px 32px rgba(15, 23, 42, 0.12);
-  }
-
-  .service-order-card {
     position: relative;
   }
 
@@ -9637,7 +12010,1356 @@ const closeCategoryForm = () => {
   }
 
   @page {
-    margin: 12mm 10mm;
+    margin: 10mm 8mm;
+    size: A4 portrait;
   }
+}
+
+/* ============ DASHBOARD PROFESIONAL ============ */
+
+.dashboard-professional-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.dashboard-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.dashboard-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.dashboard-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.dashboard-subtitle {
+  margin: 2px 0 0;
+  color: var(--brand-accent-alt);
+  font-size: 0.85rem;
+}
+
+.dashboard-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-date {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: var(--brand-accent-alt);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Métricas */
+.dashboard-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.dashboard-metric-card {
+  background: var(--brand-surface);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 14px;
+  padding: 12px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  min-width: 0;
+}
+
+.dashboard-metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.dashboard-metric-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dashboard-metric-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.dashboard-metric-icon.blue {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.dashboard-metric-icon.green {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.dashboard-metric-icon.orange {
+  background: rgba(249, 115, 22, 0.15);
+  color: #fb923c;
+}
+
+.dashboard-metric-icon.purple {
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+}
+
+.dashboard-metric-icon.red {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.dashboard-metric-icon.teal {
+  background: rgba(20, 184, 166, 0.15);
+  color: #2dd4bf;
+}
+
+.dashboard-metric-icon.blue {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.dashboard-metric-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+  line-height: 1.2;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-metric-label {
+  font-size: 0.7rem;
+  color: var(--brand-accent-alt);
+  margin: 2px 0 0;
+  line-height: 1.2;
+}
+
+/* Panel */
+.dashboard-panel {
+  background: var(--brand-surface);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 18px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.dashboard-panel-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-panel-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-panel-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.dashboard-panel-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--brand-primary-contrast);
+  margin: 0;
+}
+
+.dashboard-panel-subtitle {
+  margin: 2px 0 0;
+  color: var(--brand-accent-alt);
+  font-size: 0.8rem;
+}
+
+.dashboard-panel-filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.dashboard-date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--brand-bg-end);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+  padding: 6px 10px;
+}
+
+.dashboard-date-input {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.5);
+  color: var(--brand-primary-contrast);
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.dashboard-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.7);
+  cursor: pointer;
+}
+
+.dashboard-date-separator {
+  color: var(--brand-accent-alt);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.dashboard-date-clear {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+  margin-left: 4px;
+}
+
+.dashboard-date-clear:hover {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+/* Filtro de métricas principales */
+.dashboard-metrics-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.dashboard-metrics-filter-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--brand-bg-end);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.dashboard-metrics-filter-tab {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--brand-accent-alt);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.dashboard-metrics-filter-tab:hover {
+  color: var(--brand-primary);
+}
+
+.dashboard-metrics-filter-tab.active {
+  background: var(--brand-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.dashboard-metrics-filter-inputs {
+  display: flex;
+  align-items: center;
+}
+
+.dashboard-panel-body {
+  padding: 20px 24px;
+}
+
+/* Performance */
+.dashboard-performance-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.dashboard-performance-card {
+  background: var(--brand-bg-end);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 14px;
+  padding: 18px;
+  transition: transform 0.2s;
+}
+
+.dashboard-performance-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.dashboard-performance-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.dashboard-tech-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.dashboard-tech-info h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--brand-primary-contrast);
+  margin: 0;
+}
+
+.dashboard-tech-info span {
+  font-size: 0.75rem;
+  color: var(--brand-accent-alt);
+}
+
+.dashboard-performance-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.dashboard-perf-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dashboard-perf-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+}
+
+.dashboard-perf-label {
+  font-size: 0.72rem;
+  color: var(--brand-accent-alt);
+}
+
+.dashboard-performance-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dashboard-progress-bar {
+  height: 6px;
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.dashboard-progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, #3b82f6, #6366f1);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.dashboard-progress-label {
+  font-size: 0.72rem;
+  color: var(--brand-accent-alt);
+  text-align: right;
+}
+
+/* Charts */
+.dashboard-charts-row {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.dashboard-chart-card {
+  background: var(--brand-surface);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 16px;
+  padding: 18px;
+  flex: 1;
+}
+
+.dashboard-chart-card.wide {
+  flex: 2;
+}
+
+.dashboard-chart-card.small {
+  flex: 1;
+}
+
+.dashboard-chart-card h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--brand-primary-contrast);
+  margin: 0 0 14px;
+}
+
+.dashboard-donut-area {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.dashboard-donut-wrap {
+  flex: 0 0 auto;
+}
+
+.dashboard-donut-legend {
+  flex: 1;
+}
+
+.dashboard-status-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dashboard-status-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  color: var(--brand-accent-alt);
+}
+
+.dashboard-legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.dashboard-legend-text {
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.dashboard-legend-value {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+}
+
+.dashboard-side-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.dashboard-upcoming-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dashboard-upcoming-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  color: var(--brand-accent-alt);
+  font-size: 0.85rem;
+}
+
+.dashboard-upcoming-date {
+  font-weight: 600;
+  color: var(--brand-primary-contrast);
+}
+
+.dashboard-upcoming-time {
+  font-size: 0.8rem;
+}
+
+.dashboard-upcoming-client {
+  font-size: 0.8rem;
+  color: var(--brand-accent-alt);
+}
+
+/* Próximas Citas Destacadas */
+.dashboard-upcoming-section {
+  background: var(--brand-surface);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 18px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.dashboard-upcoming-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dashboard-upcoming-header-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(249, 115, 22, 0.15);
+  color: #fb923c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-upcoming-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--brand-primary-contrast);
+  margin: 0;
+}
+
+.dashboard-upcoming-subtitle {
+  margin: 2px 0 0;
+  color: var(--brand-accent-alt);
+  font-size: 0.8rem;
+}
+
+.dashboard-upcoming-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.dashboard-upcoming-card {
+  background: var(--brand-bg-end);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.2s;
+}
+
+.dashboard-upcoming-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.dashboard-upcoming-card-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 50px;
+  padding: 6px;
+  background: rgba(59, 130, 246, 0.15);
+  border-radius: 10px;
+  color: #60a5fa;
+}
+
+.dashboard-upcoming-day {
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.dashboard-upcoming-month {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.dashboard-upcoming-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-upcoming-card-time {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--brand-primary-contrast);
+}
+
+.dashboard-upcoming-card-client {
+  font-size: 0.8rem;
+  color: var(--brand-accent-alt);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-upcoming-card-service {
+  font-size: 0.72rem;
+  color: var(--brand-accent-alt);
+  opacity: 0.8;
+}
+
+.dashboard-upcoming-card-status {
+  font-size: 0.7rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dashboard-upcoming-card-status.pending {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.dashboard-upcoming-card-status.confirmed {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.dashboard-upcoming-card-status.completed {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.dashboard-upcoming-card-status.cancelled {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+/* Estado de Órdenes Mejorado */
+.dashboard-orders-status-panel {
+  background: var(--brand-surface);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 18px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.dashboard-orders-status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.dashboard-orders-status-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-orders-status-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-orders-status-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--brand-primary-contrast);
+  margin: 0;
+}
+
+.dashboard-orders-status-subtitle {
+  margin: 2px 0 0;
+  color: var(--brand-accent-alt);
+  font-size: 0.8rem;
+}
+
+/* Dos columnas: Órdenes + Facturación */
+.dashboard-two-columns {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.dashboard-two-columns > * {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Panel Órdenes */
+.dashboard-orders-status-panel {
+  background: var(--brand-surface);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 18px;
+  padding: 20px 24px;
+}
+
+.dashboard-orders-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.dashboard-status-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  background: var(--brand-bg-end);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 12px;
+  transition: transform 0.2s;
+}
+
+.dashboard-status-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.dashboard-status-item-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dashboard-status-item-icon.recepcion {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.dashboard-status-item-icon.diagnostico {
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+}
+
+.dashboard-status-item-icon.en-proceso {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.dashboard-status-item-icon.terminado {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.dashboard-status-item-icon.entregado {
+  background: rgba(20, 184, 166, 0.15);
+  color: #2dd4bf;
+}
+
+.dashboard-status-item-icon.default {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+}
+
+.dashboard-status-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-status-item-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--brand-primary-contrast);
+  margin-bottom: 6px;
+}
+
+.dashboard-status-item-bar {
+  height: 6px;
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.dashboard-status-item-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+  background: linear-gradient(to right, #3b82f6, #6366f1);
+}
+
+.dashboard-status-item-count {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+  min-width: 30px;
+  text-align: right;
+}
+
+.dashboard-status-item-pct {
+  font-size: 0.75rem;
+  color: var(--brand-accent-alt);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* Garantías en Técnicos */
+.dashboard-warranty-section {
+  margin-bottom: 12px;
+  padding: 10px;
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+}
+
+.dashboard-warranty-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.dashboard-warranty-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #f87171;
+}
+
+.dashboard-warranty-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f87171;
+}
+
+.dashboard-warranty-bar {
+  height: 4px;
+  background: rgba(239, 68, 68, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.dashboard-warranty-fill {
+  height: 100%;
+  background: linear-gradient(to right, #ef4444, #f87171);
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+.dashboard-warranty-sub {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--brand-accent-alt);
+}
+
+.dashboard-empty {
+  text-align: center;
+  padding: 16px;
+  color: var(--brand-accent-alt);
+  font-size: 0.85rem;
+}
+
+/* Resumen Órdenes (Activas vs Terminadas) */
+.dashboard-orders-summary {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.dashboard-orders-summary-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--brand-bg-end);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.dashboard-orders-summary-item.active {
+  border-color: rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.dashboard-orders-summary-item.finished {
+  border-color: rgba(34, 197, 94, 0.2);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.dashboard-orders-summary-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dashboard-orders-summary-item.active .dashboard-orders-summary-icon {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.dashboard-orders-summary-item.finished .dashboard-orders-summary-icon {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.dashboard-orders-summary-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-orders-summary-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+  line-height: 1.2;
+}
+
+.dashboard-orders-summary-label {
+  font-size: 0.75rem;
+  color: var(--brand-accent-alt);
+}
+
+.dashboard-orders-summary-pct {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--brand-accent-alt);
+}
+
+/* Panel Facturación */
+.dashboard-invoices-panel {
+  background: var(--brand-surface);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 18px;
+  padding: 20px 24px;
+}
+
+.dashboard-invoices-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.dashboard-invoices-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-invoices-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #4ade80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-invoices-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--brand-primary-contrast);
+  margin: 0;
+}
+
+.dashboard-invoices-subtitle {
+  margin: 2px 0 0;
+  color: var(--brand-accent-alt);
+  font-size: 0.8rem;
+}
+
+.dashboard-orders-pie-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  margin-top: 16px;
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.dashboard-invoices-pie-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  margin-bottom: 16px;
+  background: rgba(15, 23, 42, 0.3);
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.dashboard-invoices-stats {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  margin-bottom: 16px;
+  margin-top: 25px;
+}
+
+.dashboard-invoices-stat-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--brand-bg-end);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.dashboard-invoices-stat-item.paid {
+  border-color: rgba(34, 197, 94, 0.2);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.dashboard-invoices-stat-item.pending {
+  border-color: rgba(251, 191, 36, 0.2);
+  background: rgba(251, 191, 36, 0.05);
+}
+
+.dashboard-invoices-stat-item.deposit {
+  border-color: rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.dashboard-invoices-stat-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dashboard-invoices-stat-item.paid .dashboard-invoices-stat-icon {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.dashboard-invoices-stat-item.pending .dashboard-invoices-stat-icon {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.dashboard-invoices-stat-item.deposit .dashboard-invoices-stat-icon {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.dashboard-invoices-stat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dashboard-invoices-stat-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--brand-primary-contrast);
+  line-height: 1.2;
+}
+
+.dashboard-invoices-stat-label {
+  font-size: 0.75rem;
+  color: var(--brand-accent-alt);
+}
+
+.dashboard-invoices-stat-money {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--brand-primary-contrast);
+  white-space: nowrap;
+}
+
+/* Financial */
+.dashboard-financial-row {
+  display: flex;
+  gap: 18px;
+}
+
+.dashboard-chart-area {
+  min-height: 180px;
+}
+
+.dashboard-mini-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.dashboard-bar {
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;
+  transition: width 0.6s ease;
+}
+
+.dashboard-bar.rev {
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+}
+
+.dashboard-bar.cost {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.dashboard-mini-chart-legend {
+  display: flex;
+  gap: 12px;
+  font-size: 0.8rem;
+  color: var(--brand-accent-alt);
+}
+
+.dashboard-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.dashboard-dot.rev {
+  background: #3b82f6;
+}
+
+.dashboard-dot.cost {
+  background: #ef4444;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .dashboard-charts-row {
+    flex-direction: column;
+  }
+
+  .dashboard-financial-row {
+    flex-direction: column;
+  }
+
+  .dashboard-upcoming-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-professional-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .dashboard-metrics-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .dashboard-performance-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .dashboard-upcoming-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-orders-status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-two-columns {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-title {
+    font-size: 1.3rem;
+  }
+
+  .dashboard-upcoming-card {
+    padding: 10px;
+  }
+}
+
+/* Ocultar scrollbar en calendario y panel lateral */
+.pro-card::-webkit-scrollbar,
+.calendar-cell::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+}
+
+.pro-card {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.calendar-cell {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Calendar Events */
+.calendar-event {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  line-height: 1.2;
+  min-height: 16px;
+  flex-shrink: 0;
+}
+
+.calendar-event.order-event {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.2);
+  color: #93bbfc;
+}
+
+.calendar-event.agenda-event {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  cursor: pointer;
+}
+
+.calendar-event.agenda-event:hover {
+  background: rgba(34, 197, 94, 0.2);
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.event-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.event-dot.blue {
+  background: #3b82f6;
+}
+
+.event-dot.green {
+  background: #22c55e;
+}
+
+.event-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Agenda List Items */
+.agenda-list-item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  border-left: 3px solid transparent;
+  background: rgba(148, 163, 184, 0.05);
+  transition: all 0.2s ease;
+}
+
+.agenda-list-item:hover {
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.agenda-item-green {
+  border-left-color: #22c55e;
+  background: rgba(34, 197, 94, 0.05);
+  cursor: pointer;
+}
+
+.agenda-item-green:hover {
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.agenda-item-blue {
+  border-left-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.agenda-item-blue:hover {
+  background: rgba(59, 130, 246, 0.1);
 }
 </style>
