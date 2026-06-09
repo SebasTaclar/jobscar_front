@@ -27,7 +27,7 @@
 
       <!-- Controles de usuario -->
       <div class="nav-controls desktop-nav">
-        <RouterLink class="btn access-btn" to="/admin/products">Acceder</RouterLink>
+        <RouterLink v-if="!isLoggedIn" class="btn access-btn" to="/admin/products">Acceder</RouterLink>
         <RouterLink v-if="isLoggedIn && isAdmin" class="btn admin-btn" to="/admin/products">⚙️ Panel Admin</RouterLink>
         <RouterLink v-if="isLoggedIn" @click="logout" class="btn logout-btn" to="/">Cerrar sesión</RouterLink>
         <div v-if="isLoggedIn" class="user-greeting">
@@ -95,7 +95,7 @@
           </div>
 
           <div class="mobile-controls">
-            <RouterLink class="mobile-btn access-btn" to="/admin/products" @click="closeMobileMenu">
+            <RouterLink v-if="!isLoggedIn" class="mobile-btn access-btn" to="/admin/products" @click="closeMobileMenu">
               Acceder
             </RouterLink>
             <div v-if="isLoggedIn" class="mobile-user-greeting">

@@ -212,8 +212,6 @@ button.btn-secondary {
 .btn-secondary:hover:not(:disabled),
 button.btn-secondary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--primary-color-alpha-40);
-  background: var(--primary-gradient-hover);
 }
 
 .btn-primary:disabled,
