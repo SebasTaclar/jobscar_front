@@ -1045,7 +1045,9 @@
         </div>
       </div>
 
-      <div class="table-responsive invoices-fullwidth" style="margin-top:12px;">
+      <div v-if="invoicesLoading" class="loading-indicator" style="text-align:center;padding:24px;color:var(--muted);font-size:1.1rem;">⏳ Cargando facturas...</div>
+      <div v-else-if="invoicesError" class="error-banner" style="text-align:center;padding:24px;color:#dc2626;font-size:1.1rem;">❌ {{ invoicesError }}</div>
+      <div v-else class="table-responsive invoices-fullwidth" style="margin-top:12px;">
         <table class="simple-table invoices-table compact">
           <colgroup>
             <col style="width:7%" />
@@ -1079,10 +1081,10 @@
               <td data-label="Fecha">{{ invoice.createdAt ? formatShortDate(new Date(invoice.createdAt)) : '-' }}</td>
               <td data-label="Cliente">
                 <strong>{{ invoice.client }}</strong>
-                <div style="color:var(--muted);font-size:0.85rem;">{{ invoice.vehicleBrand || '' }} {{ invoice.vehicleModel || '' }}</div>
+                <div style="color:var(--muted);font-size:0.85rem;">{{ invoice.placa || invoice.vehicle || '' }}</div>
               </td>
-              <td data-label="Vehículo">{{ invoice.vehicleBrand || '-' }} {{ invoice.vehicleModel || '' }}</td>
-              <td data-label="Placa"><span style="text-transform:uppercase;font-weight:700;">{{ invoice.vehicle || '-' }}</span></td>
+              <td data-label="Vehículo">{{ invoice.vehicle || '-' }}</td>
+              <td data-label="Placa"><span style="text-transform:uppercase;font-weight:700;">{{ invoice.placa || invoice.vehicle || '-' }}</span></td>
               <td data-label="Total"><strong>${{ invoiceTotal(invoice).toLocaleString() }}</strong></td>
               <td data-label="Abono" :style="{ color: invoiceDepositTotal(invoice) > 0 ? '#22c55e' : 'var(--muted)', fontWeight: invoiceDepositTotal(invoice) > 0 ? '600' : '400' }">${{ invoiceDepositTotal(invoice).toLocaleString() }}</td>
               <td data-label="Saldo" :style="{ color: (invoiceTotal(invoice) - invoiceDepositTotal(invoice)) > 0 ? '#f59e0b' : '#22c55e', fontWeight: '600' }">${{ (invoiceTotal(invoice) - invoiceDepositTotal(invoice)).toLocaleString() }}</td>
@@ -1098,7 +1100,7 @@
               </td>
             </tr>
             <tr v-if="sortedInvoices.length === 0">
-              <td colspan="10">No hay facturas. Vaya a la pestaña <strong>Órdenes</strong> y pulse <strong>Facturar</strong> en una orden terminada para generarla aquí.</td>
+              <td colspan="10">No hay facturas asociadas</td>
             </tr>
           </tbody>
         </table>
@@ -1254,7 +1256,7 @@
                 <label>Factura (opcional)</label>
                 <select v-model.number="newInventoryItem.invoiceId" class="form-input" @change="newInventoryItem.invoiceItemIndex = null">
                   <option :value="null">Sin factura</option>
-                  <option v-for="inv in burnedInvoices.filter((i: any) => i.orderId === newInventoryItem.orderId)" :key="inv.id" :value="inv.id">#{{ inv.id }} - {{ inv.client }}</option>
+                  <option v-for="inv in invoices.filter((i: any) => i.orderId === newInventoryItem.orderId)" :key="inv.id" :value="inv.id">#{{ inv.id }} - {{ inv.client }}</option>
                 </select>
               </div>
             </div>
@@ -1263,7 +1265,7 @@
                 <label>Item de Factura</label>
                 <select v-model.number="newInventoryItem.invoiceItemIndex" class="form-input" @change="populateFromInvoiceItem(false)">
                   <option :value="null">Seleccionar item</option>
-                  <option v-for="(it, idx) in (burnedInvoices.find((i: any) => i.id === newInventoryItem.invoiceId)?.items || [])" :key="idx" :value="idx">{{ it.description }} - ${{ (Number(it.price) || 0).toLocaleString('es-CO') }}</option>
+                  <option v-for="(it, idx) in (invoices.find((i: any) => i.id === newInventoryItem.invoiceId)?.items || [])" :key="idx" :value="idx">{{ it.description }} - ${{ (Number(it.price) || 0).toLocaleString('es-CO') }}</option>
                 </select>
               </div>
               <div class="form-group">
@@ -1341,7 +1343,7 @@
                 <label>Factura (opcional)</label>
                 <select v-model.number="editingInventory.invoiceId" class="form-input" @change="editingInventory.invoiceItemIndex = null">
                   <option :value="null">Sin factura</option>
-                  <option v-for="inv in burnedInvoices.filter((i: any) => i.orderId === editingInventory.orderId)" :key="inv.id" :value="inv.id">#{{ inv.id }} - {{ inv.client }}</option>
+                  <option v-for="inv in invoices.filter((i: any) => i.orderId === editingInventory.orderId)" :key="inv.id" :value="inv.id">#{{ inv.id }} - {{ inv.client }}</option>
                 </select>
               </div>
             </div>
@@ -1350,7 +1352,7 @@
                 <label>Item de Factura</label>
                 <select v-model.number="editingInventory.invoiceItemIndex" class="form-input" @change="populateFromInvoiceItem(true)">
                   <option :value="null">Seleccionar item</option>
-                  <option v-for="(it, idx) in (burnedInvoices.find((i: any) => i.id === editingInventory.invoiceId)?.items || [])" :key="idx" :value="idx">{{ it.description }} - ${{ (Number(it.price) || 0).toLocaleString('es-CO') }}</option>
+                  <option v-for="(it, idx) in (invoices.find((i: any) => i.id === editingInventory.invoiceId)?.items || [])" :key="idx" :value="idx">{{ it.description }} - ${{ (Number(it.price) || 0).toLocaleString('es-CO') }}</option>
                 </select>
               </div>
               <div class="form-group">
@@ -3086,7 +3088,7 @@ import { reactive, ref, computed, onMounted, onBeforeUnmount, watch, nextTick, t
 import { useProducts, type ShowcaseProduct } from '@/composables/useProducts'
 import type { Product } from '@/types/ProductType'
 import type { Category, CreateCategoryRequest } from '@/types/CategoryType'
-import { workshopClientService, vehicleService, employeeService, workOrderService, appointmentService } from '@/services/api'
+import { workshopClientService, vehicleService, employeeService, workOrderService, appointmentService, invoiceService, sparePartService, moneyMovementService } from '@/services/api'
 import { paymentService } from '@/services/api/paymentService'
 import type { Purchase, ProductPaymentItem } from '@/services/api/paymentService'
 import type {
@@ -3550,6 +3552,7 @@ onMounted(async () => {
   await loadProducts()
   await loadShowcaseProducts()
   await loadPurchases()
+  await loadInvoices()
   console.log('✅ Categorías cargadas:', categories.value)
   console.log('✅ Productos cargados:', products.value)
   console.log('✅ Productos showcase cargados:', showcaseProducts.value)
@@ -3777,11 +3780,6 @@ const refreshWorkOrders = async () => {
   }
 }
 
-const INVOICES_STORAGE_KEY = 'jobscar_invoices'
-const INVOICES_STORAGE_VERSION_KEY = 'jobscar_invoices_seed_version'
-// Incrementar esta versión cuando actualices los ejemplos para forzar recarga
-const INVOICES_SEED_VERSION = 'v2'
-
 const SHOW_TECH_PDF_KEY = 'jobscar_show_tech_pdf'
 function getShowTechPdf(orderId: number | string): boolean {
   try {
@@ -3795,39 +3793,83 @@ function setShowTechPdf(orderId: number | string, value: boolean) {
   } catch { /* noop */ }
 }
 
-const _storedInvoices = (() => {
-  try {
-    const savedVer = localStorage.getItem(INVOICES_STORAGE_VERSION_KEY)
-    // Si la versión guardada no coincide, eliminar el cache para forzar los ejemplos
-    if (savedVer !== INVOICES_SEED_VERSION) {
-      localStorage.removeItem(INVOICES_STORAGE_KEY)
-      localStorage.setItem(INVOICES_STORAGE_VERSION_KEY, INVOICES_SEED_VERSION)
-    }
-    const raw = localStorage.getItem(INVOICES_STORAGE_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch (e) {
-    console.warn('No se pudo leer facturas desde localStorage', e)
-    return null
-  }
-})()
-
-const DEFAULT_INVOICES: any[] = []
-
-const burnedInvoices = reactive(_storedInvoices || DEFAULT_INVOICES.map((i: any) => ({ ...i })))
-
-// Persistir facturas en localStorage
-watch(burnedInvoices, (newVal) => {
-  try {
-    localStorage.setItem(INVOICES_STORAGE_KEY, JSON.stringify(newVal))
-    // Asegurar que la versión de seed se mantenga en sync
-    try { localStorage.setItem(INVOICES_STORAGE_VERSION_KEY, INVOICES_SEED_VERSION) } catch (e) { /* noop */ }
-    console.log('✅ Facturas guardadas en localStorage:', newVal.length)
-  } catch (e) {
-    console.warn('No se pudo persistir facturas en localStorage', e)
-  }
-}, { deep: true })
+const invoices = reactive([] as any[])
 
 // UI y helpers para facturación
+const invoicesLoading = ref(false)
+const invoicesError = ref('')
+
+function mapInvoiceFromApi(inv: any) {
+  return {
+    id: inv.id,
+    client: inv.clientName || inv.client || '',
+    clientPhone: inv.clientPhone || '',
+    clientEmail: inv.clientEmail || '',
+    clientAddress: inv.clientAddress || '',
+    vehicle: inv.placa || inv.vehicle || '',
+    vehicleBrand: inv.vehicleBrand || '',
+    vehicleModel: inv.vehiculo || inv.vehicleModel || '',
+    vehicleKm: inv.vehicleKm || '',
+    placa: inv.placa || '',
+    advisorName: inv.advisorName || '',
+    items: inv.items || [],
+    taxPct: inv.taxPct === true,
+    discount: inv.discount || 0,
+    retention: inv.retention || 0,
+    deposits: inv.deposits || [],
+    formaDePago: inv.formaDePago || '',
+    payments: inv.formaDePago || '',
+    status: inv.status || 'Pendiente',
+    notes: inv.notes || '',
+    total: typeof inv.total === 'number' ? inv.total : 0,
+    abono: inv.abono || 0,
+    saldo: inv.saldo || 0,
+    orderId: inv.workOrderId ?? null,
+    workOrderId: inv.workOrderId ?? null,
+    applyTax: inv.taxPct === true,
+    createdAt: inv.createdAt || inv.fechaCreacion || '',
+    updatedAt: inv.updatedAt || ''
+  }
+}
+
+function enrichInvoiceFromRelatedData(inv: any) {
+  const order = burnedOrders.find((o: any) => Number(o.id) === Number(inv.orderId))
+  const vehicleObj = order?.vehicleId
+    ? (Array.isArray(burnedVehicles) ? burnedVehicles.find((v: any) => v.id === order.vehicleId) : null)
+    : (Array.isArray(burnedVehicles) ? burnedVehicles.find((v: any) => String(v.plate || '').toUpperCase() === String(inv.vehicle || '').toUpperCase()) : null)
+  const clientObj = vehicleObj?.clientId
+    ? (Array.isArray(burnedClients.value) ? burnedClients.value.find((c: any) => c.id === vehicleObj.clientId) : null)
+    : null
+  return {
+    ...inv,
+    client: inv.client || clientObj?.name || '',
+    clientPhone: inv.clientPhone || clientObj?.phone || '',
+    clientEmail: inv.clientEmail || clientObj?.email || '',
+    vehicleBrand: inv.vehicleBrand || vehicleObj?.brand || '',
+    vehicleModel: inv.vehicleModel || vehicleObj?.model || '',
+    vehicleKm: inv.vehicleKm || (vehicleObj?.km ? String(vehicleObj.km) : ''),
+  }
+}
+
+async function loadInvoices() {
+  invoicesLoading.value = true
+  invoicesError.value = ''
+  try {
+    const res = await invoiceService.getAll()
+    invoices.length = 0
+    if (res.success && res.data) {
+      const data = Array.isArray(res.data.invoices) ? res.data.invoices : []
+      invoices.push(...data.map(mapInvoiceFromApi).map(enrichInvoiceFromRelatedData))
+    } else {
+      invoicesError.value = 'Error al cargar facturas'
+    }
+  } catch (e: any) {
+    invoicesError.value = e.message || 'Error al cargar facturas'
+  } finally {
+    invoicesLoading.value = false
+  }
+}
+
 const invoiceSearch = ref('')
 const invoiceFilterStatus = ref('')
 const showInvoiceModal = ref(false)
@@ -3849,7 +3891,7 @@ const formInvoice = reactive({
   discount: 0,
   retention: 0,
   deposits: [] as { amount: number; date: string; method: string }[],
-  payments: [] as string[],
+  payments: '',
   status: 'Pendiente',
   notes: '',
   createdAt: '',
@@ -3974,20 +4016,16 @@ function removeDeposit(idx: number) {
   formInvoice.deposits.splice(idx, 1)
 }
 
-const nextInvoiceId = () => {
-  const ids = Array.isArray(burnedInvoices) ? burnedInvoices.map((i: any) => Number(i.id)).filter(Number.isFinite) : []
-  return ids.length ? Math.max(...ids) + 1 : 1001
-}
-
 function openCreateInvoice() {
   Object.assign(formInvoice, {
     id: 0,
     client: '', clientPhone: '', clientEmail: '', clientAddress: '',
     vehicle: '', vehicleBrand: '', vehicleModel: '', vehicleKm: '',
+    placa: '',
     advisorName: '',
   items: [{ description: '', qty: 1, price: 0, isLabor: false }],
     taxPct: 19, applyTax: true, discount: 0, retention: 0, deposits: [],
-    payments: [], status: 'Pendiente', notes: '',
+    payments: '', status: 'Pendiente', notes: '',
     createdAt: new Date().toISOString(),
     orderId: null
   })
@@ -3995,12 +4033,12 @@ function openCreateInvoice() {
   showInvoiceModal.value = true
 }
 
-function findInvoiceByOrderId(orderId: number | string | undefined) {
-  if (!orderId) return null
-  return burnedInvoices.find((inv: any) => Number(inv.orderId) === Number(orderId)) || null
+function findInvoiceByOrderId(workOrderId: number | string | undefined) {
+  if (!workOrderId) return null
+  return invoices.find((inv: any) => Number(inv.orderId) === Number(workOrderId)) || null
 }
 
-function syncInvoiceFromOrder(order: any) {
+async function syncInvoiceFromOrder(order: any) {
   const existingInvoice = findInvoiceByOrderId(order.id)
   if (!existingInvoice) {
     alert('Esta orden no tiene factura creada aún')
@@ -4028,21 +4066,23 @@ function syncInvoiceFromOrder(order: any) {
       const scannerPrice = String(vehicle?.vehicleType || '').toLowerCase() === 'camioneta' ? 50000 : 30000
       items.push({ description: 'Escaner', qty: 1, price: scannerPrice, isLabor: true })
     }
-    const payload = {
+    const payload: any = {
       client: order.client || '',
       clientPhone: client?.phone || '',
       clientEmail: client?.email || '',
-      vehicle: order.vehicle || '',
+      placa: order.vehicle || '',
+      vehicle: [vehicle?.brand, vehicle?.model].filter(Boolean).join(' ') || order.vehicle || '',
       vehicleBrand: vehicle?.brand || '',
       vehicleModel: vehicle?.model || '',
       vehicleKm: vehicle?.km ? String(vehicle.km) : '',
       advisorName: order.mechanic || '',
       items,
-      orderId: order.id || null
+      workOrderId: order.id || null
     }
-    const idx = burnedInvoices.findIndex((i: any) => i.id === existingInvoice.id)
+    const res = await invoiceService.update(existingInvoice.id, payload)
+    const idx = invoices.findIndex((i: any) => i.id === existingInvoice.id)
     if (idx > -1) {
-      burnedInvoices.splice(idx, 1, { ...existingInvoice, ...payload })
+      invoices.splice(idx, 1, enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
     }
     alert('Factura actualizada correctamente desde la orden')
   } catch (e) {
@@ -4051,10 +4091,10 @@ function syncInvoiceFromOrder(order: any) {
   }
 }
 
-function openInvoiceForOrder(order: any) {
+async function openInvoiceForOrder(order: any) {
   const existingInvoice = findInvoiceByOrderId(order.id)
   if (existingInvoice) {
-    syncInvoiceFromOrder(order)
+    await syncInvoiceFromOrder(order)
   } else {
     createInvoiceFromOrder(order)
   }
@@ -4103,7 +4143,7 @@ function createInvoiceFromOrder(order: any) {
     formInvoice.discount = 0
     formInvoice.retention = 0
     formInvoice.deposits = []
-    formInvoice.payments = []
+    formInvoice.payments = ''
     formInvoice.status = 'Pendiente'
     formInvoice.notes = ''
     formInvoice.createdAt = new Date().toISOString()
@@ -4117,45 +4157,45 @@ function createInvoiceFromOrder(order: any) {
   }
 }
 
-function saveInvoice() {
-  const subtotal = invoiceSubtotal(formInvoice)
-  const tax = invoiceTax(formInvoice)
-  const total = subtotal + tax - Number(formInvoice.discount || 0) - Number(formInvoice.retention || 0)
+async function saveInvoice() {
   if (!formInvoice.client) { alert('Cliente requerido'); return }
-  const payload = {
+  const payload: any = {
     client: String(formInvoice.client),
     clientPhone: formInvoice.clientPhone || '',
     clientEmail: formInvoice.clientEmail || '',
     clientAddress: formInvoice.clientAddress || '',
-    vehicle: formInvoice.vehicle || '',
+    placa: formInvoice.vehicle || '',
+    vehicle: [formInvoice.vehicleBrand, formInvoice.vehicleModel].filter(Boolean).join(' ') || formInvoice.vehicle || '',
     vehicleBrand: formInvoice.vehicleBrand || '',
     vehicleModel: formInvoice.vehicleModel || '',
     vehicleKm: formInvoice.vehicleKm || '',
     advisorName: formInvoice.advisorName || '',
     items: formInvoice.items.map((it: any) => ({ ...it })),
-    taxPct: formInvoice.applyTax ? (formInvoice.taxPct || 19) : 0,
+    taxPct: formInvoice.applyTax,
     discount: Number(formInvoice.discount) || 0,
     retention: Number(formInvoice.retention) || 0,
     deposits: formInvoice.deposits.map((d: any) => ({ ...d })),
-    payments: Array.isArray(formInvoice.payments) ? formInvoice.payments : String(formInvoice.payments).split(',').map((s: any) => s.trim()),
+    formaDePago: formInvoice.payments || '',
     status: formInvoice.status || 'Pendiente',
     notes: formInvoice.notes || '',
-    subtotal,
-    tax,
-    total,
-    createdAt: formInvoice.createdAt || new Date().toISOString(),
-    orderId: formInvoice.orderId || null
+    workOrderId: formInvoice.orderId || null
   }
-  if (editingInvoice.value) {
-    const idx = burnedInvoices.findIndex((i: any) => i.id === editingInvoice.value.id)
-    if (idx > -1) {
-      burnedInvoices.splice(idx, 1, { ...editingInvoice.value, ...payload })
+  try {
+    if (editingInvoice.value) {
+      const res = await invoiceService.update(editingInvoice.value.id, payload)
+      const idx = invoices.findIndex((i: any) => i.id === editingInvoice.value.id)
+      if (idx > -1) {
+      invoices.splice(idx, 1, enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
+      }
+      editingInvoice.value = null
+    } else {
+      const res = await invoiceService.create(payload)
+      invoices.push(enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
     }
-    editingInvoice.value = null
-  } else {
-    burnedInvoices.push({ id: nextInvoiceId(), ...payload })
+    showInvoiceModal.value = false
+  } catch (e: any) {
+    alert('Error al guardar la factura: ' + (e.message || 'Error desconocido'))
   }
-  showInvoiceModal.value = false
 }
 
 function editInvoice(inv: any) {
@@ -4171,12 +4211,12 @@ function editInvoice(inv: any) {
   formInvoice.vehicleKm = inv.vehicleKm || ''
   formInvoice.advisorName = inv.advisorName || ''
   formInvoice.items = Array.isArray(inv.items) && inv.items.length ? inv.items.map((it: any) => ({ ...it, isLabor: it.isLabor ?? true })) : [{ description: '', qty: 1, price: 0, isLabor: false }]
-  formInvoice.taxPct = inv.taxPct || 19
-  formInvoice.applyTax = (inv.taxPct || 0) > 0
+  formInvoice.taxPct = 19
+  formInvoice.applyTax = inv.applyTax !== false
   formInvoice.discount = inv.discount || 0
   formInvoice.retention = inv.retention || 0
   formInvoice.deposits = Array.isArray(inv.deposits) ? inv.deposits.map((d: any) => ({ ...d })) : []
-  formInvoice.payments = Array.isArray(inv.payments) ? inv.payments.slice() : (inv.payments ? String(inv.payments).split(',').map((s: any) => s.trim()) : [])
+  formInvoice.payments = inv.payments || ''
   formInvoice.status = inv.status || 'Pendiente'
   formInvoice.notes = inv.notes || ''
   formInvoice.createdAt = inv.createdAt || new Date().toISOString()
@@ -4320,21 +4360,33 @@ function viewInvoice(inv: any) {
   }, 400)
 }
 
-function deleteInvoice(id: any) {
+async function deleteInvoice(id: any) {
   if (!confirm('¿Estás seguro de eliminar esta factura?')) return
-  const idx = burnedInvoices.findIndex((i: any) => i.id === id)
-  if (idx > -1) burnedInvoices.splice(idx, 1)
+  try {
+    await invoiceService.delete(id)
+    const idx = invoices.findIndex((i: any) => i.id === id)
+    if (idx > -1) invoices.splice(idx, 1)
+  } catch (e: any) {
+    alert('Error al eliminar la factura: ' + (e.message || 'Error desconocido'))
+  }
 }
 
-function toggleInvoicePaid(inv: any) {
+async function toggleInvoicePaid(inv: any) {
   const statusMap: Record<string, string> = {
     'Pendiente': 'Abonado',
     'Abonado': 'Pagado',
     'Pagado': 'Pendiente'
   }
-  inv.status = statusMap[inv.status] || 'Pendiente'
-  const idx = burnedInvoices.findIndex((i: any) => i.id === inv.id)
-  if (idx > -1) burnedInvoices.splice(idx, 1, { ...inv })
+  const newStatus = statusMap[inv.status] || 'Pendiente'
+  try {
+    const res = await invoiceService.update(inv.id, { status: newStatus })
+    const idx = invoices.findIndex((i: any) => i.id === inv.id)
+    if (idx > -1) {
+      invoices.splice(idx, 1, enrichInvoiceFromRelatedData({ ...inv, ...mapInvoiceFromApi(res.data) }))
+    }
+  } catch (e: any) {
+    alert('Error al cambiar estado: ' + (e.message || 'Error desconocido'))
+  }
 }
 
 function exportInvoicesCsv() {
@@ -4381,7 +4433,7 @@ const selectedInvoices = ref<any[]>([])
 
 const baseFilteredInvoices = computed(() => {
   const q = invoiceSearch.value.trim().toLowerCase()
-  return burnedInvoices.filter((inv: any) => {
+  return invoices.filter((inv: any) => {
     if (invoiceFilterStatus.value && inv.status !== invoiceFilterStatus.value) return false
     // rango de fechas
     if (dateFrom.value) {
@@ -4470,18 +4522,20 @@ function toggleSelectInvoice(id: any) {
   else selectedInvoices.value.splice(idx, 1)
 }
 
-function bulkMarkPaid() {
+async function bulkMarkPaid() {
   if (!selectedInvoices.value.length) { alert('Ninguna factura seleccionada'); return }
-  selectedInvoices.value.forEach((id: any) => {
-    const inv = burnedInvoices.find((i: any) => i.id === id)
-    if (inv) { inv.status = 'Pagado'; const idx = burnedInvoices.findIndex((i: any) => i.id === id); if (idx > -1) burnedInvoices.splice(idx, 1, { ...inv }) }
-  })
-  selectedInvoices.value = []
+  try {
+    await Promise.all(selectedInvoices.value.map((id: any) => invoiceService.update(id, { status: 'Pagado' })))
+    await loadInvoices()
+    selectedInvoices.value = []
+  } catch (e: any) {
+    alert('Error al marcar como pagadas: ' + (e.message || 'Error desconocido'))
+  }
 }
 
 function exportSelectedCsv() {
   try {
-    const rows = burnedInvoices.filter((i: any) => selectedInvoices.value.includes(i.id)).map((inv: any) => ({
+    const rows = invoices.filter((i: any) => selectedInvoices.value.includes(i.id)).map((inv: any) => ({
       id: inv.id,
       date: inv.createdAt || '',
       client: inv.client,
@@ -4508,15 +4562,17 @@ function exportSelectedCsv() {
   } catch (e) { console.error(e) }
 }
 
-function bulkDeleteSelected() {
+async function bulkDeleteSelected() {
   if (!selectedInvoices.value.length) { alert('Ninguna factura seleccionada'); return }
   if (!confirm(`¿Eliminar ${selectedInvoices.value.length} facturas?`)) return
-  selectedInvoices.value.forEach((id: any) => {
-    const idx = burnedInvoices.findIndex((i: any) => i.id === id)
-    if (idx > -1) burnedInvoices.splice(idx, 1)
-  })
-  selectedInvoices.value = []
-  currentPage.value = Math.min(currentPage.value, totalPages.value)
+  try {
+    await Promise.all(selectedInvoices.value.map((id: any) => invoiceService.delete(id)))
+    await loadInvoices()
+    selectedInvoices.value = []
+    currentPage.value = Math.min(currentPage.value, totalPages.value)
+  } catch (e: any) {
+    alert('Error al eliminar facturas: ' + (e.message || 'Error desconocido'))
+  }
 }
 
 function goToPage(n: number) { currentPage.value = Math.min(Math.max(1, n), totalPages.value) }
@@ -4524,28 +4580,6 @@ function goToPage(n: number) { currentPage.value = Math.min(Math.max(1, n), tota
 // --- Fin mejoras ---
 
 const burnedInventory = reactive<any[]>([])
-
-function saveInventoryToLocalStorage() {
-  try {
-    localStorage.setItem('burnedInventory', JSON.stringify(burnedInventory))
-  } catch (e) {
-    console.warn('Error guardando inventario en localStorage:', e)
-  }
-}
-
-function loadInventoryFromLocalStorage() {
-  try {
-    const raw = localStorage.getItem('burnedInventory')
-    if (raw) {
-      const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed)) {
-        burnedInventory.splice(0, burnedInventory.length, ...parsed)
-      }
-    }
-  } catch (e) {
-    console.warn('Error cargando inventario desde localStorage:', e)
-  }
-}
 
 const showCreateInventory = ref(false)
 const showEditInventory = ref(false)
@@ -4573,11 +4607,6 @@ function toggleInventoryOrder(orderId: number) {
   }
 }
 
-function nextInventoryId(): number {
-  const ids = Array.isArray(burnedInventory) ? burnedInventory.map((item: any) => Number(item.id)).filter((id) => Number.isFinite(id)) : []
-  return ids.length ? Math.max(...ids) + 1 : 1
-}
-
 function getInventoryGroups() {
   const groups: Record<number, any[]> = {}
   burnedInventory.forEach((item: any) => {
@@ -4594,10 +4623,35 @@ function getOrderForInventory(orderId: number) {
 
 function getInvoiceForInventory(invoiceId: number | null) {
   if (!invoiceId) return null
-  return burnedInvoices.find((i: any) => i.id === invoiceId) || null
+  return invoices.find((i: any) => i.id === invoiceId) || null
 }
 
-function addInventoryItem() {
+async function loadInventoryFromBackend() {
+  try {
+    const response = await sparePartService.getAll()
+    const spareParts = response.data?.spareParts || []
+    // Mapear campos del backend a los del frontend
+    const mapped = spareParts.map((sp: any) => ({
+      id: sp.id,
+      orderId: sp.workOrderId,
+      invoiceId: sp.invoiceId || null,
+      date: sp.createdAt ? sp.createdAt.slice(0, 10) : new Date().toISOString().slice(0, 10),
+      activity: sp.item,
+      quantity: sp.quantity,
+      unitCost: sp.unitCost,
+      cost: sp.totalCost,
+      unitValue: sp.unitValue,
+      invoiceValue: sp.totalInvoice,
+      netProfit: sp.gananciaNeta,
+    }))
+    burnedInventory.splice(0, burnedInventory.length, ...mapped)
+  } catch (error) {
+    console.error('Error cargando inventario desde el backend:', error)
+    alert('Error cargando inventario. Por favor intenta de nuevo.')
+  }
+}
+
+async function addInventoryItem() {
   const activity = String(newInventoryItem.activity || '').trim()
   if (!newInventoryItem.date || !activity || !newInventoryItem.orderId) {
     alert('Fecha, actividad y orden son obligatorios')
@@ -4605,44 +4659,62 @@ function addInventoryItem() {
   }
   calculateNetProfit(false)
   const invId = newInventoryItem.invoiceId || null
-  burnedInventory.push({
-    id: nextInventoryId(),
-    orderId: Number(newInventoryItem.orderId),
-    invoiceId: invId,
-    date: newInventoryItem.date,
-    activity,
-    quantity: Number(newInventoryItem.quantity) || 1,
-    unitCost: Number(newInventoryItem.unitCost) || 0,
-    cost: Number(newInventoryItem.cost) || 0,
-    unitValue: Number(newInventoryItem.unitValue) || 0,
-    invoiceValue: Number(newInventoryItem.invoiceValue) || 0,
-    netProfit: Number(newInventoryItem.netProfit) || 0
-  })
-  // Si está anclado a una factura, agregar el item a la factura
-  if (invId) {
-    const invoice = burnedInvoices.find((i: any) => i.id === invId)
-    if (invoice) {
-      if (!Array.isArray(invoice.items)) invoice.items = []
-      invoice.items.push({
-        description: activity,
-        qty: Number(newInventoryItem.quantity) || 1,
-        price: Number(newInventoryItem.unitValue) || 0
+  try {
+    const response = await sparePartService.create({
+      workOrderId: Number(newInventoryItem.orderId),
+      invoiceId: invId,
+      item: activity,
+      quantity: Number(newInventoryItem.quantity) || 1,
+      unitCost: Number(newInventoryItem.unitCost) || 0,
+      unitValue: Number(newInventoryItem.unitValue) || 0,
+      totalCost: Number(newInventoryItem.cost) || 0,
+      totalInvoice: Number(newInventoryItem.invoiceValue) || 0,
+      gananciaNeta: Number(newInventoryItem.netProfit) || 0,
+    })
+    const created = response.data
+    if (created) {
+      burnedInventory.push({
+        id: created.id,
+        orderId: created.workOrderId,
+        invoiceId: created.invoiceId || null,
+        date: created.createdAt ? created.createdAt.slice(0, 10) : newInventoryItem.date,
+        activity: created.item,
+        quantity: created.quantity,
+        unitCost: created.unitCost,
+        cost: created.totalCost,
+        unitValue: created.unitValue,
+        invoiceValue: created.totalInvoice,
+        netProfit: created.gananciaNeta,
       })
     }
+    // Si está anclado a una factura, agregar el item a la factura
+    if (invId) {
+      const invoice = invoices.find((i: any) => i.id === invId)
+      if (invoice) {
+        if (!Array.isArray(invoice.items)) invoice.items = []
+        invoice.items.push({
+          description: activity,
+          qty: Number(newInventoryItem.quantity) || 1,
+          price: Number(newInventoryItem.unitValue) || 0,
+          isLabor: false,
+        })
+      }
+    }
+    newInventoryItem.orderId = 0
+    newInventoryItem.invoiceId = null
+    newInventoryItem.invoiceItemIndex = null
+    newInventoryItem.date = new Date().toISOString().slice(0, 10)
+    newInventoryItem.activity = ''
+    newInventoryItem.quantity = 1
+    newInventoryItem.unitCost = 0
+    newInventoryItem.cost = 0
+    newInventoryItem.unitValue = 0
+    newInventoryItem.invoiceValue = 0
+    newInventoryItem.netProfit = 0
+    showCreateInventory.value = false
+  } catch (error: any) {
+    alert('Error guardando repuesto: ' + (error.message || 'Error desconocido'))
   }
-  newInventoryItem.orderId = 0
-  newInventoryItem.invoiceId = null
-  newInventoryItem.invoiceItemIndex = null
-  newInventoryItem.date = new Date().toISOString().slice(0, 10)
-  newInventoryItem.activity = ''
-  newInventoryItem.quantity = 1
-  newInventoryItem.unitCost = 0
-  newInventoryItem.cost = 0
-  newInventoryItem.unitValue = 0
-  newInventoryItem.invoiceValue = 0
-  newInventoryItem.netProfit = 0
-  showCreateInventory.value = false
-  saveInventoryToLocalStorage()
 }
 
 function editInventoryItem(item: any) {
@@ -4650,66 +4722,86 @@ function editInventoryItem(item: any) {
   showEditInventory.value = true
 }
 
-function saveEditedInventory() {
+async function saveEditedInventory() {
   if (!editingInventory.value) return
   const idx = burnedInventory.findIndex((entry: any) => entry.id === editingInventory.value.id)
   if (idx === -1) return
   calculateNetProfit(true)
   const invId = editingInventory.value.invoiceId || null
   const oldItem = burnedInventory[idx]
-  burnedInventory.splice(idx, 1, {
-    ...editingInventory.value,
-    orderId: Number(editingInventory.value.orderId) || 0,
-    invoiceId: invId,
-    quantity: Number(editingInventory.value.quantity) || 1,
-    unitCost: Number(editingInventory.value.unitCost) || 0,
-    cost: Number(editingInventory.value.cost) || 0,
-    unitValue: Number(editingInventory.value.unitValue) || 0,
-    invoiceValue: Number(editingInventory.value.invoiceValue) || 0,
-    netProfit: Number(editingInventory.value.netProfit) || 0
-  })
-  // Si está anclado a una factura, sincronizar el item en la factura
-  if (invId) {
-    const invoice = burnedInvoices.find((i: any) => i.id === invId)
-    if (invoice) {
-      if (!Array.isArray(invoice.items)) invoice.items = []
-      // Si antes también estaba anclado a esta misma factura, actualizar el item existente
-      if (oldItem && oldItem.invoiceId === invId) {
-        const existingItem = invoice.items.find((it: any) => it.description === oldItem.activity)
-        if (existingItem) {
-          existingItem.description = editingInventory.value.activity
-          existingItem.qty = Number(editingInventory.value.quantity) || 1
-          existingItem.price = Number(editingInventory.value.unitValue) || 0
+  try {
+    await sparePartService.update(editingInventory.value.id, {
+      workOrderId: Number(editingInventory.value.orderId) || 0,
+      invoiceId: invId,
+      item: String(editingInventory.value.activity || '').trim(),
+      quantity: Number(editingInventory.value.quantity) || 1,
+      unitCost: Number(editingInventory.value.unitCost) || 0,
+      unitValue: Number(editingInventory.value.unitValue) || 0,
+      totalCost: Number(editingInventory.value.cost) || 0,
+      totalInvoice: Number(editingInventory.value.invoiceValue) || 0,
+      gananciaNeta: Number(editingInventory.value.netProfit) || 0,
+    })
+    burnedInventory.splice(idx, 1, {
+      ...editingInventory.value,
+      orderId: Number(editingInventory.value.orderId) || 0,
+      invoiceId: invId,
+      quantity: Number(editingInventory.value.quantity) || 1,
+      unitCost: Number(editingInventory.value.unitCost) || 0,
+      cost: Number(editingInventory.value.cost) || 0,
+      unitValue: Number(editingInventory.value.unitValue) || 0,
+      invoiceValue: Number(editingInventory.value.invoiceValue) || 0,
+      netProfit: Number(editingInventory.value.netProfit) || 0,
+    })
+    // Si está anclado a una factura, sincronizar el item en la factura
+    if (invId) {
+      const invoice = invoices.find((i: any) => i.id === invId)
+      if (invoice) {
+        if (!Array.isArray(invoice.items)) invoice.items = []
+        // Si antes también estaba anclado a esta misma factura, actualizar el item existente
+        if (oldItem && oldItem.invoiceId === invId) {
+          const existingItem = invoice.items.find((it: any) => it.description === oldItem.activity)
+          if (existingItem) {
+            existingItem.description = editingInventory.value.activity
+            existingItem.qty = Number(editingInventory.value.quantity) || 1
+            existingItem.price = Number(editingInventory.value.unitValue) || 0
+          } else {
+            invoice.items.push({
+              description: editingInventory.value.activity,
+              qty: Number(editingInventory.value.quantity) || 1,
+              price: Number(editingInventory.value.unitValue) || 0,
+              isLabor: false,
+            })
+          }
         } else {
+          // Si es nuevo en esta factura, agregarlo
           invoice.items.push({
             description: editingInventory.value.activity,
             qty: Number(editingInventory.value.quantity) || 1,
-            price: Number(editingInventory.value.unitValue) || 0
+            price: Number(editingInventory.value.unitValue) || 0,
+            isLabor: false,
           })
         }
-      } else {
-        // Si es nuevo en esta factura, agregarlo
-        invoice.items.push({
-          description: editingInventory.value.activity,
-          qty: Number(editingInventory.value.quantity) || 1,
-          price: Number(editingInventory.value.unitValue) || 0
-        })
       }
     }
+    editingInventory.value = null
+    showEditInventory.value = false
+  } catch (error: any) {
+    alert('Error actualizando repuesto: ' + (error.message || 'Error desconocido'))
   }
-  editingInventory.value = null
-  showEditInventory.value = false
-  saveInventoryToLocalStorage()
 }
 
-function deleteInventoryItem(id: number) {
+async function deleteInventoryItem(id: number) {
   if (!confirm('¿Eliminar este registro de inventario?')) return
-  const idx = burnedInventory.findIndex((item: any) => item.id === id)
-  if (idx > -1) burnedInventory.splice(idx, 1)
-  saveInventoryToLocalStorage()
+  try {
+    await sparePartService.delete(id)
+    const idx = burnedInventory.findIndex((item: any) => item.id === id)
+    if (idx > -1) burnedInventory.splice(idx, 1)
+  } catch (error: any) {
+    alert('Error eliminando repuesto: ' + (error.message || 'Error desconocido'))
+  }
 }
 
-function createInventoryFromInvoice(invoice: any) {
+async function createInventoryFromInvoice(invoice: any) {
   if (!invoice || !invoice.items || !invoice.items.length) {
     alert('La factura no tiene items para generar inventario')
     return
@@ -4721,36 +4813,55 @@ function createInventoryFromInvoice(invoice: any) {
   }
 
   let count = 0
-  invoice.items.forEach((item: any) => {
+  for (const item of invoice.items) {
     if (item.description && item.price > 0) {
-      burnedInventory.push({
-        id: nextInventoryId(),
-        orderId: Number(orderId),
-        invoiceId: invoice.id,
-        date: new Date().toISOString().slice(0, 10),
-        activity: item.description,
-        quantity: Number(item.qty) || 1,
-        cost: 0,
-        invoiceValue: Number(item.price) * (Number(item.qty) || 1),
-        netProfit: 0
-      })
-      count++
+      try {
+        const response = await sparePartService.create({
+          workOrderId: Number(orderId),
+          invoiceId: invoice.id,
+          item: item.description,
+          quantity: Number(item.qty) || 1,
+          unitCost: 0,
+          unitValue: Number(item.price) || 0,
+          totalCost: 0,
+          totalInvoice: Number(item.price) * (Number(item.qty) || 1),
+          gananciaNeta: 0,
+        })
+        const created = response.data
+        if (created) {
+          burnedInventory.push({
+            id: created.id,
+            orderId: created.workOrderId,
+            invoiceId: created.invoiceId || null,
+            date: created.createdAt ? created.createdAt.slice(0, 10) : new Date().toISOString().slice(0, 10),
+            activity: created.item,
+            quantity: created.quantity,
+            unitCost: created.unitCost,
+            cost: created.totalCost,
+            unitValue: created.unitValue,
+            invoiceValue: created.totalInvoice,
+            netProfit: created.gananciaNeta,
+          })
+        }
+        count++
+      } catch (error: any) {
+        console.error('Error creando repuesto desde factura:', error)
+      }
     }
-  })
+  }
 
   if (count > 0) {
     alert(`Se generaron ${count} registros de inventario desde la factura`)
   } else {
     alert('No se generaron registros de inventario')
   }
-  saveInventoryToLocalStorage()
 }
 
 function populateFromInvoiceItem(isEditing: boolean = false) {
   const target = isEditing ? editingInventory.value : newInventoryItem
   if (!target || !target.invoiceId || target.invoiceItemIndex === null) return
 
-  const invoice = burnedInvoices.find((i: any) => i.id === target.invoiceId)
+  const invoice = invoices.find((i: any) => i.id === target.invoiceId)
   if (!invoice || !Array.isArray(invoice.items)) return
 
   const item = invoice.items[target.invoiceItemIndex]
@@ -5283,17 +5394,29 @@ const burnedReports = {
   ]
 }
 
-const burnedCashMovements = reactive([
-  { id: 1, date: '2026-03-27', reference: '', name: 'NISSAN', concept: 'TRABAJO REALIZADO', movement: 'Ingreso', amount: 80000, account: 'Banco', observation: '' },
-  { id: 2, date: '2026-03-27', reference: '', name: 'BYD', concept: 'TRABAJO REALIZADO', movement: 'Ingreso', amount: 850000, account: 'Banco', observation: '' },
-  { id: 3, date: '2026-03-27', reference: '', name: 'ACOPLES', concept: 'GASTO TALLER', movement: 'Egreso', amount: 10000, account: 'Caja Menor', observation: '' },
-  { id: 4, date: '2026-03-28', reference: '', name: 'VW', concept: 'TRABAJO REALIZADO', movement: 'Ingreso', amount: 610000, account: 'Banco', observation: '' },
-  { id: 5, date: '2026-03-28', reference: '', name: 'VW', concept: 'TRABAJO REALIZADO', movement: 'Ingreso', amount: 40000, account: 'Caja Menor', observation: '' },
-  { id: 6, date: '2026-03-28', reference: '', name: 'ESKODA', concept: 'TRABAJO REALIZADO', movement: 'Ingreso', amount: 100000, account: 'Caja Menor', observation: '' },
-  { id: 7, date: '2026-03-28', reference: '', name: 'PAGO FONDO', concept: 'GASTO CESAR', movement: 'Egreso', amount: 100000, account: 'Caja Menor', observation: '' },
-  { id: 8, date: '2026-03-28', reference: '2X', name: 'VALE FREDY', concept: 'VALE EMPLEADO', movement: 'Egreso', amount: 250000, account: 'Banco', observation: '' },
-  { id: 9, date: '2026-03-28', reference: '', name: 'CESAR', concept: 'GASTO CESAR', movement: 'Egreso', amount: 200000, account: 'Caja Menor', observation: '' }
-])
+const burnedCashMovements = reactive<any[]>([])
+
+async function loadCashFromBackend() {
+  try {
+    const response = await moneyMovementService.getAll()
+    const movements = response.data?.moneyMovements || []
+    const mapped = movements.map((mm: any) => ({
+      id: mm.id,
+      date: mm.createdAt ? mm.createdAt.slice(0, 10) : new Date().toISOString().slice(0, 10),
+      reference: mm.reference || '',
+      name: mm.name,
+      concept: mm.concept,
+      movement: mm.movement === 'INGRESO' ? 'Ingreso' : mm.movement === 'EGRESO' ? 'Egreso' : mm.movement,
+      amount: mm.amount,
+      account: mm.account,
+      observation: mm.observation || '',
+    }))
+    burnedCashMovements.splice(0, burnedCashMovements.length, ...mapped)
+  } catch (error) {
+    console.error('Error cargando movimientos de caja desde el backend:', error)
+    alert('Error cargando movimientos de caja. Por favor intenta de nuevo.')
+  }
+}
 
 const showCreateCash = ref(false)
 const showEditCash = ref(false)
@@ -5309,35 +5432,46 @@ const newCashItem = reactive({
 })
 const editingCash = ref<any | null>(null)
 
-function nextCashId(): number {
-  const ids = Array.isArray(burnedCashMovements) ? burnedCashMovements.map((item: any) => Number(item.id)).filter((id) => Number.isFinite(id)) : []
-  return ids.length ? Math.max(...ids) + 1 : 1
-}
-
-function addCashItem() {
+async function addCashItem() {
   const name = String(newCashItem.name || '').trim()
   const concept = String(newCashItem.concept || '').trim()
   if (!newCashItem.date || !name || !concept) return
-  burnedCashMovements.push({
-    id: nextCashId(),
-    date: newCashItem.date,
-    reference: newCashItem.reference || '',
-    name,
-    concept,
-    movement: newCashItem.movement,
-    amount: Number(newCashItem.amount) || 0,
-    account: newCashItem.account || 'Banco',
-    observation: newCashItem.observation || ''
-  })
-  newCashItem.date = new Date().toISOString().slice(0, 10)
-  newCashItem.reference = ''
-  newCashItem.name = ''
-  newCashItem.concept = ''
-  newCashItem.movement = 'Ingreso'
-  newCashItem.amount = 0
-  newCashItem.account = 'Banco'
-  newCashItem.observation = ''
-  showCreateCash.value = false
+  try {
+    const response = await moneyMovementService.create({
+      reference: newCashItem.reference || '',
+      name,
+      concept,
+      movement: newCashItem.movement === 'Ingreso' ? 'INGRESO' : 'EGRESO',
+      amount: Number(newCashItem.amount) || 0,
+      account: newCashItem.account || 'Banco',
+      observation: newCashItem.observation || '',
+    })
+    const created = response.data
+    if (created) {
+      burnedCashMovements.push({
+        id: created.id,
+        date: created.createdAt ? created.createdAt.slice(0, 10) : newCashItem.date,
+        reference: created.reference || '',
+        name: created.name,
+        concept: created.concept,
+        movement: created.movement === 'INGRESO' ? 'Ingreso' : 'Egreso',
+        amount: created.amount,
+        account: created.account,
+        observation: created.observation || '',
+      })
+    }
+    newCashItem.date = new Date().toISOString().slice(0, 10)
+    newCashItem.reference = ''
+    newCashItem.name = ''
+    newCashItem.concept = ''
+    newCashItem.movement = 'Ingreso'
+    newCashItem.amount = 0
+    newCashItem.account = 'Banco'
+    newCashItem.observation = ''
+    showCreateCash.value = false
+  } catch (error: any) {
+    alert('Error guardando movimiento de caja: ' + (error.message || 'Error desconocido'))
+  }
 }
 
 function editCashItem(item: any) {
@@ -5345,22 +5479,40 @@ function editCashItem(item: any) {
   showEditCash.value = true
 }
 
-function saveEditedCash() {
+async function saveEditedCash() {
   if (!editingCash.value) return
   const idx = burnedCashMovements.findIndex((entry: any) => entry.id === editingCash.value.id)
   if (idx === -1) return
-  burnedCashMovements.splice(idx, 1, {
-    ...editingCash.value,
-    amount: Number(editingCash.value.amount) || 0
-  })
-  editingCash.value = null
-  showEditCash.value = false
+  try {
+    await moneyMovementService.update(editingCash.value.id, {
+      reference: editingCash.value.reference || '',
+      name: String(editingCash.value.name || '').trim(),
+      concept: String(editingCash.value.concept || '').trim(),
+      movement: editingCash.value.movement === 'Ingreso' ? 'INGRESO' : 'EGRESO',
+      amount: Number(editingCash.value.amount) || 0,
+      account: editingCash.value.account || 'Banco',
+      observation: editingCash.value.observation || '',
+    })
+    burnedCashMovements.splice(idx, 1, {
+      ...editingCash.value,
+      amount: Number(editingCash.value.amount) || 0,
+    })
+    editingCash.value = null
+    showEditCash.value = false
+  } catch (error: any) {
+    alert('Error actualizando movimiento de caja: ' + (error.message || 'Error desconocido'))
+  }
 }
 
-function deleteCashItem(id: number) {
+async function deleteCashItem(id: number) {
   if (!confirm('¿Eliminar este movimiento de caja?')) return
-  const idx = burnedCashMovements.findIndex((item: any) => item.id === id)
-  if (idx > -1) burnedCashMovements.splice(idx, 1)
+  try {
+    await moneyMovementService.delete(id)
+    const idx = burnedCashMovements.findIndex((item: any) => item.id === id)
+    if (idx > -1) burnedCashMovements.splice(idx, 1)
+  } catch (error: any) {
+    alert('Error eliminando movimiento de caja: ' + (error.message || 'Error desconocido'))
+  }
 }
 
 // Asegurar que la pestaña activa siempre sea válida
@@ -5604,8 +5756,8 @@ const filteredVehiclesCount = computed(() => {
 })
 
 const filteredPendingInvoices = computed(() => {
-  if (!Array.isArray(burnedInvoices)) return 0
-  return burnedInvoices.filter((inv: any) => {
+  if (!Array.isArray(invoices)) return 0
+  return invoices.filter((inv: any) => {
     if (!matchesDashboardMetricsPeriod(inv.createdAt)) return false
     const st = String(inv.status || '').toLowerCase().trim()
     return !(st === 'pagada' || st === 'pagado' || st === 'completed' || st === 'completada' || st === 'abonada' || st === 'abonado')
@@ -5613,8 +5765,8 @@ const filteredPendingInvoices = computed(() => {
 })
 
 const filteredPaidInvoices = computed(() => {
-  if (!Array.isArray(burnedInvoices)) return 0
-  return burnedInvoices.filter((inv: any) => {
+  if (!Array.isArray(invoices)) return 0
+  return invoices.filter((inv: any) => {
     if (!matchesDashboardMetricsPeriod(inv.createdAt)) return false
     const st = String(inv.status || '').toLowerCase().trim()
     return st === 'pagada' || st === 'pagado' || st === 'completed' || st === 'completada'
@@ -5622,14 +5774,14 @@ const filteredPaidInvoices = computed(() => {
 })
 
 const filteredTotalInvoiced = computed(() => {
-  if (!Array.isArray(burnedInvoices)) return 0
-  return burnedInvoices.filter((inv: any) => matchesDashboardMetricsPeriod(inv.createdAt))
+  if (!Array.isArray(invoices)) return 0
+  return invoices.filter((inv: any) => matchesDashboardMetricsPeriod(inv.createdAt))
     .reduce((sum: number, inv: any) => sum + Number(inv.total || 0), 0)
 })
 
 const filteredTotalPaid = computed(() => {
-  if (!Array.isArray(burnedInvoices)) return 0
-  return burnedInvoices.filter((inv: any) => {
+  if (!Array.isArray(invoices)) return 0
+  return invoices.filter((inv: any) => {
     if (!matchesDashboardMetricsPeriod(inv.createdAt)) return false
     const st = String(inv.status || '').toLowerCase().trim()
     return st === 'pagada' || st === 'pagado' || st === 'completed' || st === 'completada'
@@ -5637,8 +5789,8 @@ const filteredTotalPaid = computed(() => {
 })
 
 const filteredDepositInvoices = computed(() => {
-  if (!Array.isArray(burnedInvoices)) return 0
-  return burnedInvoices.filter((inv: any) => {
+  if (!Array.isArray(invoices)) return 0
+  return invoices.filter((inv: any) => {
     if (!matchesDashboardMetricsPeriod(inv.createdAt)) return false
     const st = String(inv.status || '').toLowerCase().trim()
     return st === 'abonado' || st === 'abonada'
@@ -5646,21 +5798,21 @@ const filteredDepositInvoices = computed(() => {
 })
 
 const filteredTotalDeposits = computed(() => {
-  if (!Array.isArray(burnedInvoices)) return 0
-  return burnedInvoices.filter((inv: any) => matchesDashboardMetricsPeriod(inv.createdAt))
+  if (!Array.isArray(invoices)) return 0
+  return invoices.filter((inv: any) => matchesDashboardMetricsPeriod(inv.createdAt))
     .reduce((sum: number, inv: any) => sum + invoiceDepositTotal(inv), 0)
 })
 
 const filteredTotalBalance = computed(() => {
-  if (!Array.isArray(burnedInvoices)) return 0
-  return burnedInvoices.filter((inv: any) => matchesDashboardMetricsPeriod(inv.createdAt))
+  if (!Array.isArray(invoices)) return 0
+  return invoices.filter((inv: any) => matchesDashboardMetricsPeriod(inv.createdAt))
     .reduce((sum: number, inv: any) => sum + Math.max(0, Number(inv.total || 0) - invoiceDepositTotal(inv)), 0)
 })
 
 // Estadísticas de Facturación
 const invoiceStats = computed(() => {
-  const invoices = Array.isArray(burnedInvoices) ? burnedInvoices : []
-  const total = invoices.length
+  const invList = Array.isArray(invoices) ? invoices : []
+  const total = invList.length
   let pending = 0
   let paid = 0
   let deposit = 0
@@ -5668,7 +5820,7 @@ const invoiceStats = computed(() => {
   let paidValue = 0
   let depositValue = 0
   let balanceValue = 0
-  invoices.forEach((inv: any) => {
+  invList.forEach((inv: any) => {
     const st = String(inv.status || '').toLowerCase().trim()
     const val = Number(inv.total || 0)
     const dep = invoiceDepositTotal(inv)
@@ -5811,7 +5963,7 @@ const payrollRows = computed(() => {
     })
     .map((employee: any) => {
       const mechanicKey = String(employee.name || '').trim().toLowerCase()
-      const invoices = burnedInvoices.filter((inv: any) => {
+      const employeeInvoices = invoices.filter((inv: any) => {
         const advisorName = String(inv.advisorName || '').trim().toLowerCase()
         if (!mechanicKey || advisorName !== mechanicKey || Number(inv.total || 0) <= 0) return false
         if (!payrollBiweeklyFilter.value) return true
@@ -5823,25 +5975,25 @@ const payrollRows = computed(() => {
         const period = `${year}-${String(month).padStart(2, '0')} Q${quincena}`
         return period === payrollBiweeklyFilter.value
       })
-      const grossTotal = invoices.reduce((sum: number, inv: any) => {
+      const grossTotal = employeeInvoices.reduce((sum: number, inv: any) => {
         const laborTotal = Array.isArray(inv.items)
           ? inv.items.reduce((s: number, it: any) => s + (it.isLabor ? (Number(it.qty) || 0) * (Number(it.price) || 0) : 0), 0)
           : 0
         return sum + laborTotal
       }, 0)
-      const totalDiscount = invoices.reduce((sum: number, inv: any) => sum + invoicePayrollDiscount(inv), 0)
+      const totalDiscount = employeeInvoices.reduce((sum: number, inv: any) => sum + invoicePayrollDiscount(inv), 0)
       const technicianShare = Math.max(0, grossTotal * 0.5 - totalDiscount)
 
       return {
         id: employee.id,
         name: employee.name,
         role: employee.role,
-        ordersCount: invoices.length,
+        ordersCount: employeeInvoices.length,
         grossTotal,
         totalDiscount,
         technicianShare,
         workshopShare: grossTotal * 0.5,
-        orders: invoices.map((inv: any) => {
+        orders: employeeInvoices.map((inv: any) => {
           const laborTotal = Array.isArray(inv.items)
             ? inv.items.reduce((s: number, it: any) => s + (it.isLabor ? (Number(it.qty) || 0) * (Number(it.price) || 0) : 0), 0)
             : 0
@@ -5875,7 +6027,7 @@ const payrollTotals = computed(() => {
 
 const payrollBiweeklyPeriods = computed(() => {
   const periods = new Set<string>()
-  burnedInvoices.forEach((inv: any) => {
+  invoices.forEach((inv: any) => {
     const laborTotal = Array.isArray(inv.items)
       ? inv.items.reduce((s: number, it: any) => s + (it.isLabor ? (Number(it.qty) || 0) * (Number(it.price) || 0) : 0), 0)
       : 0
@@ -5893,7 +6045,7 @@ const payrollBiweeklyPeriods = computed(() => {
 const payrollBiweeklyRows = computed(() => {
   const groups: Record<string, { period: string; ordersCount: number; grossTotal: number; totalDiscount: number; technicianShare: number; workshopShare: number }> = {}
 
-  burnedInvoices.forEach((inv: any) => {
+  invoices.forEach((inv: any) => {
     const laborTotal = Array.isArray(inv.items)
       ? inv.items.reduce((s: number, it: any) => s + (it.isLabor ? (Number(it.qty) || 0) * (Number(it.price) || 0) : 0), 0)
       : 0
@@ -6132,7 +6284,10 @@ function clearPrintOrder() {
 
 onMounted(async () => {
   window.addEventListener('afterprint', clearPrintOrder)
-  loadInventoryFromLocalStorage()
+  // Limpiar datos antiguos de localStorage (ya no se usan, ahora van al backend)
+  localStorage.removeItem('burnedInventory')
+  await loadInventoryFromBackend()
+  await loadCashFromBackend()
   await refreshWorkOrders()
   await refreshAppointments()
 })
@@ -6249,10 +6404,16 @@ async function deleteOrder(id: number) {
   try {
     await workOrderService.deleteWorkOrder(id)
     // Eliminar factura asociada si existe
-    const invoiceIdx = burnedInvoices.findIndex((inv: any) => inv.orderId === id)
-    if (invoiceIdx > -1) {
-      burnedInvoices.splice(invoiceIdx, 1)
-      console.log('✅ Factura asociada eliminada')
+    const existingInvoice = findInvoiceByOrderId(id)
+    if (existingInvoice) {
+      try {
+        await invoiceService.delete(existingInvoice.id)
+        const invoiceIdx = invoices.findIndex((inv: any) => inv.orderId === id)
+        if (invoiceIdx > -1) invoices.splice(invoiceIdx, 1)
+        console.log('✅ Factura asociada eliminada')
+      } catch {
+        console.warn('No se pudo eliminar la factura asociada, puede que ya no exista en el servidor')
+      }
     }
     await refreshWorkOrders()
   } catch (error) {
@@ -6615,8 +6776,8 @@ const filteredInvoicesForDashboard = computed(() => {
   const invoiceMonth = dashboardInvoiceMonth.value
   const dateFrom = dashboardInvoiceDateFrom.value
   const dateTo = dashboardInvoiceDateTo.value
-  if (!period && !invoiceMonth && !dateFrom && !dateTo) return burnedInvoices
-  return burnedInvoices.filter((inv: any) => {
+  if (!period && !invoiceMonth && !dateFrom && !dateTo) return invoices
+  return invoices.filter((inv: any) => {
     if (invoiceMonth) {
       if (!matchesDateRange(inv.createdAt, invoiceMonth, invoiceMonth)) return false
     }
@@ -6631,8 +6792,8 @@ const filteredInvoicesForDashboard = computed(() => {
 })
 
 const dashboardDepositInvoices = computed(() => {
-  if (!Array.isArray(burnedInvoices)) return []
-  return burnedInvoices.filter((inv: any) => {
+  if (!Array.isArray(invoices)) return []
+  return invoices.filter((inv: any) => {
     const st = String(inv.status || '').toLowerCase().trim()
     return st === 'abonada' || st === 'abonado'
   }).sort((a: any, b: any) => {
@@ -6643,8 +6804,8 @@ const dashboardDepositInvoices = computed(() => {
 })
 
 const dashboardRecentInvoices = computed(() => {
-  if (!Array.isArray(burnedInvoices)) return []
-  return burnedInvoices.filter((inv: any) => {
+  if (!Array.isArray(invoices)) return []
+  return invoices.filter((inv: any) => {
     const st = String(inv.status || '').toLowerCase().trim()
     return st !== 'anulada' && st !== 'anulado'
   }).sort((a: any, b: any) => {
@@ -6693,7 +6854,7 @@ const dashboardTechniciansByMonth = computed(() => {
   const selectedMonth = dashboardSelectedMonth.value
   const from = dashboardDateFrom.value
   const to = dashboardDateTo.value
-  const allInvoices = Array.isArray(burnedInvoices) ? burnedInvoices : []
+  const allInvoices = Array.isArray(invoices) ? invoices : []
   const allOrders = Array.isArray(burnedOrders) ? burnedOrders : []
 
   const total = employees.reduce((sum: number, e: any) => {

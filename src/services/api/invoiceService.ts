@@ -1,72 +1,110 @@
 import { apiClient, type ApiResponse } from './apiConfig'
 
-const INVOICES_STORAGE_KEY = 'jobscar_invoices'
+export interface InvoiceItem {
+  description: string
+  qty: number
+  price: number
+  isLabor: boolean
+}
+
+export interface Deposit {
+  amount: number
+  date: string
+  method: string
+}
+
+export interface Invoice {
+  id: number
+  clientName?: string
+  fechaCreacion?: string
+  vehiculo?: string
+  placa?: string
+  total: number
+  abono?: number
+  saldo?: number
+  workOrderId?: number | null
+  items: InvoiceItem[]
+  taxPct: boolean
+  discount: number
+  retention: number
+  deposits: Deposit[]
+  formaDePago: string
+  status: string
+  notes: string
+  createdAt: string
+  updatedAt: string
+  client?: string
+  clientPhone?: string
+  clientEmail?: string
+  clientAddress?: string
+  vehicle?: string
+  vehicleBrand?: string
+  vehicleModel?: string
+  vehicleKm?: string
+  advisorName?: string
+}
+
+export interface GetAllInvoicesResponse {
+  count: number
+  invoices: Invoice[]
+}
+
+export interface CreateInvoiceRequest {
+  items?: InvoiceItem[]
+  taxPct?: boolean
+  discount?: number
+  retention?: number
+  deposits?: Deposit[]
+  formaDePago?: string
+  status?: string
+  notes?: string
+  workOrderId?: number | null
+  client?: string
+  clientPhone?: string
+  clientEmail?: string
+  clientAddress?: string
+  vehicle?: string
+  vehicleBrand?: string
+  vehicleModel?: string
+  vehicleKm?: string
+  advisorName?: string
+}
+
+export interface UpdateInvoiceRequest {
+  items?: InvoiceItem[]
+  taxPct?: boolean
+  discount?: number
+  retention?: number
+  deposits?: Deposit[]
+  formaDePago?: string
+  status?: string
+  notes?: string
+}
 
 class InvoiceService {
-  async getAll(): Promise<any> {
-    try {
-      console.log('🌐 [invoiceService] GET /invoices')
-      const res = await apiClient.get<any>('/invoices')
-      return res.data
-    } catch (error) {
-      console.warn('❌ [invoiceService] API no disponible, leyendo localStorage', error)
-      try {
-        const raw = localStorage.getItem(INVOICES_STORAGE_KEY)
-        return raw ? JSON.parse(raw) : []
-      } catch (e) {
-        return []
-      }
-    }
+  async getAll(): Promise<ApiResponse<GetAllInvoicesResponse>> {
+    const res = await apiClient.get<GetAllInvoicesResponse>('/invoices')
+    return res
   }
 
-  async create(invoice: any): Promise<any> {
-    try {
-      console.log('🌐 [invoiceService] POST /invoices', invoice)
-      const res = await apiClient.post<any>('/invoices', invoice)
-      return res.data
-    } catch (error) {
-      console.warn('❌ [invoiceService] POST falló, persistiendo localmente', error)
-      const list = JSON.parse(localStorage.getItem(INVOICES_STORAGE_KEY) || '[]')
-      const id = list.length ? Math.max(...list.map((i: any) => Number(i.id))) + 1 : 1001
-      const toSave = { ...invoice, id }
-      list.push(toSave)
-      localStorage.setItem(INVOICES_STORAGE_KEY, JSON.stringify(list))
-      return toSave
-    }
+  async getById(id: number): Promise<ApiResponse<Invoice>> {
+    const res = await apiClient.get<Invoice>(`/invoices/${id}`)
+    return res
   }
 
-  async update(id: number | string, invoice: any): Promise<any> {
-    try {
-      console.log('🌐 [invoiceService] PUT /invoices/', id)
-      const res = await apiClient.put<any>(`/invoices/${id}`, invoice)
-      return res.data
-    } catch (error) {
-      console.warn('❌ [invoiceService] PUT falló, actualizando localmente', error)
-      const list = JSON.parse(localStorage.getItem(INVOICES_STORAGE_KEY) || '[]')
-      const idx = list.findIndex((i: any) => i.id == id)
-      if (idx > -1) {
-        list.splice(idx, 1, invoice)
-        localStorage.setItem(INVOICES_STORAGE_KEY, JSON.stringify(list))
-      }
-      return invoice
-    }
+  async create(invoice: CreateInvoiceRequest): Promise<ApiResponse<Invoice>> {
+    const res = await apiClient.post<Invoice>('/invoices', invoice)
+    return res
   }
 
-  async delete(id: number | string): Promise<any> {
-    try {
-      console.log('🌐 [invoiceService] DELETE /invoices/', id)
-      const res = await apiClient.delete<any>(`/invoices/${id}`)
-      return res.data
-    } catch (error) {
-      console.warn('❌ [invoiceService] DELETE falló, eliminando localmente', error)
-      const list = JSON.parse(localStorage.getItem(INVOICES_STORAGE_KEY) || '[]')
-      const idx = list.findIndex((i: any) => i.id == id)
-      if (idx > -1) {
-        list.splice(idx, 1)
-        localStorage.setItem(INVOICES_STORAGE_KEY, JSON.stringify(list))
-      }
-      return { id }
-    }
+  async update(id: number, invoice: UpdateInvoiceRequest): Promise<ApiResponse<Invoice>> {
+    const res = await apiClient.put<Invoice>(`/invoices/${id}`, invoice)
+    return res
+  }
+
+  async delete(id: number): Promise<ApiResponse<unknown>> {
+    const res = await apiClient.delete<unknown>(`/invoices/${id}`)
+    return res
   }
 }
 
