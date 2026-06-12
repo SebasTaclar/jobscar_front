@@ -490,13 +490,7 @@
                   </svg>
                   Editar
                 </button>
-                <button v-if="isOrderBillable(order.status)" type="button" class="order-action-btn success" @click="openInvoiceForOrder(order)" aria-label="Facturar orden">
-                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M12 2.75a9.25 9.25 0 1 0 9.25 9.25A9.26 9.26 0 0 0 12 2.75Zm0 1.5A7.75 7.75 0 1 1 4.25 12 7.76 7.76 0 0 1 12 4.25Zm-1.1 3.75h2.7a2.35 2.35 0 0 1 0 4.7h-1.1a.85.85 0 0 0 0 1.7h1.8a.75.75 0 0 1 0 1.5h-1.1v1a.75.75 0 0 1-1.5 0v-1h-1.8a.75.75 0 0 1 0-1.5h2.7a.85.85 0 0 0 0-1.7h-1.8a2.35 2.35 0 1 1 0-4.7Z"
-                      fill="currentColor" />
-                  </svg>
-                  {{ findInvoiceByOrderId(order.id) ? 'Actualizar Factura' : 'Facturar' }}
-                </button>
+
                 <button class="order-action-btn pdf" @click="exportOrderPdf(order)" aria-label="Exportar a PDF">
                   <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M6 2h7l5 5v15H6V2Zm7 1.5V8h4.5L13 3.5ZM8 12h8v1.5H8V12Zm0 3h8v1.5H8V15Zm0-6h4.5v1.5H8V9Z"
@@ -589,12 +583,21 @@
                 <span class="order-extra-value order-observations">{{ order.observations || '-' }}</span>
               </div>
 
-              <div class="order-extra-row">
-                <span class="order-extra-icon purple" aria-hidden="true">
-                  👨‍🔧
-                </span>
-                <span class="order-extra-label">Técnico:</span>
-                <span class="order-extra-value">{{ order.mechanic || '-' }}</span>
+              <div class="order-extra-row" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                <div style="display:flex;align-items:center;gap:4px;">
+                  <span class="order-extra-icon purple" aria-hidden="true">
+                    👨‍🔧
+                  </span>
+                  <span class="order-extra-label">Técnico:</span>
+                  <span class="order-extra-value">{{ order.mechanic || '-' }}</span>
+                </div>
+                <button v-if="isOrderBillable(order.status)" type="button" class="order-action-btn success" @click="openInvoiceForOrder(order)" aria-label="Facturar orden" style="padding:4px 10px;font-size:0.75rem;height:auto;">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" style="width:14px;height:14px;">
+                    <path d="M12 2.75a9.25 9.25 0 1 0 9.25 9.25A9.26 9.26 0 0 0 12 2.75Zm0 1.5A7.75 7.75 0 1 1 4.25 12 7.76 7.76 0 0 1 12 4.25Zm-1.1 3.75h2.7a2.35 2.35 0 0 1 0 4.7h-1.1a.85.85 0 0 0 0 1.7h1.8a.75.75 0 0 1 0 1.5h-1.1v1a.75.75 0 0 1-1.5 0v-1h-1.8a.75.75 0 0 1 0-1.5h2.7a.85.85 0 0 0 0-1.7h-1.8a2.35 2.35 0 1 1 0-4.7Z"
+                      fill="currentColor" />
+                  </svg>
+                  {{ findInvoiceByOrderId(order.id) ? 'Actualizar Factura' : 'Facturar' }}
+                </button>
               </div>
 
             </div>
@@ -1083,7 +1086,7 @@
                 <strong>{{ invoice.client }}</strong>
                 <div style="color:var(--muted);font-size:0.85rem;">{{ invoice.placa || invoice.vehicle || '' }}</div>
               </td>
-              <td data-label="Vehículo">{{ invoice.vehicle || '-' }}</td>
+              <td data-label="Vehículo">{{ invoice.vehicleModel || invoice.vehicleBrand || '-' }}</td>
               <td data-label="Placa"><span style="text-transform:uppercase;font-weight:700;">{{ invoice.placa || invoice.vehicle || '-' }}</span></td>
               <td data-label="Total"><strong>${{ invoiceTotal(invoice).toLocaleString() }}</strong></td>
               <td data-label="Abono" :style="{ color: invoiceDepositTotal(invoice) > 0 ? '#22c55e' : 'var(--muted)', fontWeight: invoiceDepositTotal(invoice) > 0 ? '600' : '400' }">${{ invoiceDepositTotal(invoice).toLocaleString() }}</td>
@@ -1170,7 +1173,7 @@
           <thead class="table-header">
             <tr>
               <th></th>
-              <th>Orden #</th>
+              <th>Orden # /<br>Factura #</th>
               <th>Cliente / Vehículo</th>
               <th>Cantidad Items</th>
               <th>Costo Total</th>
@@ -1186,7 +1189,12 @@
                 <td style="text-align:center;">
                   <span style="font-size:1.2rem;color:var(--brand-primary-contrast);">{{ expandedInventoryOrders.has(Number(orderId)) ? '▼' : '▶' }}</span>
                 </td>
-                <td data-label="Orden #"><strong style="color:var(--brand-primary-contrast);">#{{ orderId }}</strong></td>
+                <td data-label="Orden #">
+                  <strong style="color:var(--brand-primary-contrast);">#{{ orderId }}</strong>
+                  <div v-if="findInvoiceByOrderId(Number(orderId))" style="font-size:0.75rem;color:var(--brand-accent);margin-top:2px;">
+                    Fact #{{ findInvoiceByOrderId(Number(orderId))?.id }}
+                  </div>
+                </td>
                 <td data-label="Cliente / Vehículo">
                   <div v-if="getOrderForInventory(Number(orderId))">
                     <div style="color:var(--brand-primary-contrast);font-weight:600;">{{ getOrderForInventory(Number(orderId))?.client || 'Sin cliente' }}</div>
@@ -1258,19 +1266,6 @@
                   <option :value="null">Sin factura</option>
                   <option v-for="inv in invoices.filter((i: any) => i.orderId === newInventoryItem.orderId)" :key="inv.id" :value="inv.id">#{{ inv.id }} - {{ inv.client }}</option>
                 </select>
-              </div>
-            </div>
-            <div class="form-row" v-if="newInventoryItem.invoiceId">
-              <div class="form-group">
-                <label>Item de Factura</label>
-                <select v-model.number="newInventoryItem.invoiceItemIndex" class="form-input" @change="populateFromInvoiceItem(false)">
-                  <option :value="null">Seleccionar item</option>
-                  <option v-for="(it, idx) in (invoices.find((i: any) => i.id === newInventoryItem.invoiceId)?.items || [])" :key="idx" :value="idx">{{ it.description }} - ${{ (Number(it.price) || 0).toLocaleString('es-CO') }}</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label></label>
-                <div style="padding-top:8px;color:var(--muted);font-size:0.85rem;">Selecciona un item para autocompletar</div>
               </div>
             </div>
             <div class="form-row">
@@ -1345,19 +1340,6 @@
                   <option :value="null">Sin factura</option>
                   <option v-for="inv in invoices.filter((i: any) => i.orderId === editingInventory.orderId)" :key="inv.id" :value="inv.id">#{{ inv.id }} - {{ inv.client }}</option>
                 </select>
-              </div>
-            </div>
-            <div class="form-row" v-if="editingInventory.invoiceId">
-              <div class="form-group">
-                <label>Item de Factura</label>
-                <select v-model.number="editingInventory.invoiceItemIndex" class="form-input" @change="populateFromInvoiceItem(true)">
-                  <option :value="null">Seleccionar item</option>
-                  <option v-for="(it, idx) in (invoices.find((i: any) => i.id === editingInventory.invoiceId)?.items || [])" :key="idx" :value="idx">{{ it.description }} - ${{ (Number(it.price) || 0).toLocaleString('es-CO') }}</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label></label>
-                <div style="padding-top:8px;color:var(--muted);font-size:0.85rem;">Selecciona un item para autocompletar</div>
               </div>
             </div>
             <div class="form-row">
@@ -1441,62 +1423,70 @@
       <div class="table-responsive" style="margin-top:16px;">
         <table class="simple-table compact">
           <colgroup>
+            <col style="width:6%" />
+            <col style="width:14%" />
+            <col style="width:14%" />
+            <col style="width:20%" />
             <col style="width:11%" />
-            <col style="width:9%" />
             <col style="width:12%" />
-            <col style="width:17%" />
-            <col style="width:11%" />
-            <col style="width:11%" />
             <col style="width:10%" />
-            <col style="width:10%" />
-            <col style="width:10%" />
+            <col style="width:13%" />
           </colgroup>
           <thead class="table-header">
             <tr>
-              <th>Fecha</th>
+              <th></th>
               <th>Referencia</th>
               <th>Nombre</th>
               <th>Conceptos</th>
               <th>Movimiento</th>
               <th>Valor</th>
               <th>Cuenta</th>
-              <th>Observación</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="entry in burnedCashMovements.filter(e => {
-              if (!searchCash) return true
-              const q = searchCash.toLowerCase()
-              return (e.name && e.name.toLowerCase().includes(q)) ||
-                (e.concept && e.concept.toLowerCase().includes(q)) ||
-                (e.reference && e.reference.toLowerCase().includes(q)) ||
-                (e.account && e.account.toLowerCase().includes(q)) ||
-                (e.observation && e.observation.toLowerCase().includes(q))
-            })" :key="entry.id">
-              <td data-label="Fecha">{{ entry.date }}</td>
-              <td data-label="Referencia">{{ entry.reference || '-' }}</td>
-              <td data-label="Nombre">{{ entry.name }}</td>
-              <td data-label="Conceptos">{{ entry.concept }}</td>
-              <td data-label="Movimiento">
-                <span class="status-badge" :class="entry.movement === 'Ingreso' ? 'available' : 'danger'">{{
-                  entry.movement
-                }}</span>
-              </td>
-              <td data-label="Valor">${{ Number(entry.amount).toLocaleString('es-CO') }}</td>
-              <td data-label="Cuenta">{{ entry.account }}</td>
-              <td data-label="Observación">{{ entry.observation || '-' }}</td>
-              <td data-label="Acciones">
-                <div style="display:flex;gap:6px;justify-content:center;">
-                  <button class="btn btn-sm btn-secondary" type="button" @click="editCashItem(entry)"
-                    aria-label="Editar movimiento">✏️</button>
-                  <button class="btn btn-sm btn-danger" type="button" @click="deleteCashItem(entry.id)"
-                    aria-label="Eliminar movimiento">🗑️</button>
-                </div>
-              </td>
-            </tr>
+            <template v-for="(items, reference) in getCashGroups()" :key="reference">
+              <!-- Fila principal de referencia -->
+              <tr class="cash-group-row" @click="toggleCashReference(reference)" v-if="items.length > 1">
+                <td style="text-align:center;">
+                  <span style="font-size:1.2rem;color:var(--brand-primary-contrast);">{{ expandedCashReferences.has(reference) ? '▼' : '▶' }}</span>
+                </td>
+                <td data-label="Referencia"><strong style="color:var(--brand-primary-contrast);">{{ reference || '-' }}</strong></td>
+                <td data-label="Nombre">{{ items[0].name }}</td>
+                <td data-label="Conceptos">{{ items.length }} movimientos</td>
+                <td data-label="Movimiento">
+                  <span class="status-badge" :class="items[0].movement === 'Ingreso' ? 'available' : 'danger'">{{ items[0].movement }}</span>
+                </td>
+                <td data-label="Valor"><strong style="color:var(--brand-primary-contrast);">${{ items.reduce((sum: number, i: any) => sum + (Number(i.amount) || 0), 0).toLocaleString('es-CO') }}</strong></td>
+                <td data-label="Cuenta">{{ items[0].account }}</td>
+                <td data-label="Acciones">
+                  <div style="display:flex;gap:6px;justify-content:center;">
+                    <button class="btn btn-sm btn-secondary" type="button" @click.stop="editCashItem(items[0])" aria-label="Editar">✏️</button>
+                    <button class="btn btn-sm btn-danger" type="button" @click.stop="deleteCashItem(items[0].id)" aria-label="Eliminar">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Filas desplegadas de detalle -->
+              <tr v-if="items.length === 1 || expandedCashReferences.has(reference)" v-for="entry in items" :key="entry.id" :class="items.length > 1 ? 'cash-item-row' : ''">
+                <td></td>
+                <td data-label="Referencia">{{ entry.reference || '-' }}</td>
+                <td data-label="Nombre">{{ entry.name }}</td>
+                <td data-label="Conceptos">{{ entry.concept }}</td>
+                <td data-label="Movimiento">
+                  <span class="status-badge" :class="entry.movement === 'Ingreso' ? 'available' : 'danger'">{{ entry.movement }}</span>
+                </td>
+                <td data-label="Valor">${{ Number(entry.amount).toLocaleString('es-CO') }}</td>
+                <td data-label="Cuenta">{{ entry.account }}</td>
+                <td data-label="Acciones">
+                  <div style="display:flex;gap:6px;justify-content:center;">
+                    <button class="btn btn-sm btn-secondary" type="button" @click="editCashItem(entry)" aria-label="Editar movimiento">✏️</button>
+                    <button class="btn btn-sm btn-danger" type="button" @click="deleteCashItem(entry.id)" aria-label="Eliminar movimiento">🗑️</button>
+                  </div>
+                </td>
+              </tr>
+            </template>
             <tr v-if="burnedCashMovements.length === 0">
-              <td colspan="9">No hay movimientos de caja registrados.</td>
+              <td colspan="8">No hay movimientos de caja registrados.</td>
             </tr>
           </tbody>
         </table>
@@ -1641,88 +1631,7 @@
     <!-- Pestaña: Empleados -->
     <div v-if="activeTab === 'employees'" class="content-section">
       <div class="section-title-bar"
-        style="display:grid;grid-template-columns:1fr minmax(320px,420px) auto;align-items:center;gap:12px;">
-        <h2 class="section-title">Empleados</h2>
-        <div style="justify-self:center;">
-          <div class="search-input-wrapper" style="max-width:420px;">
-            <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-              <path fill="currentColor"
-                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
-            </svg>
-            <input type="search" v-model="searchEmployees" placeholder="Buscar empleados..."
-              aria-label="Buscar empleados" class="search-input" />
-            <button v-if="searchEmployees" class="search-clear" @click.prevent="searchEmployees = ''"
-              aria-label="Limpiar búsqueda">X</button>
-          </div>
-        </div>
-        <div style="justify-self:end;">
-          <button class="btn btn-primary" @click="showCreateEmployee = true">➕ Crear Empleado</button>
-        </div>
-      </div>
-
-      <div class="table-responsive" style="margin-top:16px;">
-        <table class="simple-table employees-table">
-          <colgroup>
-            <col style="width:10%" /> <!-- ID Empleado -->
-            <col style="width:13%" /> <!-- Nombre -->
-            <col style="width:11%" /> <!-- Cargo -->
-            <col style="width:13%" /> <!-- Especialidad -->
-            <col style="width:12%" /> <!-- Teléfono -->
-            <col style="width:12%" /> <!-- Estado -->
-            <col style="width:11%" /> <!-- Fecha Ingreso -->
-            <col style="width:10%" /> <!-- OT Activas -->
-            <col style="width:13%" /> <!-- Observaciones -->
-            <col style="width:9%" /> <!-- Acciones -->
-          </colgroup>
-          <thead class="table-header">
-            <tr>
-              <th>ID Empleado</th>
-              <th>Nombre</th>
-              <th>Cargo</th>
-              <th>Especialidad</th>
-              <th>Teléfono</th>
-              <th>Estado</th>
-              <th>Fecha Ingreso</th>
-              <th>OT Activas</th>
-              <th>Notas</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="emp in burnedEmployees.filter(emp => {
-              if (!searchEmployees) return true
-              const q = searchEmployees.toLowerCase().trim()
-              return (emp.name && emp.name.toLowerCase().includes(q)) ||
-                (emp.role && emp.role.toLowerCase().includes(q)) ||
-                (emp.specialty && emp.specialty.toLowerCase().includes(q)) ||
-                (emp.phone && emp.phone.toLowerCase().includes(q)) ||
-                (emp.notes && emp.notes.toLowerCase().includes(q))
-            })" :key="emp.id">
-              <td data-label="ID Empleado">{{ emp.id }}</td>
-              <td data-label="Nombre">{{ emp.name }}</td>
-              <td data-label="Cargo">{{ emp.role }}</td>
-              <td data-label="Especialidad">{{ emp.specialty || '-' }}</td>
-              <td data-label="Teléfono">{{ emp.phone || '-' }}</td>
-              <td data-label="Estado">Activo</td>
-              <td data-label="Fecha Ingreso">{{ emp.entryDate ? formatShortDate(new Date(emp.entryDate)) : '-' }}</td>
-              <td data-label="OT Activas">{{ getEmployeeActiveOrders(emp) }}</td>
-              <td data-label="Observaciones"><span class="client-notes">{{ emp.notes || '-' }}</span></td>
-              <td data-label="Acciones">
-                <div class="actions" style="display:flex;gap:6px;justify-content:center;">
-                  <button class="btn btn-sm btn-secondary" @click="editEmployee(emp)">✏️</button>
-                  <button class="btn btn-sm btn-danger" @click="deleteEmployee(emp.id)">🗑️</button>
-                </div>
-              </td>
-            </tr>
-            <tr v-if="burnedEmployees.length === 0">
-              <td colspan="10">No hay empleados registrados.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="section-title-bar"
-        style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;gap:12px;">
+        style="margin-top:0;display:flex;justify-content:space-between;align-items:center;gap:12px;">
         <h2 class="section-title">💼 Nómina</h2>
         <div style="display:flex;gap:8px;align-items:center;">
           <button class="btn" :class="payrollViewMode === 'employee' ? 'btn-primary' : 'btn-secondary'" @click="payrollViewMode = 'employee'">Por Empleado</button>
@@ -1738,40 +1647,40 @@
         </div>
       </div>
 
-      <div class="stats-grid" style="margin-top:16px;">
-        <div class="stat-card">
-          <div class="stat-icon">🧾</div>
+      <div class="stats-grid" style="margin-top:16px; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px;">
+        <div class="stat-card" style="padding: 10px; gap: 10px;">
+          <div class="stat-icon" style="font-size: 1.2rem; width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0;">🧾</div>
           <div class="stat-content">
-            <div class="stat-number">{{ payrollTotals.ordersCount }}</div>
-            <div class="stat-label">Servicios entregados</div>
+            <div class="stat-number" style="font-size: 1.1rem;">{{ payrollTotals.ordersCount }}</div>
+            <div class="stat-label" style="font-size: 0.65rem;">Servicios entregados</div>
           </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon">💵</div>
+        <div class="stat-card" style="padding: 10px; gap: 10px;">
+          <div class="stat-icon" style="font-size: 1.2rem; width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0;">💵</div>
           <div class="stat-content">
-            <div class="stat-number">${{ formatNumber(payrollTotals.grossTotal) }}</div>
-            <div class="stat-label">Total M.O.</div>
+            <div class="stat-number" style="font-size: 1.1rem;">${{ formatNumber(payrollTotals.grossTotal) }}</div>
+            <div class="stat-label" style="font-size: 0.65rem;">Total M.O.</div>
           </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon">➖</div>
+        <div class="stat-card" style="padding: 10px; gap: 10px;">
+          <div class="stat-icon" style="font-size: 1.2rem; width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0;">➖</div>
           <div class="stat-content">
-            <div class="stat-number">${{ formatNumber(payrollTotals.totalDiscount) }}</div>
-            <div class="stat-label">Descuentos</div>
+            <div class="stat-number" style="font-size: 1.1rem;">${{ formatNumber(payrollTotals.totalDiscount) }}</div>
+            <div class="stat-label" style="font-size: 0.65rem;">Descuentos</div>
           </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon">👨‍🔧</div>
+        <div class="stat-card" style="padding: 10px; gap: 10px;">
+          <div class="stat-icon" style="font-size: 1.2rem; width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0;">👨‍🔧</div>
           <div class="stat-content">
-            <div class="stat-number">${{ formatNumber(payrollTotals.technicianShare) }}</div>
-            <div class="stat-label">Total a pagar técnicos</div>
+            <div class="stat-number" style="font-size: 1.1rem;">${{ formatNumber(payrollTotals.technicianShare) }}</div>
+            <div class="stat-label" style="font-size: 0.65rem;">Total a pagar técnicos</div>
           </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon">🏪</div>
+        <div class="stat-card" style="padding: 10px; gap: 10px;">
+          <div class="stat-icon" style="font-size: 1.2rem; width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0;">🏪</div>
           <div class="stat-content">
-            <div class="stat-number">${{ formatNumber(payrollTotals.workshopShare) }}</div>
-            <div class="stat-label">50% taller</div>
+            <div class="stat-number" style="font-size: 1.1rem;">${{ formatNumber(payrollTotals.workshopShare) }}</div>
+            <div class="stat-label" style="font-size: 0.65rem;">50% taller</div>
           </div>
         </div>
       </div>
@@ -1870,6 +1779,84 @@
             </tr>
             <tr v-if="payrollBiweeklyRows.length === 0">
               <td colspan="6">No hay datos de quincenas disponibles.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-title-bar"
+        style="margin-top:24px;display:grid;grid-template-columns:1fr minmax(320px,420px) auto;align-items:center;gap:12px;">
+        <h2 class="section-title">Empleados</h2>
+        <div style="justify-self:center;">
+          <div class="search-input-wrapper" style="max-width:420px;">
+            <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+              <path fill="currentColor"
+                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
+            </svg>
+            <input type="search" v-model="searchEmployees" placeholder="Buscar empleados..."
+              aria-label="Buscar empleados" class="search-input" />
+            <button v-if="searchEmployees" class="search-clear" @click.prevent="searchEmployees = ''"
+              aria-label="Limpiar búsqueda">X</button>
+          </div>
+        </div>
+        <div style="justify-self:end;">
+          <button class="btn btn-primary" @click="showCreateEmployee = true">➕ Crear Empleado</button>
+        </div>
+      </div>
+
+      <div class="table-responsive" style="margin-top:16px;">
+        <table class="simple-table employees-table">
+          <colgroup>
+            <col style="width:15%" /> <!-- Nombre -->
+            <col style="width:12%" /> <!-- Cargo -->
+            <col style="width:14%" /> <!-- Especialidad -->
+            <col style="width:13%" /> <!-- Teléfono -->
+            <col style="width:12%" /> <!-- Estado -->
+            <col style="width:12%" /> <!-- Fecha Ingreso -->
+            <col style="width:11%" /> <!-- OT Activas -->
+            <col style="width:14%" /> <!-- Observaciones -->
+            <col style="width:10%" /> <!-- Acciones -->
+          </colgroup>
+          <thead class="table-header">
+            <tr>
+              <th>Nombre</th>
+              <th>Cargo</th>
+              <th>Especialidad</th>
+              <th>Teléfono</th>
+              <th>Estado</th>
+              <th>Fecha Ingreso</th>
+              <th>OT Activas</th>
+              <th>Notas</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="emp in burnedEmployees.filter(emp => {
+              if (!searchEmployees) return true
+              const q = searchEmployees.toLowerCase().trim()
+              return (emp.name && emp.name.toLowerCase().includes(q)) ||
+                (emp.role && emp.role.toLowerCase().includes(q)) ||
+                (emp.specialty && emp.specialty.toLowerCase().includes(q)) ||
+                (emp.phone && emp.phone.toLowerCase().includes(q)) ||
+                (emp.notes && emp.notes.toLowerCase().includes(q))
+            })" :key="emp.id">
+              <td data-label="Nombre">{{ emp.name }}</td>
+              <td data-label="Cargo">{{ emp.role }}</td>
+              <td data-label="Especialidad">{{ emp.specialty || '-' }}</td>
+              <td data-label="Teléfono">{{ emp.phone || '-' }}</td>
+              <td data-label="Estado">Activo</td>
+              <td data-label="Fecha Ingreso">{{ emp.entryDate ? formatShortDate(new Date(emp.entryDate)) : '-' }}</td>
+              <td data-label="OT Activas">{{ getEmployeeActiveOrders(emp) }}</td>
+              <td data-label="Observaciones"><span class="client-notes">{{ emp.notes || '-' }}</span></td>
+              <td data-label="Acciones">
+                <div class="actions" style="display:flex;gap:6px;justify-content:center;">
+                  <button class="btn btn-sm btn-secondary" @click="editEmployee(emp)">✏️</button>
+                  <button class="btn btn-sm btn-danger" @click="deleteEmployee(emp.id)">🗑️</button>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="burnedEmployees.length === 0">
+              <td colspan="9">No hay empleados registrados.</td>
             </tr>
           </tbody>
         </table>
@@ -2259,7 +2246,7 @@
         </div>
       </div>
 
-      <!-- Métricas Principales -->
+      <!-- Métricas de Cantidades -->
       <div class="dashboard-metrics-grid">
         <!-- 1. Órdenes Activas -->
         <div class="dashboard-metric-card">
@@ -2302,7 +2289,24 @@
           </div>
         </div>
 
-        <!-- 4. Facturas Pendientes -->
+        <!-- 4. Facturas Generadas -->
+        <div class="dashboard-metric-card">
+          <div class="dashboard-metric-icon blue">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <div class="dashboard-metric-info">
+            <p class="dashboard-metric-value">{{ filteredTotalInvoices }}</p>
+            <p class="dashboard-metric-label">Facturas Generadas</p>
+          </div>
+        </div>
+
+        <!-- 5. Facturas sin abono -->
         <div class="dashboard-metric-card">
           <div class="dashboard-metric-icon red">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
@@ -2311,12 +2315,25 @@
             </svg>
           </div>
           <div class="dashboard-metric-info">
-            <p class="dashboard-metric-value">{{ filteredPendingInvoices }}</p>
-            <p class="dashboard-metric-label">Facturas Pendientes</p>
+            <p class="dashboard-metric-value">{{ filteredWithoutDepositInvoices }}</p>
+            <p class="dashboard-metric-label">Facturas sin abono</p>
           </div>
         </div>
 
-        <!-- 5. Facturas Pagadas -->
+        <!-- 6. Facturas con abono -->
+        <div class="dashboard-metric-card">
+          <div class="dashboard-metric-icon orange">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <div class="dashboard-metric-info">
+            <p class="dashboard-metric-value">{{ filteredWithDepositInvoices }}</p>
+            <p class="dashboard-metric-label">Facturas con abono</p>
+          </div>
+        </div>
+
+        <!-- 7. Facturas Pagadas -->
         <div class="dashboard-metric-card">
           <div class="dashboard-metric-icon purple">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
@@ -2329,8 +2346,11 @@
             <p class="dashboard-metric-label">Facturas Pagadas</p>
           </div>
         </div>
+      </div>
 
-        <!-- 6. Ingresos Facturados -->
+      <!-- Métricas de Ingresos ($) -->
+      <div class="dashboard-metrics-grid" style="margin-top:12px;">
+        <!-- 1. Ingresos Facturados -->
         <div class="dashboard-metric-card">
           <div class="dashboard-metric-icon teal">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
@@ -2343,7 +2363,20 @@
           </div>
         </div>
 
-        <!-- 7. Ingresos Pagados -->
+        <!-- 2. Ingresos con Abono -->
+        <div class="dashboard-metric-card">
+          <div class="dashboard-metric-icon orange">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <div class="dashboard-metric-info">
+            <p class="dashboard-metric-value">${{ filteredTotalDepositsOnly.toLocaleString() }}</p>
+            <p class="dashboard-metric-label">Ingresos con Abono</p>
+          </div>
+        </div>
+
+        <!-- 3. Ingresos Pagados Total -->
         <div class="dashboard-metric-card">
           <div class="dashboard-metric-icon green">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
@@ -2351,8 +2384,8 @@
             </svg>
           </div>
           <div class="dashboard-metric-info">
-            <p class="dashboard-metric-value">${{ filteredTotalPaid.toLocaleString() }}</p>
-            <p class="dashboard-metric-label">Ingresos Pagados</p>
+            <p class="dashboard-metric-value">${{ filteredTotalPaidOnly.toLocaleString() }}</p>
+            <p class="dashboard-metric-label">Ingresos Pagados Total</p>
           </div>
         </div>
       </div>
@@ -2587,14 +2620,27 @@
               </div>
               <div class="dashboard-orders-summary-info">
                 <div class="dashboard-orders-summary-value">{{ filteredOrderStats.active }}</div>
-                <div class="dashboard-orders-summary-label">Activas / Terminadas</div>
+                <div class="dashboard-orders-summary-label">Activas</div>
               </div>
               <div class="dashboard-orders-summary-pct">{{ filteredOrderStats.total > 0 ? Math.round((filteredOrderStats.active / filteredOrderStats.total) * 100) : 0 }}%</div>
+            </div>
+            <div class="dashboard-orders-summary-item completed">
+              <div class="dashboard-orders-summary-icon">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 6L9 17l-5-5"/>
+                </svg>
+              </div>
+              <div class="dashboard-orders-summary-info">
+                <div class="dashboard-orders-summary-value">{{ filteredOrderStats.completed }}</div>
+                <div class="dashboard-orders-summary-label">Terminadas</div>
+              </div>
+              <div class="dashboard-orders-summary-pct">{{ filteredOrderStats.total > 0 ? Math.round((filteredOrderStats.completed / filteredOrderStats.total) * 100) : 0 }}%</div>
             </div>
             <div class="dashboard-orders-summary-item finished">
               <div class="dashboard-orders-summary-icon">
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20 6L9 17l-5-5"/>
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
                 </svg>
               </div>
               <div class="dashboard-orders-summary-info">
@@ -2648,9 +2694,19 @@
               </div>
               <div class="dashboard-invoices-stat-info">
                 <div class="dashboard-invoices-stat-value">{{ filteredInvoiceStats.pending }}</div>
-                <div class="dashboard-invoices-stat-label">Pendientes</div>
+                <div class="dashboard-invoices-stat-label">Sin abono</div>
               </div>
-              <div class="dashboard-invoices-stat-money">${{ filteredInvoiceStats.pendingValue.toLocaleString() }}</div>
+            </div>
+            <div class="dashboard-invoices-stat-item deposit">
+              <div class="dashboard-invoices-stat-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+              </div>
+              <div class="dashboard-invoices-stat-info">
+                <div class="dashboard-invoices-stat-value">{{ filteredInvoiceStats.withDeposit }}</div>
+                <div class="dashboard-invoices-stat-label">Con abono</div>
+              </div>
             </div>
             <div class="dashboard-invoices-stat-item paid">
               <div class="dashboard-invoices-stat-icon">
@@ -2663,7 +2719,6 @@
                 <div class="dashboard-invoices-stat-value">{{ filteredInvoiceStats.paid }}</div>
                 <div class="dashboard-invoices-stat-label">Pagadas</div>
               </div>
-              <div class="dashboard-invoices-stat-money">${{ filteredInvoiceStats.paidValue.toLocaleString() }}</div>
             </div>
           </div>
           <div class="dashboard-invoices-pie-chart">
@@ -2730,8 +2785,15 @@
               <div class="form-group"><label>Modelo</label><input v-model="formInvoice.vehicleModel" type="text" class="form-input" placeholder="Ej: Corolla 2022" /></div>
             </div>
             <div class="form-row">
+              <div class="form-group"><label>Tipo de Vehículo</label><select v-model="formInvoice.vehicleType" class="form-input"><option value="">Seleccionar tipo</option><option value="Automovil">Automóvil</option><option value="Camioneta">Camioneta</option></select></div>
               <div class="form-group"><label>Placa</label><input v-model="formInvoice.vehicle" type="text" class="form-input" placeholder="Ej: ABC123" style="text-transform:uppercase;" /></div>
               <div class="form-group"><label>Kilometraje</label><input v-model="formInvoice.vehicleKm" type="text" class="form-input" placeholder="Ej: 45000" /></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Técnico / Asesor</label><select v-model="formInvoice.advisorName" class="form-input">
+                  <option value="">Seleccionar técnico...</option>
+                  <option v-for="emp in burnedEmployees" :key="emp.id" :value="emp.name">{{ emp.name }} ({{ emp.role || 'Sin cargo' }})</option>
+                </select></div>
             </div>
           </div>
 
@@ -2741,12 +2803,12 @@
             <table class="simple-table compact" style="margin-bottom:10px;">
               <thead class="table-header">
                 <tr>
-                  <th style="width:40%">Descripción</th>
-                  <th style="width:10%">Cant.</th>
-                  <th style="width:15%">Valor Unit.</th>
-                  <th style="width:12%">Valor Total</th>
+                  <th style="width:30%">Descripción</th>
+                  <th style="width:12%">Cant.</th>
+                  <th style="width:20%">Valor Unit.</th>
+                  <th style="width:14%">Valor Total</th>
                   <th style="width:8%">M.O</th>
-                  <th style="width:15%">Acción</th>
+                  <th style="width:16%">Acción</th>
                 </tr>
               </thead>
               <tbody>
@@ -2831,6 +2893,26 @@
             </div>
           </div>
 
+          <!-- Evidencias -->
+          <div class="form-section">
+            <div class="form-section-title">📷 Evidencias Fotográficas</div>
+            <div v-for="(ev, idx) in formInvoice.evidences" :key="idx" class="form-row" style="align-items:flex-end;">
+              <div class="form-group" style="flex:0 0 140px;">
+                <label>Tipo</label>
+                <select v-model="ev.type" class="form-input">
+                  <option value="actual">Actual</option>
+                  <option value="pasada">Pasada</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label>URL de la imagen</label>
+                <input v-model="ev.url" type="url" class="form-input" placeholder="https://blob.core.windows.net/evidences/foto.jpg" />
+              </div>
+              <button type="button" class="btn btn-sm btn-danger" @click="formInvoice.evidences.splice(idx, 1)" style="margin-bottom:2px;">−</button>
+            </div>
+            <button type="button" class="btn btn-secondary" @click="formInvoice.evidences.push({ type: 'actual', url: '' })">➕ Agregar evidencia</button>
+          </div>
+
           <div class="form-actions" style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;">
             <button type="button" class="btn btn-secondary" @click="showInvoiceModal = false">Cancelar</button>
 
@@ -2867,6 +2949,13 @@
             <div style="font-size:0.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">📋 Estado</div>
             <span class="status-badge" :class="String(previewInvoice?.status || 'Pendiente').toLowerCase()">{{ previewInvoice?.status || 'Pendiente' }}</span>
             <div style="font-size:0.85rem;color:var(--muted);margin-top:6px;">{{ previewInvoice?.createdAt ? formatShortDate(new Date(previewInvoice.createdAt)) : '-' }}</div>
+          </div>
+          <div class="pro-card" style="padding:12px;">
+            <div style="font-size:0.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">🔧 Orden</div>
+            <div style="font-weight:700;">#{{ previewInvoice?.orderId || '-' }}</div>
+            <div v-if="previewInvoice?.orderId" style="font-size:0.85rem;color:var(--muted);margin-top:6px;">
+              {{ getOrderForInventory(Number(previewInvoice.orderId))?.vehicle || '' }}
+            </div>
           </div>
         </div>
 
@@ -2919,7 +3008,7 @@
       <!-- Encabezado -->
       <div class="inv-header">
         <div class="inv-brand">
-          <img class="inv-logo" src="/images/logo.png" alt="Jobs Car logo" />
+          <img class="inv-logo" src="/images/logobn.png" alt="Jobs Car logo" />
           <div class="inv-brand-text">
             <div class="inv-company">JOB'S CAR</div>
             <div class="inv-tagline">Centro Automotriz Especializado</div>
@@ -2951,13 +3040,6 @@
             <div class="inv-line"><span class="inv-label">Modelo</span><span class="inv-val">{{ printInvoice.vehicleModel || '-' }}</span></div>
             <div class="inv-line"><span class="inv-label">Placa</span><span class="inv-val">{{ printInvoice.vehicle || '-' }}</span></div>
             <div class="inv-line"><span class="inv-label">Kilometraje</span><span class="inv-val">{{ printInvoice.vehicleKm || '-' }}</span></div>
-          </div>
-        </div>
-        <div class="inv-card">
-          <div class="inv-card-title">Validación</div>
-          <div class="inv-card-body">
-            <div class="inv-qr">{{ printInvoice.qrCode || '||||||||||||||||||||\n||||||||||||||||||||\n||||||||||||||||||||\n||||||||||||||||||||\n||||||||||||||||||||' }}</div>
-            <div class="inv-qr-hint">Escanee para validar la factura</div>
           </div>
         </div>
       </div>
@@ -3035,12 +3117,17 @@
       <div class="inv-photos">
         <div class="inv-section-title">Evidencia Fotográfica</div>
         <div class="inv-photo-grid">
-          <div class="inv-photo-group">
-            <div class="inv-photo-label">Antes del servicio</div>
+          <div v-for="(ev, idx) in (printInvoice.evidences || [])" :key="idx" class="inv-photo-group">
+            <div class="inv-photo-label">{{ ev.type === 'pasada' ? 'Pasada' : 'Actual' }}</div>
+            <img v-if="ev.url" :src="ev.url" class="inv-photo-thumb" alt="Evidencia" />
+            <div v-else class="inv-photo-thumb inv-placeholder">📷 Sin fotografía</div>
+          </div>
+          <div v-if="!(printInvoice.evidences && printInvoice.evidences.length)" class="inv-photo-group">
+            <div class="inv-photo-label">Actual</div>
             <div class="inv-photo-thumb inv-placeholder">📷 Sin fotografía</div>
           </div>
-          <div class="inv-photo-group">
-            <div class="inv-photo-label">Después del servicio</div>
+          <div v-if="!(printInvoice.evidences && printInvoice.evidences.length)" class="inv-photo-group">
+            <div class="inv-photo-label">Pasada</div>
             <div class="inv-photo-thumb inv-placeholder">📷 Sin fotografía</div>
           </div>
         </div>
@@ -3055,7 +3142,7 @@
         </div>
         <div class="inv-sig-box">
           <div class="inv-sig-line"></div>
-          <div class="inv-sig-label">Firma del Responsable</div>
+          <div class="inv-sig-label">Firma del Responsable (JOB'S)</div>
           <div class="inv-sig-name">JOB'S CAR</div>
         </div>
       </div>
@@ -3063,20 +3150,7 @@
       <!-- Pie de página -->
       <div class="inv-footer">
         <div class="inv-footer-col">
-          <span class="inv-footer-icon">📞</span>
-          <span>+57 300 123 4567</span>
-        </div>
-        <div class="inv-footer-col">
-          <span class="inv-footer-icon">📍</span>
-          <span>Calle 123 # 45-67, Bogotá</span>
-        </div>
-        <div class="inv-footer-col">
-          <span class="inv-footer-icon">✉️</span>
-          <span>contacto@jobscar.com</span>
-        </div>
-        <div class="inv-footer-col">
-          <span class="inv-footer-icon">🌐</span>
-          <span>www.jobscar.com</span>
+          <span>Carrera 79 No. 67 - 39 - Barrio San Marcos - Cal: 311 296 7517 - Bogotá, D.C</span>
         </div>
       </div>
     </div>
@@ -3807,13 +3881,14 @@ function mapInvoiceFromApi(inv: any) {
     clientEmail: inv.clientEmail || '',
     clientAddress: inv.clientAddress || '',
     vehicle: inv.placa || inv.vehicle || '',
+    vehicleType: inv.vehicleType || '',
     vehicleBrand: inv.vehicleBrand || '',
     vehicleModel: inv.vehiculo || inv.vehicleModel || '',
     vehicleKm: inv.vehicleKm || '',
     placa: inv.placa || '',
     advisorName: inv.advisorName || '',
     items: inv.items || [],
-    taxPct: inv.taxPct === true,
+    taxPct: typeof inv.taxPct === 'number' ? inv.taxPct : inv.taxPct === true ? 19 : 0,
     discount: inv.discount || 0,
     retention: inv.retention || 0,
     deposits: inv.deposits || [],
@@ -3821,12 +3896,13 @@ function mapInvoiceFromApi(inv: any) {
     payments: inv.formaDePago || '',
     status: inv.status || 'Pendiente',
     notes: inv.notes || '',
+    evidences: inv.evidences || [],
     total: typeof inv.total === 'number' ? inv.total : 0,
     abono: inv.abono || 0,
     saldo: inv.saldo || 0,
     orderId: inv.workOrderId ?? null,
     workOrderId: inv.workOrderId ?? null,
-    applyTax: inv.taxPct === true,
+    applyTax: inv.taxPct === true || typeof inv.taxPct === 'number',
     createdAt: inv.createdAt || inv.fechaCreacion || '',
     updatedAt: inv.updatedAt || ''
   }
@@ -3834,20 +3910,27 @@ function mapInvoiceFromApi(inv: any) {
 
 function enrichInvoiceFromRelatedData(inv: any) {
   const order = burnedOrders.find((o: any) => Number(o.id) === Number(inv.orderId))
+  const vehiclePlaca = inv.vehicle || order?.vehicle || ''
   const vehicleObj = order?.vehicleId
     ? (Array.isArray(burnedVehicles) ? burnedVehicles.find((v: any) => v.id === order.vehicleId) : null)
-    : (Array.isArray(burnedVehicles) ? burnedVehicles.find((v: any) => String(v.plate || '').toUpperCase() === String(inv.vehicle || '').toUpperCase()) : null)
+    : (Array.isArray(burnedVehicles) && vehiclePlaca ? burnedVehicles.find((v: any) => String(v.plate || '').toUpperCase() === String(vehiclePlaca).toUpperCase()) : null)
   const clientObj = vehicleObj?.clientId
     ? (Array.isArray(burnedClients.value) ? burnedClients.value.find((c: any) => c.id === vehicleObj.clientId) : null)
-    : null
+    : (Array.isArray(burnedClients.value) && (inv.client || order?.client)
+      ? burnedClients.value.find((c: any) => String(c.name || '').toLowerCase() === String(inv.client || order?.client || '').toLowerCase())
+      : null)
   return {
     ...inv,
-    client: inv.client || clientObj?.name || '',
+    client: inv.client || order?.client || clientObj?.name || '',
     clientPhone: inv.clientPhone || clientObj?.phone || '',
     clientEmail: inv.clientEmail || clientObj?.email || '',
-    vehicleBrand: inv.vehicleBrand || vehicleObj?.brand || '',
-    vehicleModel: inv.vehicleModel || vehicleObj?.model || '',
+    vehicle: inv.vehicle || order?.vehicle || vehicleObj?.plate || '',
+    placa: inv.placa || inv.vehicle || order?.vehicle || vehicleObj?.plate || '',
+    vehicleType: inv.vehicleType || vehicleObj?.vehicleType || order?.vehicleType || '',
+    vehicleBrand: inv.vehicleBrand || vehicleObj?.brand || order?.vehicleBrand || '',
+    vehicleModel: inv.vehicleModel || vehicleObj?.model || order?.vehicleModel || '',
     vehicleKm: inv.vehicleKm || (vehicleObj?.km ? String(vehicleObj.km) : ''),
+    advisorName: inv.advisorName || order?.mechanic || '',
   }
 }
 
@@ -3881,6 +3964,7 @@ const formInvoice = reactive({
   clientEmail: '',
   clientAddress: '',
   vehicle: '',
+  vehicleType: '',
   vehicleBrand: '',
   vehicleModel: '',
   vehicleKm: '',
@@ -3894,6 +3978,7 @@ const formInvoice = reactive({
   payments: '',
   status: 'Pendiente',
   notes: '',
+  evidences: [] as { type: string; url: string }[],
   createdAt: '',
   orderId: null
 })
@@ -4020,12 +4105,13 @@ function openCreateInvoice() {
   Object.assign(formInvoice, {
     id: 0,
     client: '', clientPhone: '', clientEmail: '', clientAddress: '',
-    vehicle: '', vehicleBrand: '', vehicleModel: '', vehicleKm: '',
+    vehicle: '', vehicleType: '', vehicleBrand: '', vehicleModel: '', vehicleKm: '',
     placa: '',
     advisorName: '',
   items: [{ description: '', qty: 1, price: 0, isLabor: false }],
     taxPct: 19, applyTax: true, discount: 0, retention: 0, deposits: [],
     payments: '', status: 'Pendiente', notes: '',
+    evidences: [],
     createdAt: new Date().toISOString(),
     orderId: null
   })
@@ -4133,6 +4219,7 @@ function createInvoiceFromOrder(order: any) {
     formInvoice.clientEmail = client?.email || ''
     formInvoice.clientAddress = ''
     formInvoice.vehicle = order.vehicle || ''
+    formInvoice.vehicleType = vehicle?.vehicleType || ''
     formInvoice.vehicleBrand = vehicle?.brand || ''
     formInvoice.vehicleModel = vehicle?.model || ''
     formInvoice.vehicleKm = vehicle?.km ? String(vehicle.km) : ''
@@ -4157,6 +4244,36 @@ function createInvoiceFromOrder(order: any) {
   }
 }
 
+async function createCashMovementFromDeposit(invoiceId: number, deposit: any, clientName: string) {
+  try {
+    const response = await moneyMovementService.create({
+      reference: `Fact #${invoiceId}`,
+      name: clientName || 'Cliente',
+      concept: `Abono factura #${invoiceId}`,
+      movement: 'INGRESO',
+      amount: Number(deposit.amount) || 0,
+      account: 'Banco',
+      observation: deposit.method || '',
+    })
+    const created = response.data
+    if (created) {
+      burnedCashMovements.push({
+        id: created.id,
+        date: created.createdAt ? created.createdAt.slice(0, 10) : deposit.date,
+        reference: created.reference || '',
+        name: created.name,
+        concept: created.concept,
+        movement: created.movement === 'INGRESO' ? 'Ingreso' : 'Egreso',
+        amount: created.amount,
+        account: created.account,
+        observation: created.observation || '',
+      })
+    }
+  } catch (error: any) {
+    console.error('Error creando movimiento de caja desde abono:', error)
+  }
+}
+
 async function saveInvoice() {
   if (!formInvoice.client) { alert('Cliente requerido'); return }
   const payload: any = {
@@ -4166,6 +4283,7 @@ async function saveInvoice() {
     clientAddress: formInvoice.clientAddress || '',
     placa: formInvoice.vehicle || '',
     vehicle: [formInvoice.vehicleBrand, formInvoice.vehicleModel].filter(Boolean).join(' ') || formInvoice.vehicle || '',
+    vehicleType: formInvoice.vehicleType || '',
     vehicleBrand: formInvoice.vehicleBrand || '',
     vehicleModel: formInvoice.vehicleModel || '',
     vehicleKm: formInvoice.vehicleKm || '',
@@ -4178,19 +4296,39 @@ async function saveInvoice() {
     formaDePago: formInvoice.payments || '',
     status: formInvoice.status || 'Pendiente',
     notes: formInvoice.notes || '',
+    evidences: formInvoice.evidences.map((e: any) => ({ type: e.type || 'actual', url: e.url || '' })),
     workOrderId: formInvoice.orderId || null
   }
+  const previousDeposits = editingInvoice.value
+    ? (invoices.find((i: any) => i.id === editingInvoice.value.id)?.deposits || [])
+    : []
   try {
+    let savedInvoiceId: number | null = null
     if (editingInvoice.value) {
       const res = await invoiceService.update(editingInvoice.value.id, payload)
       const idx = invoices.findIndex((i: any) => i.id === editingInvoice.value.id)
       if (idx > -1) {
       invoices.splice(idx, 1, enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
       }
+      savedInvoiceId = res.data?.id || editingInvoice.value.id
       editingInvoice.value = null
     } else {
       const res = await invoiceService.create(payload)
       invoices.push(enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
+      savedInvoiceId = res.data?.id || null
+    }
+    // Crear ingresos de caja automáticos por cada abono nuevo
+    const savedInvoice = invoices.find((i: any) => i.id === savedInvoiceId)
+    const newDeposits = savedInvoice?.deposits || formInvoice.deposits || []
+    for (const deposit of newDeposits) {
+      const exists = previousDeposits.some((d: any) =>
+        d.date === deposit.date &&
+        Number(d.amount) === Number(deposit.amount) &&
+        d.method === deposit.method
+      )
+      if (!exists) {
+        await createCashMovementFromDeposit(savedInvoiceId || 0, deposit, formInvoice.client)
+      }
     }
     showInvoiceModal.value = false
   } catch (e: any) {
@@ -4206,6 +4344,7 @@ function editInvoice(inv: any) {
   formInvoice.clientEmail = inv.clientEmail || ''
   formInvoice.clientAddress = inv.clientAddress || ''
   formInvoice.vehicle = inv.vehicle || ''
+  formInvoice.vehicleType = inv.vehicleType || ''
   formInvoice.vehicleBrand = inv.vehicleBrand || ''
   formInvoice.vehicleModel = inv.vehicleModel || ''
   formInvoice.vehicleKm = inv.vehicleKm || ''
@@ -4219,7 +4358,9 @@ function editInvoice(inv: any) {
   formInvoice.payments = inv.payments || ''
   formInvoice.status = inv.status || 'Pendiente'
   formInvoice.notes = inv.notes || ''
+  formInvoice.evidences = Array.isArray(inv.evidences) ? inv.evidences.map((e: any) => ({ type: e.type || 'actual', url: e.url || '' })) : []
   formInvoice.createdAt = inv.createdAt || new Date().toISOString()
+  formInvoice.orderId = inv.orderId || inv.workOrderId || null
   showInvoiceModal.value = true
 }
 
@@ -4233,9 +4374,9 @@ function buildInvoiceHtml(inv: any): string {
   const itemsHtml = items.map((it: any, idx: number) => {
     const qty = it.qty ?? 1
     const price = Number(it.price) || 0
-    return `<tr><td class="inv-col-num">${idx + 1}</td><td class="inv-col-desc">${it.description || '-'}</td><td class="inv-col-qty">${qty}</td><td class="inv-col-price">$${price.toLocaleString()}</td><td class="inv-col-tax">${(inv.applyTax !== false && (inv.taxPct || 0) > 0) ? (inv.taxPct || 19) + '%' : '-'}</td><td class="inv-col-total">$${(qty * price).toLocaleString()}</td></tr>`
+    return `<tr><td class="inv-col-num">${idx + 1}</td><td class="inv-col-desc">${it.description || '-'}</td><td class="inv-col-qty">${qty}</td><td class="inv-col-price">$${price.toLocaleString()}</td><td class="inv-col-total">$${(qty * price).toLocaleString()}</td></tr>`
   }).join('')
-  const fallbackRow = `<tr><td class="inv-col-num">1</td><td class="inv-col-desc">Servicio general</td><td class="inv-col-qty">1</td><td class="inv-col-price">$${subtotal.toLocaleString()}</td><td class="inv-col-tax">${(inv.applyTax !== false && (inv.taxPct || 0) > 0) ? (inv.taxPct || 19) + '%' : '-'}</td><td class="inv-col-total">$${subtotal.toLocaleString()}</td></tr>`
+  const fallbackRow = `<tr><td class="inv-col-num">1</td><td class="inv-col-desc">Servicio general</td><td class="inv-col-qty">1</td><td class="inv-col-price">$${subtotal.toLocaleString()}</td><td class="inv-col-total">$${subtotal.toLocaleString()}</td></tr>`
   const statusClass = String(inv.status || 'Pendiente').toLowerCase()
   const statusLabel = inv.status || 'Pendiente'
   const discountRow = inv.discount ? `<div class="inv-totals-row discount"><span>Descuento</span><span>-$${Number(inv.discount).toLocaleString()}</span></div>` : ''
@@ -4244,75 +4385,156 @@ function buildInvoiceHtml(inv: any): string {
   const depositTotal = invoiceDepositTotal(inv)
   const depositRow = depositTotal > 0 ? `<div class="inv-totals-row" style="color:#166534;"><span>ABONADO</span><span>$${depositTotal.toLocaleString()}</span></div>` : ''
   const balanceRow = depositTotal > 0 && total > depositTotal ? `<div class="inv-totals-row" style="color:#b45309;"><span>SALDO PENDIENTE</span><span>$${(total - depositTotal).toLocaleString()}</span></div>` : ''
-  const photosHtml = (Array.isArray(inv.photos) ? inv.photos : []).map((ph: string) => `<img src="${ph}" class="inv-photo" alt="Foto" />`).join('')
+  const photosHtml = (Array.isArray(inv.evidences) ? inv.evidences : []).map((ev: any) => `<img src="${ev.url}" class="inv-photo" alt="Evidencia ${ev.type || ''}" />`).join('')
   return `<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Factura #FV-${String(inv.id).padStart(6,'0')} - JOB'S CAR</title>
 <style>
-@page { margin: 10mm 8mm; size: A4 portrait; }
-body { margin:0; padding:0; background:#fff; color:#111827; font-family:'Inter','Segoe UI',Arial,sans-serif; }
+@page { margin: 0; size: A4 portrait; }
+body { margin:0; padding:0; background:#fff; color:#111827; font-family:'Inter','Segoe UI',Arial,sans-serif; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
 .inv-sheet { max-width:210mm; margin:0 auto; padding:12mm 10mm; }
-.inv-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; padding-bottom:10px; border-bottom:2px solid #1f2937; }
-.inv-header-left { display:flex; align-items:center; gap:10px; }
-.inv-logo { height:46px; width:auto; display:block; }
-.inv-brand-text h1 { font-size:18px; font-weight:700; color:#111827; margin:0; line-height:1.2; }
-.inv-brand-text p { font-size:11px; color:#6b7280; margin:2px 0 0 0; line-height:1.2; }
-.inv-header-right { text-align:right; }
-.inv-header-right .inv-doc-title { font-size:16px; font-weight:700; color:#1f2937; margin:0; }
-.inv-header-right .inv-doc-id { font-size:12px; color:#6b7280; margin:4px 0 0 0; }
+.inv-header { display:flex; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:2px solid #1f2937; }
+.inv-header-left { display:flex; align-items:center; gap:12px; flex:0 0 auto; }
+.inv-header-separator { width:1px; height:70px; background:#e5e7eb; margin:0 20px; }
+.inv-header-center { text-align:left; flex:0 0 auto; }
+.inv-doc-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#6b7280; margin:0; }
+.inv-doc-id { font-size:28px; font-weight:800; color:#111827; margin:4px 0 0 0; }
+.inv-logo { height:90px; width:auto; display:block; }
+.inv-brand-text h1 { font-size:28px; font-weight:800; color:#111827; margin:0; line-height:1.1; }
+.inv-brand-text p { font-size:10px; color:#6b7280; margin:3px 0 0 0; letter-spacing:0.1em; text-transform:uppercase; }
+.inv-header-right { text-align:left; flex:0 0 auto; display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.inv-header-meta { display:flex; align-items:flex-start; gap:8px; }
+.inv-header-meta svg { color:#9ca3af; margin-top:2px; }
+.inv-meta-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#9ca3af; }
+.inv-meta-val { font-size:12px; color:#374151; font-weight:500; }
 .inv-status { display:inline-block; padding:3px 10px; border-radius:999px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
 .inv-status.pendiente { background:#fef9c3; color:#854d0e; border:1px solid #fde047; }
 .inv-status.pagada { background:#dcfce7; color:#166534; border:1px solid #86efac; }
 .inv-status.abonada, .inv-status.abonado { background:#dbeafe; color:#1e40af; border:1px solid #93c5fd; }
 .inv-status.anulada { background:#fee2e2; color:#991b1b; border:1px solid #fca5a5; }
-.inv-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
-.inv-card { background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:10px 12px; }
-.inv-card h3 { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#9ca3af; margin:0 0 6px 0; }
-.inv-card p { font-size:11px; color:#374151; margin:0 0 3px 0; line-height:1.3; }
-.inv-card .inv-val { font-weight:600; color:#111827; }
-.inv-table { width:100%; border-collapse:collapse; margin-bottom:14px; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; }
-.inv-table th { background:#f9fafb; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#6b7280; padding:8px 10px; text-align:left; border-bottom:1px solid #e5e7eb; }
-.inv-table td { font-size:11px; color:#374151; padding:8px 10px; border-bottom:1px solid #f3f4f6; }
+.inv-info-grid { display:flex; align-items:stretch; gap:0; margin-bottom:14px; border:1px solid #e2e8f0; border-radius:12px; background:#f9fafb; overflow:hidden; }
+.inv-info-col { flex:1; padding:16px 20px; }
+.inv-info-separator { width:1px; border-left:1px solid #d1d5db; margin:12px 0; }
+.inv-info-header { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.inv-info-header svg { color:#6b7280; flex-shrink:0; }
+.inv-info-label { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:#9ca3af; }
+.inv-info-name { font-size:14px; font-weight:700; color:#111827; margin-top:2px; }
+.inv-info-divider { height:1px; border-bottom:1px solid #d1d5db; margin:10px 0; }
+.inv-info-row { display:flex; align-items:center; gap:8px; font-size:11px; color:#374151; margin-bottom:6px; }
+.inv-info-row svg { color:#9ca3af; flex-shrink:0; }
+.inv-info-pair { display:flex; align-items:baseline; gap:10px; margin-bottom:5px; font-size:11px; }
+.inv-info-key { font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:#9ca3af; min-width:70px; }
+.inv-info-val { color:#374151; font-weight:500; }
+.inv-table { width:100%; border-collapse:collapse; margin:0 auto 14px auto; border:1px solid #e5e7eb; border-radius:8px; overflow:hidden; }
+.inv-table th { background:#f9fafb; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#6b7280; padding:8px 10px; text-align:center; border-bottom:1px solid #e5e7eb; }
+.inv-table td { font-size:11px; color:#374151; padding:8px 10px; text-align:center; border-bottom:1px solid #f3f4f6; }
 .inv-table tr:last-child td { border-bottom:none; }
+.inv-col-desc { text-align:left !important; }
 .inv-col-num { width:30px; text-align:center; }
 .inv-col-qty { width:50px; text-align:center; }
-.inv-col-price,.inv-col-tax,.inv-col-total { width:90px; text-align:right; }
+.inv-col-price,.inv-col-total { width:90px; text-align:center; }
 .inv-totals { display:flex; justify-content:flex-end; margin-bottom:14px; }
 .inv-totals-box { width:260px; border:1px solid #e5e7eb; border-radius:8px; padding:12px 14px; background:#f9fafb; }
 .inv-totals-row { display:flex; justify-content:space-between; font-size:11px; margin-bottom:6px; color:#374151; }
 .inv-totals-row.discount { color:#dc2626; }
 .inv-totals-row.retention { color:#ea580c; }
 .inv-totals-row.total { font-size:14px; font-weight:700; color:#111827; margin-top:8px; padding-top:8px; border-top:1px solid #d1d5db; }
-.inv-notes-box { background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:10px 12px; margin-bottom:14px; }
-.inv-notes-box h3 { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#6b7280; margin:0 0 6px 0; }
-.inv-notes-box p { font-size:10px; color:#374151; margin:0; line-height:1.4; }
-.inv-photos { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
-.inv-photo { width:90px; height:60px; object-fit:cover; border-radius:4px; border:1px solid #e5e7eb; }
-.inv-signatures { display:flex; gap:20px; margin-bottom:14px; }
-.inv-sig-block { flex:1; border-top:1px solid #9ca3af; padding-top:6px; text-align:center; }
-.inv-sig-block p { font-size:9px; color:#6b7280; margin:0; }
-.inv-footer { text-align:center; font-size:9px; color:#9ca3af; border-top:1px solid #e5e7eb; padding-top:8px; }
+.inv-evidence-section { border:1px solid #e5e7eb; border-radius:12px; background:#f9fafb; padding:16px; margin-bottom:14px; }
+.inv-evidence-header { display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:12px; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:0.5px; }
+.inv-evidence-header svg { color:#6b7280; }
+.inv-evidence-grid { display:flex; gap:16px; }
+.inv-evidence-col { flex:1; }
+.inv-evidence-title { font-size:10px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+.inv-evidence-photos { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
+.inv-evidence-photo { width:100%; height:80px; object-fit:cover; border-radius:8px; border:1px solid #e5e7eb; filter: grayscale(100%); }
+.inv-evidence-placeholder { width:100%; height:80px; border-radius:8px; background:#f3f4f6; border:2px dashed #d1d5db; display:flex; align-items:center; justify-content:center; font-size:12px; color:#9ca3af; }
+.inv-evidence-separator { width:1px; background:#e5e7eb; margin:0 8px; }
+.inv-bottom-section { display:flex; gap:16px; margin-bottom:14px; }
+.inv-bottom-card { flex:1; border:1px solid #e5e7eb; border-radius:12px; background:#f9fafb; padding:16px; }
+.inv-bottom-header { display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:10px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.5px; }
+.inv-bottom-header svg { color:#6b7280; }
+.inv-signature-line { display:flex; flex-direction:column; align-items:center; padding-top:20px; }
+.inv-sig-line { width:200px; border-top:1px solid #9ca3af; padding-top:8px; }
+.inv-sig-text { font-size:10px; color:#6b7280; margin-top:4px; }
+.inv-notes-lines { display:flex; flex-direction:column; gap:8px; }
+.inv-note-line { height:1px; background:#e5e7eb; border-bottom:1px dashed #d1d5db; }
+.inv-footer { display:flex; align-items:center; justify-content:space-between; border-top:1px solid #e5e7eb; padding-top:12px; margin-top:8px; font-size:9px; color:#6b7280; }
+.inv-footer-left { display:flex; align-items:center; gap:8px; }
+.inv-footer-left svg { color:#6b7280; flex-shrink:0; }
+.inv-footer-tagline { font-size:8px; color:#9ca3af; margin-top:2px; }
+.inv-footer-center { display:flex; align-items:center; gap:6px; }
+.inv-footer-center svg { color:#6b7280; flex-shrink:0; }
+.inv-footer-right { display:flex; align-items:center; gap:6px; }
+.inv-footer-right svg { color:#6b7280; flex-shrink:0; }
 </style>
 </head>
 <body>
   <div class="inv-sheet">
   <div class="inv-header">
-    <div class="inv-header-left"><img src="/images/logobn.png" class="inv-logo" alt="JOB'S CAR" /><div class="inv-brand-text"><h1>JOB'S CAR</h1><p>Taller especializado</p></div></div>
-    <div class="inv-header-right">
+    <div class="inv-header-left">
+      <img src="/images/logobn.png" class="inv-logo" alt="JOB'S CAR" />
+      <div class="inv-brand-text"><h1>JOB'S CAR</h1><p>CENTRO AUTOMOTRIZ ESPECIALIZADO</p></div>
+    </div>
+    <div class="inv-header-separator"></div>
+    <div class="inv-header-center">
       <p class="inv-doc-title">FACTURA DE VENTA</p>
       <p class="inv-doc-id">No. FV-${String(inv.id).padStart(6,'0')}</p>
-      <span class="inv-status ${statusClass}">${statusLabel}</span>
+    </div>
+    <div class="inv-header-separator"></div>
+    <div class="inv-header-right">
+      <div class="inv-header-meta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        <div>
+          <div class="inv-meta-label">FECHA EMISIÓN</div>
+          <div class="inv-meta-val">${dateStr}</div>
+        </div>
+      </div>
+      <div class="inv-header-meta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        <div>
+          <div class="inv-meta-label">ESTADO</div>
+          <span class="inv-status ${statusClass}">${statusLabel}</span>
+        </div>
+      </div>
     </div>
   </div>
-  <div class="inv-grid">
-    <div class="inv-card"><h3>Cliente</h3><p class="inv-val">${inv.client || '-'}</p><p>${inv.clientPhone || '-'}</p><p>${inv.clientEmail || '-'}</p><p>${inv.clientAddress || '-'}</p></div>
-    <div class="inv-card"><h3>Vehículo</h3><p class="inv-val">${inv.vehicle || '-'} — ${inv.vehicleBrand || '-'} ${inv.vehicleModel || '-'}</p><p>Km: ${inv.vehicleKm || '-'}</p></div>
-    <div class="inv-card"><h3>Detalles</h3><p><strong>Fecha:</strong> ${dateStr}</p><p><strong>Vence:</strong> ${dueStr}</p></div>
+  <div class="inv-info-grid">
+    <div class="inv-info-col">
+      <div class="inv-info-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <div>
+          <div class="inv-info-label">CLIENTE</div>
+          <div class="inv-info-name">${inv.client || '-'}</div>
+        </div>
+      </div>
+      <div class="inv-info-divider"></div>
+      <div class="inv-info-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+        <span>${inv.clientPhone || '-'}</span>
+      </div>
+      <div class="inv-info-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        <span>${inv.clientEmail || '-'}</span>
+      </div>
+    </div>
+    <div class="inv-info-separator"></div>
+    <div class="inv-info-col">
+      <div class="inv-info-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"></path><circle cx="6.5" cy="16.5" r="2.5"></circle><circle cx="16.5" cy="16.5" r="2.5"></circle></svg>
+        <div>
+          <div class="inv-info-label">VEHÍCULO</div>
+          <div class="inv-info-name">${inv.vehicleBrand || ''} ${inv.vehicleModel || ''}</div>
+        </div>
+      </div>
+      <div class="inv-info-divider"></div>
+      <div class="inv-info-pair"><span class="inv-info-key">PLACA</span><span class="inv-info-val">${inv.vehicle || '-'}</span></div>
+      <div class="inv-info-pair"><span class="inv-info-key">MODELO</span><span class="inv-info-val"> ${inv.vehicleModel || ''}</span></div>
+      <div class="inv-info-pair"><span class="inv-info-key">KILOMETRAJE</span><span class="inv-info-val">${inv.vehicleKm || '-'}</span></div>
+    </div>
   </div>
   <table class="inv-table">
-    <thead><tr><th class="inv-col-num">#</th><th class="inv-col-desc">Descripción</th><th class="inv-col-qty">Cant.</th><th class="inv-col-price">Precio</th><th class="inv-col-tax">IVA</th><th class="inv-col-total">Total</th></tr></thead>
+    <thead><tr><th class="inv-col-num">#</th><th class="inv-col-desc">Descripción</th><th class="inv-col-qty">Cantidad</th><th class="inv-col-price">Valor Unitario</th><th class="inv-col-total">Total</th></tr></thead>
     <tbody>${itemsHtml || fallbackRow}</tbody>
   </table>
   <div class="inv-totals">
@@ -4326,14 +4548,74 @@ body { margin:0; padding:0; background:#fff; color:#111827; font-family:'Inter',
       ${balanceRow}
     </div>
   </div>
-  <div class="inv-notes-box"><h3>Notas / Condiciones</h3><p>${inv.notes || 'Sin notas adicionales.'}</p></div>
-  <div class="inv-photos">${photosHtml}</div>
-  <div class="inv-signatures">
-    <div class="inv-sig-block"><p>Firma del Cliente</p></div>
-    <div class="inv-sig-block"><p>Firma del Responsable</p></div>
-    <div class="inv-sig-block"><p>Sello del Taller</p></div>
+  <div class="inv-evidence-section">
+    <div class="inv-evidence-header">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+      <span>4. EVIDENCIA FOTOGRÁFICA</span>
+    </div>
+    <div class="inv-evidence-grid">
+      <div class="inv-evidence-col">
+        <div class="inv-evidence-title">ANTES DEL SERVICIO</div>
+        <div class="inv-evidence-photos">
+          ${inv.evidences && inv.evidences.filter((e: any) => e.type === 'pasada').map((e: any) => `<img src="${e.url}" class="inv-evidence-photo" alt="Antes" />`).join('') || '<div class="inv-evidence-placeholder">📷 Sin fotografía</div>'}
+        </div>
+      </div>
+      <div class="inv-evidence-separator"></div>
+      <div class="inv-evidence-col">
+        <div class="inv-evidence-title">DESPUÉS DEL SERVICIO</div>
+        <div class="inv-evidence-photos">
+          ${inv.evidences && inv.evidences.filter((e: any) => e.type !== 'pasada').map((e: any) => `<img src="${e.url}" class="inv-evidence-photo" alt="Después" />`).join('') || '<div class="inv-evidence-placeholder">📷 Sin fotografía</div>'}
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="inv-footer"><p>Generado por JOB'S CAR — Gracias por confiar en nosotros</p></div>
+
+  <div class="inv-bottom-section">
+    <div class="inv-bottom-card">
+      <div class="inv-bottom-header">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>5. FIRMAS</span>
+      </div>
+      <div class="inv-signature-line">
+        <div class="inv-sig-line"></div>
+        <div class="inv-sig-text">Firma del Encargado JOBS CAR</div>
+      </div>
+    </div>
+    <div class="inv-bottom-card">
+      <div class="inv-bottom-header">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span>NOTAS ADICIONALES</span>
+      </div>
+      <div class="inv-notes-lines">
+        <div class="inv-note-line"></div>
+        <div class="inv-note-line"></div>
+        <div class="inv-note-line"></div>
+        <div class="inv-note-line"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="inv-footer">
+    <div class="inv-footer-left">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      <div>
+        <div>Gracias por confiar en <strong>JOB'S CAR</strong></div>
+        <div class="inv-footer-tagline">Calidad, honestidad y confianza.</div>
+      </div>
+    </div>
+    <div class="inv-footer-center">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+      <span>311 296 7517</span>
+    </div>
+    <div class="inv-footer-center">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+      <span>Carrera 79 No. 67 - 39, Bogotá D.C</span>
+    </div>
+    <div class="inv-footer-right">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+      <span>www.jobscar.com</span>
+    </div>
+  </div>
 </div>
 </body>
 </html>`
@@ -4598,6 +4880,7 @@ const newInventoryItem = reactive({
 })
 const editingInventory = ref<any | null>(null)
 const expandedInventoryOrders = reactive<Set<number>>(new Set())
+const expandedCashReferences = reactive<Set<string>>(new Set())
 
 function toggleInventoryOrder(orderId: number) {
   if (expandedInventoryOrders.has(orderId)) {
@@ -4607,12 +4890,39 @@ function toggleInventoryOrder(orderId: number) {
   }
 }
 
+function toggleCashReference(reference: string) {
+  if (expandedCashReferences.has(reference)) {
+    expandedCashReferences.delete(reference)
+  } else {
+    expandedCashReferences.add(reference)
+  }
+}
+
 function getInventoryGroups() {
   const groups: Record<number, any[]> = {}
   burnedInventory.forEach((item: any) => {
     const oid = item.orderId || 0
     if (!groups[oid]) groups[oid] = []
     groups[oid].push(item)
+  })
+  return groups
+}
+
+function getCashGroups() {
+  const groups: Record<string, any[]> = {}
+  const filtered = burnedCashMovements.filter((e: any) => {
+    if (!searchCash.value) return true
+    const q = searchCash.value.toLowerCase()
+    return (e.name && e.name.toLowerCase().includes(q)) ||
+      (e.concept && e.concept.toLowerCase().includes(q)) ||
+      (e.reference && e.reference.toLowerCase().includes(q)) ||
+      (e.account && e.account.toLowerCase().includes(q)) ||
+      (e.observation && e.observation.toLowerCase().includes(q))
+  })
+  filtered.forEach((entry: any) => {
+    const ref = entry.reference || 'Sin referencia'
+    if (!groups[ref]) groups[ref] = []
+    groups[ref].push(entry)
   })
   return groups
 }
@@ -5615,15 +5925,16 @@ const reportsCount = computed(() => burnedReports.servicios.length)
 // --- Dashboard computed values ---
 const dashboardBiweeklySeries = computed(() => {
   try {
-    if (!Array.isArray(burnedReports.ingresos)) return []
+    if (!Array.isArray(burnedCashMovements) || burnedCashMovements.length === 0) return []
     const buckets = new Map<string, number>()
-    burnedReports.ingresos.forEach((r: any) => {
-      const d = new Date(r.fecha)
+    burnedCashMovements.forEach((m: any) => {
+      if (m.movement !== 'Ingreso') return
+      const d = new Date(m.date)
       if (Number.isNaN(d.getTime())) return
       const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
       const half = d.getDate() <= 15 ? 'Q1' : 'Q2'
       const key = `${monthKey} ${half}`
-      buckets.set(key, (buckets.get(key) || 0) + (Number(r.total) || 0))
+      buckets.set(key, (buckets.get(key) || 0) + (Number(m.amount) || 0))
     })
     return Array.from(buckets.entries())
       .map(([label, value]) => ({ label, value }))
@@ -5755,12 +6066,26 @@ const filteredVehiclesCount = computed(() => {
   return plates.size
 })
 
-const filteredPendingInvoices = computed(() => {
+const filteredTotalInvoices = computed(() => {
+  if (!Array.isArray(invoices)) return 0
+  return invoices.filter((inv: any) => matchesDashboardMetricsPeriod(inv.createdAt)).length
+})
+
+const filteredWithoutDepositInvoices = computed(() => {
   if (!Array.isArray(invoices)) return 0
   return invoices.filter((inv: any) => {
     if (!matchesDashboardMetricsPeriod(inv.createdAt)) return false
     const st = String(inv.status || '').toLowerCase().trim()
     return !(st === 'pagada' || st === 'pagado' || st === 'completed' || st === 'completada' || st === 'abonada' || st === 'abonado')
+  }).length
+})
+
+const filteredWithDepositInvoices = computed(() => {
+  if (!Array.isArray(invoices)) return 0
+  return invoices.filter((inv: any) => {
+    if (!matchesDashboardMetricsPeriod(inv.createdAt)) return false
+    const st = String(inv.status || '').toLowerCase().trim()
+    return st === 'abonada' || st === 'abonado'
   }).length
 })
 
@@ -5801,6 +6126,24 @@ const filteredTotalDeposits = computed(() => {
   if (!Array.isArray(invoices)) return 0
   return invoices.filter((inv: any) => matchesDashboardMetricsPeriod(inv.createdAt))
     .reduce((sum: number, inv: any) => sum + invoiceDepositTotal(inv), 0)
+})
+
+const filteredTotalDepositsOnly = computed(() => {
+  if (!Array.isArray(invoices)) return 0
+  return invoices.filter((inv: any) => {
+    if (!matchesDashboardMetricsPeriod(inv.createdAt)) return false
+    const st = String(inv.status || '').toLowerCase().trim()
+    return st === 'abonado' || st === 'abonada'
+  }).reduce((sum: number, inv: any) => sum + invoiceDepositTotal(inv), 0)
+})
+
+const filteredTotalPaidOnly = computed(() => {
+  if (!Array.isArray(invoices)) return 0
+  return invoices.filter((inv: any) => {
+    if (!matchesDashboardMetricsPeriod(inv.createdAt)) return false
+    const st = String(inv.status || '').toLowerCase().trim()
+    return st === 'pagada' || st === 'pagado' || st === 'completed' || st === 'completada'
+  }).reduce((sum: number, inv: any) => sum + Number(inv.total || 0), 0)
 })
 
 const filteredTotalBalance = computed(() => {
@@ -6163,8 +6506,8 @@ function exportOrderPdf(order: any) {
       .service-order-card { max-width: 920px; margin: 10mm auto; padding: 0; box-sizing: border-box; background: #ffffff; border-radius: 12px; overflow: visible; box-shadow: 0 6px 22px rgba(16,24,40,0.06); border: 1px solid rgba(0,0,0,0.06); }
       .so-topbar { display:flex; justify-content:space-between; align-items:stretch; gap:16px; padding: 18px 20px; background: transparent; color:#111827; border-top-left-radius:12px; border-top-right-radius:12px; }
       .so-brand { display:flex; align-items:center; gap:14px; min-width:0; }
-      .so-logo { width:98px; height:68px; flex:0 0 auto; border-radius:12px; background:#000000;  display:inline-flex; align-items:center; justify-content:center; box-shadow: 0 6px 20px rgba(11,12,13,0.12); }
-      .so-logo img { width:100%; height:100%; object-fit:cover; border-radius:8px; display:block; }
+      .so-logo { width:140px; height:96px; flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; }
+      .so-logo img { width:100%; height:100%; object-fit:contain; display:block; }
       .so-brand-copy { min-width:0; }
       .so-kicker { margin:0 0 4px 0; font-size:9pt; letter-spacing: .16em; text-transform:uppercase; color:#9ca3af; }
       .so-brand-copy h1 { margin:0; font-size:22pt; line-height:1.02; color:#9ca3af; font-weight:800; }
@@ -6188,7 +6531,7 @@ function exportOrderPdf(order: any) {
       <div class="service-order-card">
         <div class="so-topbar">
           <div class="so-brand">
-            <img class="so-logo" src="${location.origin}/images/logo.png" alt="Jobs Car logo" />
+            <img class="so-logo" src="${location.origin}/images/logobn.png" alt="Jobs Car logo" />
             <div class="so-brand-copy">
               <p class="so-kicker">Orden de servicio</p>
               <h1>JOB'S CAR</h1>
@@ -6436,9 +6779,9 @@ function statusClass(status: string) {
 function isOrderBillable(status: string): boolean {
   if (!status) return false
   const s = normalizeText(status.toString().trim())
-  // Solo permitir facturar desde: En Proceso, Pendiente
-  // No permitir facturar desde: Recepción, Diagnóstico, Terminado, Entregado
-  return s === 'en proceso' || s === 'en-proceso' || s === 'pendiente'
+  // Solo permitir facturar desde: En Proceso, Pendiente, Diagnóstico
+  // No permitir facturar desde: Recepción, Terminado, Entregado
+  return s === 'en proceso' || s === 'en-proceso' || s === 'pendiente' || s === 'diagnostico'
 }
 
 function getOrderServiceChips(order: any): string[] {
@@ -6620,8 +6963,14 @@ const donutOptions = computed(() => {
 const donutLegendColors = ['#16a34a', '#2563eb']
 
 const revenueVsCosts = computed(() => {
-  const rev = dashboardBiweeklyLast.value || totalRevenue.value || 0
-  const cost = Math.round(rev * 0.6)
+  const rev = burnedCashMovements
+    .filter((m: any) => m.movement === 'Ingreso')
+    .reduce((sum: number, m: any) => sum + (Number(m.amount) || 0), 0)
+  const egresos = burnedCashMovements
+    .filter((m: any) => m.movement === 'Egreso')
+    .reduce((sum: number, m: any) => sum + (Number(m.amount) || 0), 0)
+  const nomina = payrollTotals.value.workshopShare || 0
+  const cost = egresos + nomina
   const total = rev + cost || 1
   return { rev, cost, revPct: Math.round((rev / total) * 100), costPct: Math.round((cost / total) * 100) }
 })
@@ -6744,26 +7093,27 @@ const filteredOrderStats = computed(() => {
   const orders = filteredOrdersForDashboard.value
   const total = orders.length
   let active = 0
+  let completed = 0
   let finished = 0
 
   orders.forEach((o: any) => {
     const st = normalizeText(String(o.status || '')).trim()
-    // Activas: recepcion, diagnostico, en-proceso, pendiente, terminado
-    if (st === 'recepcion' || st === 'diagnostico' || st === 'en proceso' || st === 'en-proceso' || st === 'pendiente' || st === 'terminado' || st === 'terminada') {
-      active += 1
+    if (st === 'terminado' || st === 'terminada') {
+      completed += 1
     } else if (st === 'entregado' || st === 'entregada') {
-      // Entregadas
       finished += 1
+    } else if (st === 'recepcion' || st === 'diagnostico' || st === 'en proceso' || st === 'en-proceso' || st === 'pendiente') {
+      active += 1
     }
   })
 
-  return { total, active, finished }
+  return { total, active, completed, finished }
 })
 
-const ordersPieSeries = computed(() => [filteredOrderStats.value.active, filteredOrderStats.value.finished])
+const ordersPieSeries = computed(() => [filteredOrderStats.value.active, filteredOrderStats.value.completed, filteredOrderStats.value.finished])
 const ordersPieOptions = computed(() => ({
-  labels: ['Activas / Terminadas', 'Entregadas'],
-  colors: ['#3b82f6', '#22c55e'],
+  labels: ['Activas', 'Terminadas', 'Entregadas'],
+  colors: ['#3b82f6', '#f59e0b', '#22c55e'],
   legend: { show: true, position: 'bottom', labels: { colors: 'var(--brand-accent-alt)' } },
   dataLabels: { enabled: true, style: { colors: ['#fff'] } },
   chart: { background: 'transparent', foreColor: 'var(--brand-accent-alt)' },
@@ -6820,8 +7170,10 @@ const filteredInvoiceStats = computed(() => {
   const total = invoices.length
   let pending = 0
   let paid = 0
+  let withDeposit = 0
   let pendingValue = 0
   let paidValue = 0
+  let withDepositValue = 0
 
   invoices.forEach((inv: any) => {
     const st = String(inv.status || '').toLowerCase().trim()
@@ -6829,19 +7181,22 @@ const filteredInvoiceStats = computed(() => {
     if (st === 'pagada' || st === 'pagado' || st === 'completed' || st === 'completada') {
       paid += 1
       paidValue += val
+    } else if (st === 'abonada' || st === 'abonado') {
+      withDeposit += 1
+      withDepositValue += val
     } else {
       pending += 1
       pendingValue += val
     }
   })
 
-  return { total, pending, paid, totalValue: pendingValue + paidValue, pendingValue, paidValue }
+  return { total, pending, paid, withDeposit, totalValue: pendingValue + paidValue + withDepositValue, pendingValue, paidValue, withDepositValue }
 })
 
-const filteredInvoicePieSeries = computed(() => [filteredInvoiceStats.value.paid, filteredInvoiceStats.value.pending])
+const filteredInvoicePieSeries = computed(() => [filteredInvoiceStats.value.paid, filteredInvoiceStats.value.pending, filteredInvoiceStats.value.withDeposit])
 const filteredInvoicePieOptions = computed(() => ({
-  labels: ['Pagadas', 'Pendientes'],
-  colors: ['#22c55e', '#f59e0b'],
+  labels: ['Pagadas', 'Sin abono', 'Con abono'],
+  colors: ['#22c55e', '#f59e0b', '#3b82f6'],
   legend: { show: true, position: 'bottom', labels: { colors: 'var(--brand-accent-alt)' } },
   dataLabels: { enabled: true, style: { colors: ['#fff'] } },
   chart: { background: 'transparent', foreColor: 'var(--brand-accent-alt)' },
@@ -7815,6 +8170,14 @@ const closeCategoryForm = () => {
   max-width: 340px;
   min-width: 180px;
   width: 34vw;
+}
+
+/* Inputs en tabla compacta del modal de facturación */
+.simple-table.compact td .form-input {
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  min-width: 60px;
+  white-space: nowrap;
 }
 
 /* Header controls: mantener en una sola fila y permitir scroll horizontal en pantallas pequeñas */
@@ -10057,6 +10420,27 @@ const closeCategoryForm = () => {
   padding-bottom: 8px;
 }
 
+.cash-group-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--brand-border);
+}
+
+.cash-group-row:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.cash-item-row {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--brand-border);
+}
+
+.cash-item-row td {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
 /* Estilos para tabla de nómina colapsable */
 .payroll-group-row {
   cursor: pointer;
@@ -11672,12 +12056,10 @@ const closeCategoryForm = () => {
   }
 
   .inv-logo {
-    width: 64px;
-    height: 64px;
+    height: 70px;
+    width: auto;
     object-fit: contain;
     border-radius: 10px;
-    background: #0f172a;
-    padding: 6px;
   }
 
   .inv-brand-text {
@@ -11758,7 +12140,7 @@ const closeCategoryForm = () => {
 
   .inv-cards {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-bottom: 20px;
   }
@@ -12238,7 +12620,7 @@ const closeCategoryForm = () => {
 /* Métricas */
 .dashboard-metrics-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 12px;
   margin-bottom: 24px;
 }
@@ -13097,6 +13479,11 @@ const closeCategoryForm = () => {
   background: rgba(34, 197, 94, 0.05);
 }
 
+.dashboard-orders-summary-item.completed {
+  border-color: rgba(251, 191, 36, 0.2);
+  background: rgba(251, 191, 36, 0.05);
+}
+
 .dashboard-orders-summary-icon {
   width: 36px;
   height: 36px;
@@ -13115,6 +13502,11 @@ const closeCategoryForm = () => {
 .dashboard-orders-summary-item.finished .dashboard-orders-summary-icon {
   background: rgba(34, 197, 94, 0.15);
   color: #4ade80;
+}
+
+.dashboard-orders-summary-item.completed .dashboard-orders-summary-icon {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
 }
 
 .dashboard-orders-summary-info {
