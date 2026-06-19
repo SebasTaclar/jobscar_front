@@ -2802,29 +2802,37 @@
             <div class="form-section-title">🛠️ Productos y Servicios</div>
             <table class="simple-table compact" style="margin-bottom:10px;">
               <thead class="table-header">
-                <tr>
-                  <th style="width:30%">Descripción</th>
-                  <th style="width:12%">Cant.</th>
-                  <th style="width:20%">Valor Unit.</th>
-                  <th style="width:14%">Valor Total</th>
-                  <th style="width:8%">M.O</th>
-                  <th style="width:16%">Acción</th>
-                </tr>
+                 <tr>
+                   <th style="width:30%">Descripción</th>
+                   <th style="width:12%">Cant.</th>
+                   <th style="width:16%">Valor Unit.</th>
+                   <th style="width:12%">Valor Total</th>
+                   <th style="width:8%">M.O</th>
+                   <th style="width:10%">Desc. Téc.</th>
+                   <th style="width:12%">Acción</th>
+                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(it, idx) in formInvoice.items" :key="idx">
-                   <td><input v-model="it.description" class="form-input" placeholder="Descripción de mano de obra / servicio" /></td>
-                  <td><input :value="formatNumber(it.qty)" type="text" class="form-input" @input="it.qty = parseNumber(($event.target as HTMLInputElement).value)" /></td>
-                  <td><input :value="formatNumber(it.price)" type="text" class="form-input" @input="it.price = parseNumber(($event.target as HTMLInputElement).value)" /></td>
-                  <td style="text-align:right;font-weight:600;">${{ formatNumber((Number(it.qty)||0) * (Number(it.price)||0)) }}</td>
-                  <td style="text-align:center;white-space:nowrap;">
-                    <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.85rem;justify-content:center;">
-                      <input v-model="it.isLabor" type="checkbox" style="width:16px;height:16px;cursor:pointer;" />
-                      <span>🛠️</span>
-                    </label>
-                  </td>
-                  <td><button type="button" class="btn btn-sm btn-danger" @click="removeInvoiceItem(idx)">−</button></td>
-                </tr>
+                 <tr v-for="(it, idx) in formInvoice.items" :key="idx">
+                    <td><input v-model="it.description" class="form-input" placeholder="Descripción de mano de obra / servicio" /></td>
+                   <td><input :value="formatNumber(it.qty)" type="text" class="form-input" @input="it.qty = parseNumber(($event.target as HTMLInputElement).value)" /></td>
+                   <td><input :value="formatNumber(it.price)" type="text" class="form-input" @input="it.price = parseNumber(($event.target as HTMLInputElement).value)" /></td>
+                   <td style="text-align:right;font-weight:600;">${{ formatNumber((Number(it.qty)||0) * (Number(it.price)||0)) }}</td>
+                   <td style="text-align:center;white-space:nowrap;">
+                     <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.85rem;justify-content:center;">
+                       <input v-model="it.isLabor" type="checkbox" style="width:16px;height:16px;cursor:pointer;" />
+                       <span>🛠️</span>
+                     </label>
+                   </td>
+                    <td v-if="['gases','escaner'].includes(String(it.description || '').trim().toLowerCase())" style="text-align:center;white-space:nowrap;">
+                       <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size:0.85rem;justify-content:center;" title="Descontar al técnico">
+                         <input v-model="it.discountToTechnician" type="checkbox" style="width:16px;height:16px;cursor:pointer;" />
+                         <span>➖</span>
+                       </label>
+                    </td>
+                    <td v-else style="text-align:center;white-space:nowrap;"></td>
+                   <td><button type="button" class="btn btn-sm btn-danger" @click="removeInvoiceItem(idx)">−</button></td>
+                 </tr>
               </tbody>
             </table>
             <button type="button" class="btn btn-secondary" @click="addInvoiceItem">➕ Agregar item</button>
@@ -2911,6 +2919,9 @@
               <button type="button" class="btn btn-sm btn-danger" @click="formInvoice.evidences.splice(idx, 1)" style="margin-bottom:2px;">−</button>
             </div>
             <button type="button" class="btn btn-secondary" @click="formInvoice.evidences.push({ type: 'actual', url: '' })">➕ Agregar evidencia</button>
+            <label style="display:inline-flex;align-items:center;gap:8px;font-weight:600;margin-top:10px;">
+              <input type="checkbox" v-model="formInvoice.showEvidencesInPdf" /> Incluir fotografías en PDF
+            </label>
           </div>
 
           <div class="form-actions" style="margin-top:12px;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;">
@@ -2981,13 +2992,13 @@
 
         <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
           <div style="width:260px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;">
-            <div style="display:flex;justify-content:space-between;font-size:0.95rem;"><span>Subtotal</span><strong>${{ invoiceSubtotal(previewInvoice).toLocaleString() }}</strong></div>
-            <div style="display:flex;justify-content:space-between;font-size:0.95rem;"><span>Descuento</span><strong style="color:#dc2626;">-${{ Number(previewInvoice?.discount || 0).toLocaleString() }}</strong></div>
-            <div v-if="(previewInvoice?.taxPct || 0) > 0" style="display:flex;justify-content:space-between;font-size:0.95rem;"><span>IVA ({{ previewInvoice?.taxPct || 19 }}%)</span><strong>${{ invoiceTax(previewInvoice).toLocaleString() }}</strong></div>
-            <div style="display:flex;justify-content:space-between;font-size:0.95rem;"><span>Retención</span><strong style="color:#dc2626;">-${{ Number(previewInvoice?.retention || 0).toLocaleString() }}</strong></div>
-            <div style="display:flex;justify-content:space-between;font-size:1.15rem;border-top:1.5px solid #d1d5db;padding-top:6px;margin-top:2px;"><span>TOTAL</span><strong>${{ invoiceTotal(previewInvoice).toLocaleString() }}</strong></div>
-            <div v-if="invoiceDepositTotal(previewInvoice) > 0" style="display:flex;justify-content:space-between;font-size:0.95rem;color:#22c55e;"><span>ABONADO</span><strong>${{ invoiceDepositTotal(previewInvoice).toLocaleString() }}</strong></div>
-            <div v-if="invoiceDepositTotal(previewInvoice) > 0 && invoiceTotal(previewInvoice) > invoiceDepositTotal(previewInvoice)" style="display:flex;justify-content:space-between;font-size:0.95rem;color:#f59e0b;"><span>SALDO</span><strong>${{ (invoiceTotal(previewInvoice) - invoiceDepositTotal(previewInvoice)).toLocaleString() }}</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.95rem;color:#374151;"><span>Subtotal</span><strong style="color:#111827;">${{ invoiceSubtotal(previewInvoice).toLocaleString() }}</strong></div>
+            <div v-if="(previewInvoice?.discount || 0) > 0" style="display:flex;justify-content:space-between;font-size:0.95rem;color:#374151;"><span>Descuento</span><strong style="color:#dc2626;">-${{ Number(previewInvoice?.discount || 0).toLocaleString() }}</strong></div>
+            <div v-if="(previewInvoice?.taxPct || 0) > 0" style="display:flex;justify-content:space-between;font-size:0.95rem;color:#374151;"><span>IVA ({{ previewInvoice?.taxPct || 19 }}%)</span><strong style="color:#111827;">${{ invoiceTax(previewInvoice).toLocaleString() }}</strong></div>
+            <div v-if="(previewInvoice?.retention || 0) > 0" style="display:flex;justify-content:space-between;font-size:0.95rem;color:#374151;"><span>Retención</span><strong style="color:#dc2626;">-${{ Number(previewInvoice?.retention || 0).toLocaleString() }}</strong></div>
+            <div style="display:flex;justify-content:space-between;font-size:1.15rem;border-top:1.5px solid #d1d5db;padding-top:6px;margin-top:2px;color:#111827;"><span style="font-weight:700;">TOTAL</span><strong style="color:#111827;">${{ invoiceTotal(previewInvoice).toLocaleString() }}</strong></div>
+            <div v-if="invoiceDepositTotal(previewInvoice) > 0" style="display:flex;justify-content:space-between;font-size:0.95rem;color:#166534;"><span style="font-weight:700;">ABONADO</span><strong>${{ invoiceDepositTotal(previewInvoice).toLocaleString() }}</strong></div>
+            <div v-if="invoiceDepositTotal(previewInvoice) > 0 && invoiceTotal(previewInvoice) > invoiceDepositTotal(previewInvoice)" style="display:flex;justify-content:space-between;font-size:0.95rem;color:#92400e;"><span style="font-weight:700;">SALDO</span><strong>${{ (invoiceTotal(previewInvoice) - invoiceDepositTotal(previewInvoice)).toLocaleString() }}</strong></div>
           </div>
         </div>
 
@@ -3015,8 +3026,8 @@
           </div>
         </div>
         <div class="inv-badge-wrap">
-          <div class="inv-doc-type">FACTURA DE VENTA</div>
-          <div class="inv-doc-number">#FV-{{ String(printInvoice.id).padStart(6, '0') }}</div>
+          <div class="inv-doc-type">Remision</div>
+          <div class="inv-doc-number">#RM-{{ String(printInvoice.id).padStart(4, '0') }}</div>
           <div class="inv-date">Fecha: {{ new Date(printInvoice.createdAt || Date.now()).toLocaleDateString() }}</div>
           <span class="inv-status" :class="String(printInvoice.status || 'Pendiente').toLowerCase()">{{ printInvoice.status || 'Pendiente' }}</span>
         </div>
@@ -3114,7 +3125,7 @@
       </div>
 
       <!-- Evidencia fotográfica -->
-      <div class="inv-photos">
+      <div v-if="printInvoice.showEvidencesInPdf !== false" class="inv-photos">
         <div class="inv-section-title">Evidencia Fotográfica</div>
         <div class="inv-photo-grid">
           <div v-for="(ev, idx) in (printInvoice.evidences || [])" :key="idx" class="inv-photo-group">
@@ -3131,6 +3142,12 @@
             <div class="inv-photo-thumb inv-placeholder">📷 Sin fotografía</div>
           </div>
         </div>
+      </div>
+
+      <!-- Notas adicionales -->
+      <div class="inv-notes">
+        <div class="inv-section-title">Notas Adicionales</div>
+        <div style="font-size:0.9rem;color:#374151;white-space:pre-wrap;">{{ printInvoice.notes || 'no registran' }}</div>
       </div>
 
       <!-- Firmas -->
@@ -3150,7 +3167,7 @@
       <!-- Pie de página -->
       <div class="inv-footer">
         <div class="inv-footer-col">
-          <span>Carrera 79 No. 67 - 39 - Barrio San Marcos - Cal: 311 296 7517 - Bogotá, D.C</span>
+          <span>Carrera 79 No. 67 - 39 - Barrio San Marcos - Cal: +57 314 4607515 - Bogotá, D.C</span>
         </div>
       </div>
     </div>
@@ -3887,7 +3904,7 @@ function mapInvoiceFromApi(inv: any) {
     vehicleKm: inv.vehicleKm || '',
     placa: inv.placa || '',
     advisorName: inv.advisorName || '',
-    items: inv.items || [],
+    items: restoreInvoiceItemDiscounts(inv.id, inv.items || []),
     taxPct: typeof inv.taxPct === 'number' ? inv.taxPct : inv.taxPct === true ? 19 : 0,
     discount: inv.discount || 0,
     retention: inv.retention || 0,
@@ -3904,7 +3921,8 @@ function mapInvoiceFromApi(inv: any) {
     workOrderId: inv.workOrderId ?? null,
     applyTax: inv.taxPct === true || typeof inv.taxPct === 'number',
     createdAt: inv.createdAt || inv.fechaCreacion || '',
-    updatedAt: inv.updatedAt || ''
+    updatedAt: inv.updatedAt || '',
+    showEvidencesInPdf: restoreInvoiceShowEvidences(inv.id)
   }
 }
 
@@ -3969,7 +3987,7 @@ const formInvoice = reactive({
   vehicleModel: '',
   vehicleKm: '',
   advisorName: '',
-  items: [{ description: '', qty: 1, price: 0, isLabor: false }],
+  items: [{ description: '', qty: 1, price: 0, isLabor: false, discountToTechnician: true }],
   taxPct: 19,
   applyTax: true,
   discount: 0,
@@ -3979,6 +3997,7 @@ const formInvoice = reactive({
   status: 'Pendiente',
   notes: '',
   evidences: [] as { type: string; url: string }[],
+  showEvidencesInPdf: true,
   createdAt: '',
   orderId: null
 })
@@ -4073,11 +4092,63 @@ function invoiceDepositTotal(inv: any): number {
   return Number(inv.deposit || 0)
 }
 
-function invoicePayrollDiscount(inv: any): number {
-  if (!Array.isArray(inv.items)) return 0
-  return inv.items.reduce((sum: number, it: any) => {
+function saveInvoiceItemDiscounts(invoiceId: number, items: any[]) {
+  const discountMap = items.reduce((acc: any, it: any) => {
     const desc = String(it.description || '').trim().toLowerCase()
     if (desc === 'gases' || desc === 'escaner') {
+      acc[desc] = it.discountToTechnician !== false
+    }
+    return acc
+  }, {})
+  localStorage.setItem(`invoice_discount_${invoiceId}`, JSON.stringify(discountMap))
+}
+
+function restoreInvoiceItemDiscounts(invoiceId: number, items: any[]): any[] {
+  const saved = localStorage.getItem(`invoice_discount_${invoiceId}`)
+  if (!saved) return items
+  try {
+    const discountMap = JSON.parse(saved)
+    return items.map((it: any) => {
+      const desc = String(it.description || '').trim().toLowerCase()
+      if ((desc === 'gases' || desc === 'escaner') && discountMap[desc] !== undefined) {
+        return { ...it, discountToTechnician: discountMap[desc] !== false }
+      }
+      return it
+    })
+  } catch {
+    return items
+  }
+}
+
+function clearInvoiceItemDiscounts(invoiceId: number) {
+  localStorage.removeItem(`invoice_discount_${invoiceId}`)
+}
+
+function saveInvoiceShowEvidences(invoiceId: number, show: boolean) {
+  localStorage.setItem(`invoice_evidences_${invoiceId}`, JSON.stringify({ showEvidencesInPdf: show !== false }))
+}
+
+function restoreInvoiceShowEvidences(invoiceId: number): boolean {
+  const saved = localStorage.getItem(`invoice_evidences_${invoiceId}`)
+  if (!saved) return true
+  try {
+    const parsed = JSON.parse(saved)
+    return parsed.showEvidencesInPdf !== false
+  } catch {
+    return true
+  }
+}
+
+function clearInvoiceShowEvidences(invoiceId: number) {
+  localStorage.removeItem(`invoice_evidences_${invoiceId}`)
+}
+
+function invoicePayrollDiscount(inv: any): number {
+  if (!Array.isArray(inv.items)) return 0
+  const items = restoreInvoiceItemDiscounts(inv.id, inv.items)
+  return items.reduce((sum: number, it: any) => {
+    const desc = String(it.description || '').trim().toLowerCase()
+    if ((desc === 'gases' || desc === 'escaner') && it.discountToTechnician !== false) {
       return sum + (Number(it.price) || 0)
     }
     return sum
@@ -4085,7 +4156,7 @@ function invoicePayrollDiscount(inv: any): number {
 }
 
 function addInvoiceItem() {
-  formInvoice.items.push({ description: '', qty: 1, price: 0, isLabor: false })
+  formInvoice.items.push({ description: '', qty: 1, price: 0, isLabor: false, discountToTechnician: true })
 }
 
 function removeInvoiceItem(idx: number) {
@@ -4108,10 +4179,11 @@ function openCreateInvoice() {
     vehicle: '', vehicleType: '', vehicleBrand: '', vehicleModel: '', vehicleKm: '',
     placa: '',
     advisorName: '',
-  items: [{ description: '', qty: 1, price: 0, isLabor: false }],
+  items: [{ description: '', qty: 1, price: 0, isLabor: false, discountToTechnician: true }],
     taxPct: 19, applyTax: true, discount: 0, retention: 0, deposits: [],
     payments: '', status: 'Pendiente', notes: '',
     evidences: [],
+    showEvidencesInPdf: true,
     createdAt: new Date().toISOString(),
     orderId: null
   })
@@ -4137,6 +4209,19 @@ async function syncInvoiceFromOrder(order: any) {
     const client = Array.isArray(burnedClients.value)
       ? burnedClients.value.find((c: any) => String(c.name || '').trim().toLowerCase() === String(order.client || '').trim().toLowerCase())
       : null
+
+    // Preservar items manuales (repuestos u otros) que no sean servicios de la orden ni gases/escaner
+    const currentItems = Array.isArray(existingInvoice.items) ? existingInvoice.items : []
+    const orderServiceDescriptions = new Set(
+      (Array.isArray(order.services) && order.services.length)
+        ? order.services.map((s: string) => String(s).trim().toLowerCase())
+        : [String(order.serviceType || 'Servicio general').trim().toLowerCase()]
+    )
+    const preservedItems = currentItems.filter((it: any) => {
+      const desc = String(it.description || '').trim().toLowerCase()
+      return desc !== 'gases' && desc !== 'escaner' && !orderServiceDescriptions.has(desc)
+    })
+
     const items: any[] = []
     if (Array.isArray(order.services) && order.services.length) {
       order.services.forEach((s: string) => {
@@ -4145,13 +4230,19 @@ async function syncInvoiceFromOrder(order: any) {
     } else {
       items.push({ description: order.serviceType || 'Servicio general', qty: 1, price: 0, isLabor: true })
     }
+    // Preservar discountToTechnician de items existentes
+    const existingGases = currentItems.find((it: any) => String(it.description || '').trim().toLowerCase() === 'gases')
+    const existingEscaner = currentItems.find((it: any) => String(it.description || '').trim().toLowerCase() === 'escaner')
     if (order.gases) {
-      items.push({ description: 'Gases', qty: 1, price: 20000, isLabor: false })
+      items.push({ description: 'Gases', qty: 1, price: 20000, isLabor: false, discountToTechnician: existingGases ? existingGases.discountToTechnician !== false : true })
     }
     if (order.escaner) {
       const scannerPrice = String(vehicle?.vehicleType || '').toLowerCase() === 'camioneta' ? 50000 : 30000
-      items.push({ description: 'Escaner', qty: 1, price: scannerPrice, isLabor: true })
+      items.push({ description: 'Escaner', qty: 1, price: scannerPrice, isLabor: false, discountToTechnician: existingEscaner ? existingEscaner.discountToTechnician !== false : true })
     }
+    // Agregar items manuales preservados (repuestos: M.O desmarcado)
+    items.push(...preservedItems.map((it: any) => ({ ...it, isLabor: false })))
+
     const payload: any = {
       client: order.client || '',
       clientPhone: client?.phone || '',
@@ -4166,6 +4257,7 @@ async function syncInvoiceFromOrder(order: any) {
       workOrderId: order.id || null
     }
     const res = await invoiceService.update(existingInvoice.id, payload)
+    saveInvoiceItemDiscounts(existingInvoice.id, items)
     const idx = invoices.findIndex((i: any) => i.id === existingInvoice.id)
     if (idx > -1) {
       invoices.splice(idx, 1, enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
@@ -4206,12 +4298,12 @@ function createInvoiceFromOrder(order: any) {
     }
     // Agregar Gases si aplica (repuesto)
     if (order.gases) {
-      items.push({ description: 'Gases', qty: 1, price: 20000, isLabor: false })
+      items.push({ description: 'Gases', qty: 1, price: 20000, isLabor: false, discountToTechnician: true })
     }
     // Agregar Escaner si aplica (servicio / mano de obra)
     if (order.escaner) {
       const scannerPrice = String(vehicle?.vehicleType || '').toLowerCase() === 'camioneta' ? 50000 : 30000
-      items.push({ description: 'Escaner', qty: 1, price: scannerPrice, isLabor: true })
+      items.push({ description: 'Escaner', qty: 1, price: scannerPrice, isLabor: false, discountToTechnician: true })
     }
     formInvoice.id = 0
     formInvoice.client = order.client || ''
@@ -4233,6 +4325,7 @@ function createInvoiceFromOrder(order: any) {
     formInvoice.payments = ''
     formInvoice.status = 'Pendiente'
     formInvoice.notes = ''
+    formInvoice.showEvidencesInPdf = true
     formInvoice.createdAt = new Date().toISOString()
     formInvoice.orderId = order.id || null
     editingInvoice.value = null
@@ -4306,16 +4399,24 @@ async function saveInvoice() {
     let savedInvoiceId: number | null = null
     if (editingInvoice.value) {
       const res = await invoiceService.update(editingInvoice.value.id, payload)
+      savedInvoiceId = res.data?.id || editingInvoice.value.id
+      if (savedInvoiceId) {
+        saveInvoiceItemDiscounts(savedInvoiceId, formInvoice.items)
+        saveInvoiceShowEvidences(savedInvoiceId, formInvoice.showEvidencesInPdf !== false)
+      }
       const idx = invoices.findIndex((i: any) => i.id === editingInvoice.value.id)
       if (idx > -1) {
       invoices.splice(idx, 1, enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
       }
-      savedInvoiceId = res.data?.id || editingInvoice.value.id
       editingInvoice.value = null
     } else {
       const res = await invoiceService.create(payload)
-      invoices.push(enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
       savedInvoiceId = res.data?.id || null
+      if (savedInvoiceId) {
+        saveInvoiceItemDiscounts(savedInvoiceId, formInvoice.items)
+        saveInvoiceShowEvidences(savedInvoiceId, formInvoice.showEvidencesInPdf !== false)
+      }
+      invoices.push(enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
     }
     // Crear ingresos de caja automáticos por cada abono nuevo
     const savedInvoice = invoices.find((i: any) => i.id === savedInvoiceId)
@@ -4349,7 +4450,7 @@ function editInvoice(inv: any) {
   formInvoice.vehicleModel = inv.vehicleModel || ''
   formInvoice.vehicleKm = inv.vehicleKm || ''
   formInvoice.advisorName = inv.advisorName || ''
-  formInvoice.items = Array.isArray(inv.items) && inv.items.length ? inv.items.map((it: any) => ({ ...it, isLabor: it.isLabor ?? true })) : [{ description: '', qty: 1, price: 0, isLabor: false }]
+  formInvoice.items = Array.isArray(inv.items) && inv.items.length ? inv.items.map((it: any) => ({ ...it, isLabor: it.isLabor ?? true, discountToTechnician: it.discountToTechnician !== false })) : [{ description: '', qty: 1, price: 0, isLabor: false, discountToTechnician: true }]
   formInvoice.taxPct = 19
   formInvoice.applyTax = inv.applyTax !== false
   formInvoice.discount = inv.discount || 0
@@ -4359,6 +4460,7 @@ function editInvoice(inv: any) {
   formInvoice.status = inv.status || 'Pendiente'
   formInvoice.notes = inv.notes || ''
   formInvoice.evidences = Array.isArray(inv.evidences) ? inv.evidences.map((e: any) => ({ type: e.type || 'actual', url: e.url || '' })) : []
+  formInvoice.showEvidencesInPdf = inv.showEvidencesInPdf !== false
   formInvoice.createdAt = inv.createdAt || new Date().toISOString()
   formInvoice.orderId = inv.orderId || inv.workOrderId || null
   showInvoiceModal.value = true
@@ -4478,8 +4580,8 @@ body { margin:0; padding:0; background:#fff; color:#111827; font-family:'Inter',
     </div>
     <div class="inv-header-separator"></div>
     <div class="inv-header-center">
-      <p class="inv-doc-title">FACTURA DE VENTA</p>
-      <p class="inv-doc-id">No. FV-${String(inv.id).padStart(6,'0')}</p>
+      <p class="inv-doc-title">Remision</p>
+      <p class="inv-doc-id">No. RM-${String(inv.id).padStart(4,'0')}</p>
     </div>
     <div class="inv-header-separator"></div>
     <div class="inv-header-right">
@@ -4548,6 +4650,7 @@ body { margin:0; padding:0; background:#fff; color:#111827; font-family:'Inter',
       ${balanceRow}
     </div>
   </div>
+  ${inv.showEvidencesInPdf !== false ? `
   <div class="inv-evidence-section">
     <div class="inv-evidence-header">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
@@ -4568,7 +4671,7 @@ body { margin:0; padding:0; background:#fff; color:#111827; font-family:'Inter',
         </div>
       </div>
     </div>
-  </div>
+  </div>` : ''}
 
   <div class="inv-bottom-section">
     <div class="inv-bottom-card">
@@ -4587,10 +4690,7 @@ body { margin:0; padding:0; background:#fff; color:#111827; font-family:'Inter',
         <span>NOTAS ADICIONALES</span>
       </div>
       <div class="inv-notes-lines">
-        <div class="inv-note-line"></div>
-        <div class="inv-note-line"></div>
-        <div class="inv-note-line"></div>
-        <div class="inv-note-line"></div>
+        ${inv.notes ? `<div style="font-size:11px;color:#374151;white-space:pre-wrap;">${String(inv.notes || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>` : '<div style="font-size:11px;color:#9ca3af;font-style:italic;">no registran</div>'}
       </div>
     </div>
   </div>
@@ -4605,15 +4705,11 @@ body { margin:0; padding:0; background:#fff; color:#111827; font-family:'Inter',
     </div>
     <div class="inv-footer-center">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-      <span>311 296 7517</span>
+      <span>+57 314 4607515</span>
     </div>
     <div class="inv-footer-center">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
       <span>Carrera 79 No. 67 - 39, Bogotá D.C</span>
-    </div>
-    <div class="inv-footer-right">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-      <span>www.jobscar.com</span>
     </div>
   </div>
 </div>
@@ -4648,6 +4744,8 @@ async function deleteInvoice(id: any) {
     await invoiceService.delete(id)
     const idx = invoices.findIndex((i: any) => i.id === id)
     if (idx > -1) invoices.splice(idx, 1)
+    clearInvoiceItemDiscounts(Number(id))
+    clearInvoiceShowEvidences(Number(id))
   } catch (e: any) {
     alert('Error al eliminar la factura: ' + (e.message || 'Error desconocido'))
   }
@@ -5102,10 +5200,40 @@ async function saveEditedInventory() {
 
 async function deleteInventoryItem(id: number) {
   if (!confirm('¿Eliminar este registro de inventario?')) return
+  const invItem = burnedInventory.find((item: any) => item.id === id)
   try {
     await sparePartService.delete(id)
     const idx = burnedInventory.findIndex((item: any) => item.id === id)
     if (idx > -1) burnedInventory.splice(idx, 1)
+    // Si estaba vinculado a una factura, quitar el item de la factura
+    if (invItem?.invoiceId) {
+      const invoice = invoices.find((i: any) => Number(i.id) === Number(invItem.invoiceId))
+      if (invoice && Array.isArray(invoice.items)) {
+        const updatedItems = invoice.items.filter((it: any) => String(it.description || '').trim().toLowerCase() !== String(invItem.activity || '').trim().toLowerCase())
+        if (updatedItems.length !== invoice.items.length) {
+          try {
+            const payload = {
+              items: updatedItems.map((it: any) => ({ description: it.description, qty: Number(it.qty) || 1, price: Number(it.price) || 0, isLabor: it.isLabor === true })),
+              taxPct: invoice.applyTax === true,
+              discount: Number(invoice.discount) || 0,
+              retention: Number(invoice.retention) || 0,
+              deposits: Array.isArray(invoice.deposits) ? invoice.deposits.map((d: any) => ({ amount: Number(d.amount) || 0, date: d.date || '', method: d.method || '' })) : [],
+              formaDePago: invoice.payments || invoice.formaDePago || '',
+              status: invoice.status || 'Pendiente',
+              notes: invoice.notes || ''
+            }
+            const res = await invoiceService.update(invoice.id, payload)
+            const invoiceIdx = invoices.findIndex((i: any) => i.id === invoice.id)
+            if (invoiceIdx > -1) {
+              invoices.splice(invoiceIdx, 1, enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
+            }
+          } catch (e: any) {
+            console.error('Error actualizando factura al eliminar repuesto:', e)
+            alert('Repuesto eliminado, pero no se pudo actualizar la factura: ' + (e.message || 'Error desconocido'))
+          }
+        }
+      }
+    }
   } catch (error: any) {
     alert('Error eliminando repuesto: ' + (error.message || 'Error desconocido'))
   }
@@ -6753,6 +6881,8 @@ async function deleteOrder(id: number) {
         await invoiceService.delete(existingInvoice.id)
         const invoiceIdx = invoices.findIndex((inv: any) => inv.orderId === id)
         if (invoiceIdx > -1) invoices.splice(invoiceIdx, 1)
+        clearInvoiceItemDiscounts(Number(existingInvoice.id))
+        clearInvoiceShowEvidences(Number(existingInvoice.id))
         console.log('✅ Factura asociada eliminada')
       } catch {
         console.warn('No se pudo eliminar la factura asociada, puede que ya no exista en el servidor')
@@ -12306,6 +12436,14 @@ const closeCategoryForm = () => {
 
   .inv-photos {
     margin-bottom: 20px;
+  }
+
+  .inv-notes {
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
   }
 
   .inv-photo-grid {
