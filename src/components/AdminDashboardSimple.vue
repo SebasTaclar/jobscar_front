@@ -238,9 +238,9 @@
           <colgroup>
             <col style="width:20%" /> <!-- Nombre -->
             <col style="width:14%" /> <!-- Teléfono -->
-            <col style="width:20%" /> <!-- Correo -->
-            <col style="width:14%" /> <!-- Fecha registro -->
-            <col style="width:24%" /> <!-- Notas -->
+            <col style="width:26%" /> <!-- Correo -->
+            <col style="width:12%" /> <!-- Fecha registro -->
+            <col style="width:15%" /> <!-- Notas -->
             <col style="width:13%" /> <!-- Acciones (fijo) -->
           </colgroup>
           <thead class="table-header">
@@ -306,22 +306,22 @@
           </div>
         </div>
         <div style="justify-self:end;">
-          <button class="btn btn-primary" @click="showCreateVehicle = true">➕ Crear Vehículo</button>
+          <button class="btn btn-primary" @click="vehicleClientSearch = ''; vehicleClientDropdownOpen = false; showCreateVehicle = true">➕ Crear Vehículo</button>
         </div>
       </div>
 
       <div class="table-responsive" style="margin-top:16px;">
         <table class="simple-table vehicles-table compact">
           <colgroup>
-            <col style="width:14%" /> <!-- Nombre Cliente -->
-            <col style="width:10%" /> <!-- Placa -->
-            <col style="width:10%" /> <!-- Marca -->
-            <col style="width:13%" /> <!-- Modelo -->
-            <col style="width:11%" /> <!-- Tipo Vehículo -->
-            <col style="width:12%" /> <!-- Fecha Registro -->
-            <col style="width:9%" /> <!-- Km Actual -->
-            <col style="width:12%" /> <!-- Último Servicio -->
-            <col style="width:16%" /> <!-- Observaciones -->
+            <col style="width:13%" /> <!-- Nombre Cliente -->
+            <col style="width:9%" /> <!-- Placa -->
+            <col style="width:15%" /> <!-- Marca -->
+            <col style="width:12%" /> <!-- Modelo -->
+            <col style="width:10%" /> <!-- Tipo Vehículo -->
+            <col style="width:10%" /> <!-- Fecha Registro -->
+            <col style="width:8%" /> <!-- Km Actual -->
+            <col style="width:10%" /> <!-- Último Servicio -->
+            <col style="width:13%" /> <!-- Observaciones -->
             <col style="width:10%" /> <!-- Acciones -->
           </colgroup>
           <thead class="table-header">
@@ -339,14 +339,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(v, idx) in burnedVehicles.filter(vehicle => {
-              if (!searchVehicles) return true
-              const q = searchVehicles.toLowerCase()
-              return (vehicle.client && vehicle.client.toLowerCase().includes(q)) ||
-                (vehicle.plate && vehicle.plate.toLowerCase().includes(q)) ||
-                (vehicle.brand && vehicle.brand.toLowerCase().includes(q)) ||
-                (vehicle.model && vehicle.model.toLowerCase().includes(q))
-            })" :key="v.plate || idx">
+            <tr v-for="(v, idx) in paginatedVehicles" :key="v.plate || idx">
               <td data-label="Nombre Cliente">{{ v.client || '-' }}</td>
               <td data-label="Placa" style="text-transform: uppercase;">{{ v.plate || '-' }}</td>
               <td data-label="Marca" style="text-transform: uppercase;">{{ v.brand || '-' }}</td>
@@ -366,7 +359,7 @@
                 </div>
               </td>
             </tr>
-            <tr v-if="burnedVehicles.length === 0">
+            <tr v-if="filteredVehicles.length === 0">
               <td colspan="10">No hay vehículos registrados.</td>
             </tr>
           </tbody>
@@ -375,6 +368,12 @@
         <datalist id="clients-list">
           <option v-for="c in burnedClients" :key="c.id" :value="c.name"></option>
         </datalist>
+      </div>
+      <!-- Paginación vehículos -->
+      <div v-if="vehicleTotalPages > 1" style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap;">
+        <button class="btn" :disabled="vehiclePage <= 1" @click.prevent="vehiclePage--">Anterior</button>
+        <span>Página {{ vehiclePage }} / {{ vehicleTotalPages }}</span>
+        <button class="btn" :disabled="vehiclePage >= vehicleTotalPages" @click.prevent="vehiclePage++">Siguiente</button>
       </div>
 
       <!-- Modal crear vehículo -->
@@ -388,10 +387,22 @@
             <form @submit.prevent="addBurnedVehicle">
               <div class="form-group">
                 <label>Nombre Cliente</label>
-                <select v-model.number="newVehicle.clientId" class="form-input">
-                  <option :value="0">Seleccionar cliente</option>
-                  <option v-for="c in burnedClients" :key="c.id" :value="c.id">{{ c.name }}</option>
-                </select>
+                <div style="position:relative;">
+                  <input type="text" class="form-input" v-model="vehicleClientSearch"
+                    @focus="vehicleClientDropdownOpen = true"
+                    @input="vehicleClientDropdownOpen = true"
+                    @blur="closeVehicleClientDropdown"
+                    placeholder="Buscar cliente..." autocomplete="off" />
+                  <div v-if="vehicleClientDropdownOpen && filteredVehicleClients.length > 0"
+                    style="position:absolute;top:100%;left:0;right:0;max-height:200px;overflow-y:auto;background:var(--bg-card, #1a1a2e);border:1px solid var(--border-color, #333);border-radius:0 0 6px 6px;z-index:10;">
+                    <div v-for="c in filteredVehicleClients" :key="c.id"
+                      @mousedown.prevent="selectVehicleClient(c)"
+                      style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border-color, #333);"
+                      :style="{ background: newVehicle.clientId === c.id ? 'var(--brand-primary, #00897b)' : 'transparent' }">
+                      {{ c.name }}
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="form-row">
                 <div class="form-group">
@@ -1404,17 +1415,23 @@
     <div v-if="activeTab === 'cash'" class="content-section">
       <div class="section-title-bar" style="display:grid;grid-template-columns:1fr minmax(260px,420px) auto;align-items:center;gap:12px;">
         <h2 class="section-title">💰 Caja</h2>
-        <div style="justify-self:center;">
-          <div class="search-input-wrapper" style="max-width:420px;">
+        <div style="justify-self:center;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <div class="search-input-wrapper" style="max-width:280px;">
             <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
               <path fill="currentColor"
-                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a1 1 0 0 0 1.414-1.414z" />
+                d="M10 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16zm8.707 17.293-4.387-4.387a9 9 0 1 0-1.414 1.414l4.387 4.387a 1 1 0 0 0 1.414-1.414z" />
             </svg>
             <input type="search" v-model="searchCash" placeholder="Buscar movimientos..."
               aria-label="Buscar movimientos de caja" class="search-input" />
             <button v-if="searchCash" class="search-clear" @click.prevent="searchCash = ''"
               aria-label="Limpiar búsqueda">X</button>
           </div>
+          <select v-model="cashFilterMovement" class="form-input" style="max-width:160px;padding:6px 8px;font-size:0.85rem;">
+            <option value="">Todos</option>
+            <option value="Ingreso">Ingresos</option>
+            <option value="Egreso">Egresos</option>
+          </select>
+          <input v-model="cashFilterMonth" type="month" class="form-input" style="max-width:180px;padding:6px 8px;font-size:0.85rem;" />
         </div>
         <div style="justify-self:end;">
           <button class="btn btn-primary" @click="showCreateCash = true">➕ Crear Movimiento</button>
@@ -1445,7 +1462,7 @@
             </tr>
           </thead>
           <tbody>
-            <template v-for="(items, reference) in getCashGroups()" :key="reference">
+            <template v-for="(items, reference) in cashPaginatedGroups" :key="reference">
               <!-- Fila principal de referencia -->
               <tr class="cash-group-row" @click="toggleCashReference(reference)" v-if="items.length > 1">
                 <td style="text-align:center;">
@@ -1485,11 +1502,17 @@
                 </td>
               </tr>
             </template>
-            <tr v-if="burnedCashMovements.length === 0">
+            <tr v-if="Object.keys(cashPaginatedGroups).length === 0">
               <td colspan="8">No hay movimientos de caja registrados.</td>
             </tr>
           </tbody>
         </table>
+      </div>
+      <!-- Paginación caja -->
+      <div v-if="cashTotalPages > 1" style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap;">
+        <button class="btn" :disabled="cashPage <= 1" @click.prevent="cashPage--">Anterior</button>
+        <span>Página {{ cashPage }} / {{ cashTotalPages }}</span>
+        <button class="btn" :disabled="cashPage >= cashTotalPages" @click.prevent="cashPage++">Siguiente</button>
       </div>
 
       <!-- Modal crear movimiento de caja -->
@@ -2476,7 +2499,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="inv in filteredInvoicesForDashboard.slice(0, 10)" :key="inv.id">
+                <tr v-for="inv in dashboardPaginatedInvoices" :key="inv.id">
                   <td style="text-align:center;font-weight:700;">#{{ inv.id }}</td>
                   <td style="text-align:left;">
                     <strong>{{ inv.client }}</strong>
@@ -2491,10 +2514,13 @@
               </tbody>
             </table>
           </div>
+          <div v-if="dashboardInvoiceTotalPages > 1" style="display:flex;justify-content:center;align-items:center;gap:12px;padding:12px 0;flex-wrap:wrap;">
+            <button class="btn" :disabled="dashboardInvoicePage <= 1" @click.prevent="dashboardInvoicePage--">Anterior</button>
+            <span>Página {{ dashboardInvoicePage }} / {{ dashboardInvoiceTotalPages }}</span>
+            <button class="btn" :disabled="dashboardInvoicePage >= dashboardInvoiceTotalPages" @click.prevent="dashboardInvoicePage++">Siguiente</button>
+          </div>
         </div>
       </div>
-
-      <!-- Desempeño de Técnicos con Filtro -->
       <div class="dashboard-panel">
         <div class="dashboard-panel-header">
           <div class="dashboard-panel-header-left">
@@ -3454,8 +3480,34 @@ const searchSales = ref('')
 const searchClients = ref('')
 const searchEmployees = ref('')
 const searchVehicles = ref('')
+const vehiclePage = ref(1)
+const vehiclePageSize = ref(20)
+
+const filteredVehicles = computed(() => {
+  if (!searchVehicles.value) return burnedVehicles
+  const q = searchVehicles.value.toLowerCase()
+  return burnedVehicles.filter((v: any) =>
+    (v.client && v.client.toLowerCase().includes(q)) ||
+    (v.plate && v.plate.toLowerCase().includes(q)) ||
+    (v.brand && v.brand.toLowerCase().includes(q)) ||
+    (v.model && v.model.toLowerCase().includes(q))
+  )
+})
+
+const vehicleTotalPages = computed(() => Math.max(1, Math.ceil(filteredVehicles.value.length / vehiclePageSize.value)))
+
+const paginatedVehicles = computed(() => {
+  const start = (vehiclePage.value - 1) * vehiclePageSize.value
+  return filteredVehicles.value.slice(start, start + vehiclePageSize.value)
+})
+
+watch(searchVehicles, () => { vehiclePage.value = 1 })
 const searchOrders = ref('')
 const searchCash = ref('')
+const cashFilterMovement = ref('')
+const cashFilterMonth = ref('')
+const cashPage = ref(1)
+const cashPageSize = ref(15)
 const searchInventory = ref('')
 
 // Vehículos: modal y formulario rápido
@@ -3474,6 +3526,25 @@ const newVehicle = reactive({
   nextServiceKm: '',
   observations: ''
 })
+
+const vehicleClientSearch = ref('')
+const vehicleClientDropdownOpen = ref(false)
+
+const filteredVehicleClients = computed(() => {
+  const q = vehicleClientSearch.value.toLowerCase()
+  if (!q) return burnedClients.value || []
+  return (burnedClients.value || []).filter((c: any) => c.name && c.name.toLowerCase().includes(q))
+})
+
+function selectVehicleClient(c: any) {
+  newVehicle.clientId = c.id
+  vehicleClientSearch.value = c.name
+  vehicleClientDropdownOpen.value = false
+}
+
+function closeVehicleClientDropdown() {
+  setTimeout(() => { vehicleClientDropdownOpen.value = false }, 150)
+}
 
 async function addBurnedVehicle() {
   if (!newVehicle.plate.trim() || !newVehicle.clientId) return
@@ -3501,6 +3572,9 @@ async function addBurnedVehicle() {
     const response = await vehicleService.createVehicle(payload)
     if (response.data) {
       burnedVehicles.unshift(mapVehicleToRow(response.data))
+      newVehicle.clientId = 0
+      newVehicle.plate = ''
+      newVehicle.brand = ''
       newVehicle.model = ''
       newVehicle.year = new Date().getFullYear()
       newVehicle.km = ''
@@ -3510,6 +3584,7 @@ async function addBurnedVehicle() {
       newVehicle.lastServiceDate = ''
       newVehicle.nextServiceKm = ''
       newVehicle.observations = ''
+      vehicleClientSearch.value = ''
       showCreateVehicle.value = false
     }
   } catch (error) {
@@ -3904,7 +3979,7 @@ function mapInvoiceFromApi(inv: any) {
     vehicleKm: inv.vehicleKm || '',
     placa: inv.placa || '',
     advisorName: inv.advisorName || '',
-    items: restoreInvoiceItemDiscounts(inv.id, inv.items || []),
+    items: (inv.items || []).map((it: any) => ({ ...it, discountToTechnician: it.discountToTechnician !== false })),
     taxPct: typeof inv.taxPct === 'number' ? inv.taxPct : inv.taxPct === true ? 19 : 0,
     discount: inv.discount || 0,
     retention: inv.retention || 0,
@@ -3922,7 +3997,7 @@ function mapInvoiceFromApi(inv: any) {
     applyTax: inv.taxPct === true || typeof inv.taxPct === 'number',
     createdAt: inv.createdAt || inv.fechaCreacion || '',
     updatedAt: inv.updatedAt || '',
-    showEvidencesInPdf: restoreInvoiceShowEvidences(inv.id)
+    showEvidencesInPdf: inv.showEvidencesInPdf !== false
   }
 }
 
@@ -4092,61 +4167,9 @@ function invoiceDepositTotal(inv: any): number {
   return Number(inv.deposit || 0)
 }
 
-function saveInvoiceItemDiscounts(invoiceId: number, items: any[]) {
-  const discountMap = items.reduce((acc: any, it: any) => {
-    const desc = String(it.description || '').trim().toLowerCase()
-    if (desc === 'gases' || desc === 'escaner') {
-      acc[desc] = it.discountToTechnician !== false
-    }
-    return acc
-  }, {})
-  localStorage.setItem(`invoice_discount_${invoiceId}`, JSON.stringify(discountMap))
-}
-
-function restoreInvoiceItemDiscounts(invoiceId: number, items: any[]): any[] {
-  const saved = localStorage.getItem(`invoice_discount_${invoiceId}`)
-  if (!saved) return items
-  try {
-    const discountMap = JSON.parse(saved)
-    return items.map((it: any) => {
-      const desc = String(it.description || '').trim().toLowerCase()
-      if ((desc === 'gases' || desc === 'escaner') && discountMap[desc] !== undefined) {
-        return { ...it, discountToTechnician: discountMap[desc] !== false }
-      }
-      return it
-    })
-  } catch {
-    return items
-  }
-}
-
-function clearInvoiceItemDiscounts(invoiceId: number) {
-  localStorage.removeItem(`invoice_discount_${invoiceId}`)
-}
-
-function saveInvoiceShowEvidences(invoiceId: number, show: boolean) {
-  localStorage.setItem(`invoice_evidences_${invoiceId}`, JSON.stringify({ showEvidencesInPdf: show !== false }))
-}
-
-function restoreInvoiceShowEvidences(invoiceId: number): boolean {
-  const saved = localStorage.getItem(`invoice_evidences_${invoiceId}`)
-  if (!saved) return true
-  try {
-    const parsed = JSON.parse(saved)
-    return parsed.showEvidencesInPdf !== false
-  } catch {
-    return true
-  }
-}
-
-function clearInvoiceShowEvidences(invoiceId: number) {
-  localStorage.removeItem(`invoice_evidences_${invoiceId}`)
-}
-
 function invoicePayrollDiscount(inv: any): number {
   if (!Array.isArray(inv.items)) return 0
-  const items = restoreInvoiceItemDiscounts(inv.id, inv.items)
-  return items.reduce((sum: number, it: any) => {
+  return inv.items.reduce((sum: number, it: any) => {
     const desc = String(it.description || '').trim().toLowerCase()
     if ((desc === 'gases' || desc === 'escaner') && it.discountToTechnician !== false) {
       return sum + (Number(it.price) || 0)
@@ -4257,7 +4280,6 @@ async function syncInvoiceFromOrder(order: any) {
       workOrderId: order.id || null
     }
     const res = await invoiceService.update(existingInvoice.id, payload)
-    saveInvoiceItemDiscounts(existingInvoice.id, items)
     const idx = invoices.findIndex((i: any) => i.id === existingInvoice.id)
     if (idx > -1) {
       invoices.splice(idx, 1, enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
@@ -4390,6 +4412,7 @@ async function saveInvoice() {
     status: formInvoice.status || 'Pendiente',
     notes: formInvoice.notes || '',
     evidences: formInvoice.evidences.map((e: any) => ({ type: e.type || 'actual', url: e.url || '' })),
+    showEvidencesInPdf: formInvoice.showEvidencesInPdf !== false,
     workOrderId: formInvoice.orderId || null
   }
   const previousDeposits = editingInvoice.value
@@ -4400,10 +4423,6 @@ async function saveInvoice() {
     if (editingInvoice.value) {
       const res = await invoiceService.update(editingInvoice.value.id, payload)
       savedInvoiceId = res.data?.id || editingInvoice.value.id
-      if (savedInvoiceId) {
-        saveInvoiceItemDiscounts(savedInvoiceId, formInvoice.items)
-        saveInvoiceShowEvidences(savedInvoiceId, formInvoice.showEvidencesInPdf !== false)
-      }
       const idx = invoices.findIndex((i: any) => i.id === editingInvoice.value.id)
       if (idx > -1) {
       invoices.splice(idx, 1, enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
@@ -4412,10 +4431,6 @@ async function saveInvoice() {
     } else {
       const res = await invoiceService.create(payload)
       savedInvoiceId = res.data?.id || null
-      if (savedInvoiceId) {
-        saveInvoiceItemDiscounts(savedInvoiceId, formInvoice.items)
-        saveInvoiceShowEvidences(savedInvoiceId, formInvoice.showEvidencesInPdf !== false)
-      }
       invoices.push(enrichInvoiceFromRelatedData(mapInvoiceFromApi(res.data)))
     }
     // Crear ingresos de caja automáticos por cada abono nuevo
@@ -4744,8 +4759,6 @@ async function deleteInvoice(id: any) {
     await invoiceService.delete(id)
     const idx = invoices.findIndex((i: any) => i.id === id)
     if (idx > -1) invoices.splice(idx, 1)
-    clearInvoiceItemDiscounts(Number(id))
-    clearInvoiceShowEvidences(Number(id))
   } catch (e: any) {
     alert('Error al eliminar la factura: ' + (e.message || 'Error desconocido'))
   }
@@ -4872,6 +4885,10 @@ const paginatedInvoices = computed(() => {
 // Reiniciar paginación cuando cambien filtros o búsqueda
 watch([invoiceSearch, invoiceFilterStatus, dateFrom, dateTo], () => {
   currentPage.value = 1
+})
+
+watch([searchCash, cashFilterMovement, cashFilterMonth], () => {
+  cashPage.value = 1
 })
 
 const selectAllChecked = computed(() => {
@@ -5009,13 +5026,24 @@ function getInventoryGroups() {
 function getCashGroups() {
   const groups: Record<string, any[]> = {}
   const filtered = burnedCashMovements.filter((e: any) => {
-    if (!searchCash.value) return true
-    const q = searchCash.value.toLowerCase()
-    return (e.name && e.name.toLowerCase().includes(q)) ||
-      (e.concept && e.concept.toLowerCase().includes(q)) ||
-      (e.reference && e.reference.toLowerCase().includes(q)) ||
-      (e.account && e.account.toLowerCase().includes(q)) ||
-      (e.observation && e.observation.toLowerCase().includes(q))
+    if (searchCash.value) {
+      const q = searchCash.value.toLowerCase()
+      const match = (e.name && e.name.toLowerCase().includes(q)) ||
+        (e.concept && e.concept.toLowerCase().includes(q)) ||
+        (e.reference && e.reference.toLowerCase().includes(q)) ||
+        (e.account && e.account.toLowerCase().includes(q)) ||
+        (e.observation && e.observation.toLowerCase().includes(q))
+      if (!match) return false
+    }
+    if (cashFilterMovement.value) {
+      const m = (e.movement || '').toLowerCase()
+      if (cashFilterMovement.value === 'Ingreso' && m !== 'ingreso') return false
+      if (cashFilterMovement.value === 'Egreso' && m !== 'egreso') return false
+    }
+    if (cashFilterMonth.value && e.date) {
+      if (!e.date.startsWith(cashFilterMonth.value)) return false
+    }
+    return true
   })
   filtered.forEach((entry: any) => {
     const ref = entry.reference || 'Sin referencia'
@@ -5024,6 +5052,24 @@ function getCashGroups() {
   })
   return groups
 }
+
+const cashAllGroups = computed(() => getCashGroups())
+
+const cashTotalPages = computed(() => {
+  const keys = Object.keys(cashAllGroups.value)
+  return Math.max(1, Math.ceil(keys.length / cashPageSize.value))
+})
+
+const cashPaginatedGroups = computed(() => {
+  const allKeys = Object.keys(cashAllGroups.value)
+  const start = (cashPage.value - 1) * cashPageSize.value
+  const pageKeys = allKeys.slice(start, start + cashPageSize.value)
+  const result: Record<string, any[]> = {}
+  for (const key of pageKeys) {
+    result[key] = cashAllGroups.value[key]
+  }
+  return result
+})
 
 function getOrderForInventory(orderId: number) {
   return burnedOrders.find((o: any) => o.id === orderId) || null
@@ -6881,8 +6927,6 @@ async function deleteOrder(id: number) {
         await invoiceService.delete(existingInvoice.id)
         const invoiceIdx = invoices.findIndex((inv: any) => inv.orderId === id)
         if (invoiceIdx > -1) invoices.splice(invoiceIdx, 1)
-        clearInvoiceItemDiscounts(Number(existingInvoice.id))
-        clearInvoiceShowEvidences(Number(existingInvoice.id))
         console.log('✅ Factura asociada eliminada')
       } catch {
         console.warn('No se pudo eliminar la factura asociada, puede que ya no exista en el servidor')
@@ -7269,6 +7313,20 @@ const filteredInvoicesForDashboard = computed(() => {
     }
     return true
   })
+})
+
+const dashboardInvoicePage = ref(1)
+const dashboardInvoicePageSize = ref(10)
+
+const dashboardInvoiceTotalPages = computed(() => Math.max(1, Math.ceil(filteredInvoicesForDashboard.value.length / dashboardInvoicePageSize.value)))
+
+const dashboardPaginatedInvoices = computed(() => {
+  const start = (dashboardInvoicePage.value - 1) * dashboardInvoicePageSize.value
+  return filteredInvoicesForDashboard.value.slice(start, start + dashboardInvoicePageSize.value)
+})
+
+watch([filteredInvoicesForDashboard], () => {
+  dashboardInvoicePage.value = 1
 })
 
 const dashboardDepositInvoices = computed(() => {

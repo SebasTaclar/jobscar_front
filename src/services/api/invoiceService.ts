@@ -5,6 +5,7 @@ export interface InvoiceItem {
   qty: number
   price: number
   isLabor: boolean
+  discountToTechnician: boolean
 }
 
 export interface Deposit {
@@ -31,6 +32,7 @@ export interface Invoice {
   formaDePago: string
   status: string
   notes: string
+  showEvidencesInPdf: boolean
   createdAt: string
   updatedAt: string
   client?: string
@@ -58,6 +60,7 @@ export interface CreateInvoiceRequest {
   formaDePago?: string
   status?: string
   notes?: string
+  showEvidencesInPdf?: boolean
   workOrderId?: number | null
   client?: string
   clientPhone?: string
@@ -79,6 +82,7 @@ export interface UpdateInvoiceRequest {
   formaDePago?: string
   status?: string
   notes?: string
+  showEvidencesInPdf?: boolean
 }
 
 class InvoiceService {
