@@ -2233,6 +2233,9 @@
             <p class="dashboard-subtitle">Visión general y métricas clave del taller</p>
           </div>
         </div>
+        <div class="dashboard-header-center">
+          <span class="dashboard-user-name" @click="router.push('/admin/cesar-olivos')">Cesar Olivos</span>
+        </div>
         <div class="dashboard-header-right">
           <span class="dashboard-date">{{ currentDate }}</span>
           <button @click="loadPurchases" class="btn btn-secondary" :disabled="isLoadingSales">
@@ -3202,6 +3205,7 @@
 
 <script setup lang="ts">
 import { reactive, ref, computed, onMounted, onBeforeUnmount, watch, nextTick, type Ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { useProducts, type ShowcaseProduct } from '@/composables/useProducts'
 import type { Product } from '@/types/ProductType'
 import type { Category, CreateCategoryRequest } from '@/types/CategoryType'
@@ -3223,6 +3227,8 @@ import type {
   CreateEmployeeRequest,
   UpdateEmployeeRequest,
 } from '@/types/EmployeeType'
+
+const router = useRouter()
 
 // Estado para modal y formulario de cliente quemado
 const showCreateClient = ref(false)
@@ -4745,12 +4751,21 @@ function viewInvoice(inv: any) {
   doc.open()
   doc.write(html)
   doc.close()
-  setTimeout(() => {
-    iframe.contentWindow?.print()
-    setTimeout(() => {
-      if (iframe.parentNode) iframe.parentNode.removeChild(iframe)
-    }, 1000)
-  }, 400)
+  const onLoaded = () => {
+    try {
+      iframe.contentWindow?.focus()
+      iframe.contentWindow?.print()
+    } catch (e) {
+      // fallback
+    } finally {
+      setTimeout(() => {
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe)
+      }, 1000)
+    }
+  }
+  iframe.onload = onLoaded
+  // Fallback si onload no se dispara (ej. contenido ya cargado)
+  setTimeout(onLoaded, 2000)
 }
 
 async function deleteInvoice(id: any) {
@@ -6769,14 +6784,15 @@ function exportOrderPdf(order: any) {
       if (supportsSrcdoc) {
         ; (iframe as any).srcdoc = html
         iframe.onload = onLoaded
-      } else {
-        const doc = iframe.contentDocument ?? iframe.contentWindow?.document ?? null
-        if (doc) {
-          doc.open()
-          doc.write(html)
-          doc.close()
-          setTimeout(onLoaded, 400)
         } else {
+          const doc = iframe.contentDocument ?? iframe.contentWindow?.document ?? null
+          if (doc) {
+            doc.open()
+            doc.write(html)
+            doc.close()
+            iframe.onload = onLoaded
+            setTimeout(onLoaded, 2000)
+          } else {
           // Ultimo recurso: fallback
           printOrder.value = { ...order }
           nextTick(() => window.print())
@@ -12795,6 +12811,29 @@ const closeCategoryForm = () => {
   margin: 2px 0 0;
   color: var(--brand-accent-alt);
   font-size: 0.85rem;
+}
+
+.dashboard-header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-user-name {
+  padding: 8px 18px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(99, 102, 241, 0.2));
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dashboard-user-name:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.35), rgba(99, 102, 241, 0.35));
+  border-color: rgba(99, 102, 241, 0.5);
 }
 
 .dashboard-header-right {

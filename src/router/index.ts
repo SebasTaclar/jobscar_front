@@ -72,6 +72,15 @@ const router = createRouter({
         requiredRole: 'admin',
       },
     },
+    {
+      path: '/admin/cesar-olivos',
+      name: 'cesar-olivos',
+      component: () => import('../views/CesarOlivosView.vue'),
+      meta: {
+        requiresAuth: true,
+        requiredRole: 'admin',
+      },
+    },
 
     {
       path: '/admin/workshop/clients',
